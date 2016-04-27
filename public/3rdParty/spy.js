@@ -25,26 +25,28 @@ var Spy = (function()
 	var Spy = function(game, x, y, spy_def) 
 	{
 		Phaser.Particle.call(this, game, x, y, 'spies', spy_def.stand);
-		//this.animations.add("rotate");
-		console.log('coin()');
+
+		// Associate specific image frames with animation sequences
 		this.animations.add('run_right', [spy_def.stand_right, spy_def.run_right], 6, true, false);
+		this.animations.add('run_left', [spy_def.stand_left, spy_def.run_left], 6, true, false);
 
 		game.add.existing(this);		
+		console.log('spy()');
 	};
 	
+	// Override Phaser's Sprite object so we can add our own logic on top
 	Spy.prototype = Object.create(Phaser.Particle.prototype);
 	Spy.prototype.constructor = Spy;
 	
 	var action;
-	Spy.prototype.setAction = function(action)
+	Spy.prototype.setAction = function(new_action)
 	{
-		this.action = 'run_right';
-		
-		// stop other actions
-		
-		// 
-		this.animations.play( action );
-		console.log('playing[' + action + ']');
+		// stop previous action
+		this.animations.stop( action );
+		this.action = new_action;		
+	
+		this.animations.play( new_action );
+		console.log('playing animation[' + new_action + ']');
 	};
 	
 	Spy.prototype.updateMovement = function()
@@ -57,7 +59,7 @@ var Spy = (function()
 				this.x = -50;
 			break;
 		default:
-			console.error("no handler for action[" + this.action + "]");
+			console.error("We have no logic for action[" + this.action + "]");
 			break;
 		}
 
