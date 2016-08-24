@@ -28,8 +28,8 @@ var Spy = (function()
 		Phaser.Particle.call(this, game, x, y, 'spies', spy_def.stand);
 
 		// Associate specific image frames with animation sequences
-		this.animations.add('run_right', [spy_def.stand_right, spy_def.run_right], 4, true, false);
-		this.animations.add('run_left', [spy_def.stand_left, spy_def.run_left], 4, true, false);
+		this.animations.add('run_right', [spy_def.stand_right, spy_def.run_right], 8, true, false);
+		this.animations.add('run_left', [spy_def.stand_left, spy_def.run_left], 8, true, false);
 
 		game.add.existing(this);		
 		console.log('spy()');
@@ -38,6 +38,7 @@ var Spy = (function()
 	// Override Phaser's Sprite object so we can add our own logic on top
 	Spy.prototype = Object.create(Phaser.Particle.prototype);
 	Spy.prototype.constructor = Spy;
+	
 	
 	Spy.prototype.setAction = function(new_action)
 	{
@@ -52,7 +53,7 @@ var Spy = (function()
 	Spy.prototype.checkAction = function(action)
 	{
 		// check action
-		// if not action is not correct, call setAction
+		// if action is not correct, call setAction
 		if ( this.action != action )
 			this.setAction(action);
 				
@@ -82,7 +83,8 @@ var Spy = (function()
 			//console.error("We have no logic for action[" + this.action + "]");
 			break;
 		}
-
+		
+		return this.getPosData();
 	};
 
 	Spy.prototype.moveRight = function()
@@ -106,6 +108,19 @@ var Spy = (function()
 		this.animations.stop(null, true);
 	}
 
+	var moved = false;
+	
+	Spy.prototype.getPosData = function()
+	{
+		var pos = 
+		{ 
+			x : this.x,
+			y : this.y,
+			room : 'room0'
+		};
+		
+		return pos;
+	}
 	
 	/*
 	CoinParticle.prototype.onEmit = function() {

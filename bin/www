@@ -6,20 +6,23 @@
 
 var app = require('../app');
 var debug = require('debug')('caivscai:server');
-var http = require('http');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
+var port = 3000; //normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server = require('http').Server(app);
+var io = require('socket.io')(server);
+app.set('io', io);
+//var cvcServer = require('../public/js/cvc_server');
+//cvcServer.init(io);
 
 /**
  * Listen on provided port, on all network interfaces.
@@ -28,6 +31,15 @@ var server = http.createServer(app);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
+/*
+io.on('connection', function (socket) {
+	  socket.emit('initial', { hello: 'world' });
+	  socket.on('update.single', function (data) {
+	    console.log('got update data: ' + data);
+	  });
+	});
+*/
 
 /**
  * Normalize a port into a number, string, or false.
