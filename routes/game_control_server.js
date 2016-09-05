@@ -86,7 +86,8 @@ function attachIO( chatChannel, dataChannel, gameData, IO )
 		socket.on(dataChannel, function(data)
 		{
 			console.log('server[' + dataChannel + ']> got data: ' + data);
-			chat.emit(dataChannel, data);
+			//chat.emit(dataChannel, data);
+			socket.broadcast.to( gameData.name ).emit( dataChannel, data );
 		});
 
 		socket.on(chatChannel, function(data)

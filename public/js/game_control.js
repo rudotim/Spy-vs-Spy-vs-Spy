@@ -39,7 +39,15 @@ var GameControl = function()
 				
 		socket.on( gameData.datachannel, function(msg)
 		{
-			console.log('got game data[' + msg + ']');
+			//console.log('got game data[action(' + msg.action + '), x(' + msg.x + '), y(' + msg.y + ') ]');
+			
+			// update spy with data
+			for ( var p = 0; p<players.length; p++)
+			{
+				//console.log('found player: ' + players[p].name);
+				//console.log( players[p] );
+				players[p].setPos( msg );
+			}
 		});
 		
 		socket.on( 'start_game', function(msg)
@@ -57,9 +65,6 @@ var GameControl = function()
 	{
 		console.log('sending data {' + msg + '} on [' + _gameInstance.chatchannel + '] channel');
 		socket.emit(_gameInstance.chatchannel, msg);
-		//io.emit(_gameInstance.chatchannel, msg);
-		//io.to('some room').emit('some event'):
-		//io.to( _gameInstance.chatchannel ).emit( msg );	
 	};
 	
 	ctrl.listGames = function()
@@ -126,19 +131,27 @@ var GameControl = function()
 		console.log('closing game room [' + gameName + ']');		
 	};
 	
-	/*
-	ctrl.startGame = function()
-	{
-		console.log('starting');
-		startGame();
-	};
-	*/
-	
 	ctrl.triggerStartGame = function( gameData )
 	{
 		socket.emit( 'start_game', gameData);	
 	};
 	
+	ctrl.sendPosUpdate = function( spy )
+	{
+		//var pos = spy.getPos();
+		//console.log('sent game data[action(' + pos.action + '), x(' + pos.x + '), y(' + pos.y + ') ]');
+
+		socket.emit(_gameInstance.datachannel, spy.getPos() );
+	};
+
+	ctrl.sendStopUpdate = function( spy )
+	{
+		var pos = spy.getPos();
+		pos.extra = 'stop';
+		//console.log('sent game data[action(' + pos.action + '), x(' + pos.x + '), y(' + pos.y + '), extra(' + pos.extra + ') ]');
+
+		socket.emit(_gameInstance.datachannel, pos );
+	};
 	return ctrl;
 };
 

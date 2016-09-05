@@ -1,0 +1,26 @@
+{
+  "lobby" : {
+    "actors" : [
+    {
+        "type" : "door",
+        "id" : "door0W",
+        "animation_id" : "animDoorW",
+        "pos" : {
+          "x" : 30,
+          "y" : 100
+        },
+        "teleports-to" : "door0E"
+    },
+    {
+        "type" : "door",
+        "id" : "door0E",
+        "animation_id" : "animDoorW",
+        "pos" : {
+          "x" : 470,
+          "y" : 100
+        },
+        "teleports-to" : "door0W"
+    }
+    ]
+  }
+}
