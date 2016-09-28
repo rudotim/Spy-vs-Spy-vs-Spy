@@ -11,7 +11,7 @@ var debug = require('debug')('caivscai:server');
  * Get port from environment and store in Express.
  */
 
-var port = 3000; //normalizePort(process.env.PORT || '3000');
+var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
 
 /**
@@ -21,8 +21,6 @@ app.set('port', port);
 var server = require('http').Server(app);
 var io = require('socket.io')(server);
 app.set('io', io);
-//var cvcServer = require('../public/js/cvc_server');
-//cvcServer.init(io);
 
 /**
  * Listen on provided port, on all network interfaces.

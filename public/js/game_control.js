@@ -80,7 +80,7 @@ var GameControl = function()
 
 		$.ajax({
 		    type: 'post',
-		    url: '/cvc/room/join/',
+		    url: '/room/join/',
 		    data: JSON.stringify(gameData),
 		    contentType: "application/json",
 		    success: function (data) {
@@ -106,7 +106,7 @@ var GameControl = function()
 			
 		$.ajax({
 		    type: 'post',
-		    url: '/cvc/room/create/',
+		    url: '/room/create/',
 		    data: JSON.stringify(gameData),
 		    contentType: "application/json",
 		    success: function (data) {

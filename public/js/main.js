@@ -256,7 +256,7 @@ function buttonUpRight()
 function startGame(socket)
 {
 	// game.state.add('main', mainState, true);
-	game = new Phaser.Game(800, 600, Phaser.AUTO, 'Cai vs Cai',
+	game = new Phaser.Game(800, 400, Phaser.AUTO, 'game_div',
 	{
 		preload : preload,
 		create : create,

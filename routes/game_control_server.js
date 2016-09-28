@@ -1,6 +1,51 @@
 var express = require('express');
 var router = express.Router();
 
+var activeGameList = [];
+
+/* GET users listing. */
+router.get('/list_games', function(req, res, next) {
+	res.json( getStubGameList() );
+});
+
+router.post('/room/create', function(req, res, next) 
+{
+	var gameData = req.body;
+	
+	if ( ! createRoom( gameData, req.app.get('io') ) )
+	{
+		// room is set up already, just join it
+		console.log('room exists already, joining...');
+		
+		// something went wrong, return error
+		//res.status(500).send( gameData.error );		
+		//console.log('DID U SEE THIS?  BECASE YOU SHOULDNT HAVE!!!!!');
+	}	
+		
+	// attach chat channel to client gameData object
+	res.json( gameData );
+});
+
+
+router.post('/room/join', function(req, res, next) 
+{
+	var gameData = req.body;
+			
+	if ( ! createRoom( gameData, req.app.get('io') ) )
+	{
+		// room is set up already, just join it
+		console.log('room exists already, joining...');
+	}	
+
+	// attach chat channel to client gameData object
+	res.json( gameData );
+});
+
+
+
+
+
+
 
 function getStubGameList()
 {
@@ -25,7 +70,6 @@ function getStubGameList()
 	return gameList;
 }
 
-var activeGameList = [];
 
 function gameExists( name )
 {
@@ -85,8 +129,7 @@ function attachIO( chatChannel, dataChannel, gameData, IO )
 	    // join data channel	    
 		socket.on(dataChannel, function(data)
 		{
-			console.log('server[' + dataChannel + ']> got data: ' + data);
-			//chat.emit(dataChannel, data);
+			//console.log('server[' + dataChannel + ']> got data: ' + data);
 			socket.broadcast.to( gameData.name ).emit( dataChannel, data );
 		});
 
@@ -105,44 +148,9 @@ function attachIO( chatChannel, dataChannel, gameData, IO )
 }
 
 
-/* GET users listing. */
-router.get('/list_games', function(req, res, next) {
-	res.json( getStubGameList() );
-});
 
-router.post('/room/create', function(req, res, next) 
-{
-	var gameData = req.body;
-	
-	if ( ! createRoom( gameData, req.app.get('io') ) )
-	{
-		// room is set up already, just join it
-		console.log('room exists already, joining...');
-		
-		// something went wrong, return error
-		//res.status(500).send( gameData.error );		
-		//console.log('DID U SEE THIS?  BECASE YOU SHOULDNT HAVE!!!!!');
-	}	
-		
-	// attach chat channel to client gameData object
-	res.json( gameData );
-});
-
-
-router.post('/room/join', function(req, res, next) 
-{
-	var gameData = req.body;
-			
-	if ( ! createRoom( gameData, req.app.get('io') ) )
-	{
-		// room is set up already, just join it
-		console.log('room exists already, joining...');
-	}	
-
-	// attach chat channel to client gameData object
-	res.json( gameData );
-});
 
 
 
 module.exports = router;
+

@@ -1,0 +1,52 @@
+<html>
+
+<head>
+<script src="/js/jquery-2.2.3.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+
+<script src="/js/socket.io-1.4.5.js"></script>
+<script src="/js/phaser.min.js"></script>
+<script src="/js/gameinstance.js"></script>
+<script src="/js/game_control.js"></script>
+<script src="/js/spy.js"></script>
+<script src="/js/main.js"></script>
+
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="/css/svs.css">
+</head>
+
+
+<body>
+
+<div id="container">
+	<div id="game_info">
+		<button class="form-control"
+			onClick="gameControl.createServerRoom( getGameDataStub('game0') );">Create
+			Server Room</button>
+		<br>
+		<button class="form-control" onClick="gameControl.joinRoom( getGameDataStub('game0') );">Join</button>
+		<br>
+		<button class="form-control" onClick="startGame( null );">Start</button>
+		<br>
+		<button class="form-control"
+			onClick="gameControl.triggerStartGame( getGameDataStub('game0') );">Trigger
+			Start</button>
+	</div>
+
+	<div id="game_div">
+	</div>
+	
+	<div id="chat_div">
+		<input type="text" class="form-control" id="txtinp" value="test">
+		<button onClick="gameControl.sendChat( $('#txtinp').val() );">Send
+			Chat Text</button>
+	</div>
+	
+</div>
+
+
+
+</body>
+
+
+</html>
