@@ -17,21 +17,70 @@ var GameControl = function()
 {
 	var ctrl = {};
 	var socket; // = io().connect('http://localhost:3000');
-	var _gameInstance;	
+	var _gameInstance;		
+	var player = {
+			name : 'noname'
+	};
+		
+	updateRoomList = function( serverPlayers, add )
+	{
+		if ( add == true )
+		{
+			$('#player_list ul').empty();
+			
+			for ( var p=0; p<serverPlayers.length; p++)
+			{
+				var playerName = serverPlayers[p].name;
+				
+				$('#player_list ul').append(
+						$('<li>').append(
+								$('<span>').attr('class', 'list-group-item player_list_entry').append( playerName )
+							));
+			}
+		}
+		else
+		{
+			console.log('remove [' + serverPlayers + ']');
+		}
+	};
+	
+	updatePlayerAttr = function( player )
+	{
+		console.log('updating player attr: ');
+		console.log( player );
+	};
 	
 	_joinRoom = function( gameData )
 	{
 		var urlid = '/' + gameData.name;
 
 		console.log('client joining ' + urlid + '/[' + gameData.datachannel + ']');
-										
+				
 		socket = io( urlid );
 		
 		socket.on('connection', function(msg)
 		{
 			console.log('CONNECTED TO SERVER');
 		});
+
+		socket.on('player_entered', function( serverPlayers )
+		{
+			console.log('rcv> player_entered ' + serverPlayers);
+			updateRoomList( serverPlayers, true );
+		});
 		
+		socket.on('player_left', function(serverPlayers)
+		{
+			console.log('player_left ' + serverPlayers);
+			updateRoomList( serverPlayers, false );
+		});
+		
+		socket.on('player_attr_updated', function( player )
+		{
+			console.log('player_attr_updated ' + player);
+			updatePlayerAttr( player );
+		});
+
 		socket.on( gameData.chatchannel, function(msg)
 		{
 			console.log('got chat data[' + msg + ']');
@@ -53,14 +102,28 @@ var GameControl = function()
 		socket.on( 'start_game', function(msg)
 		{
 			console.log('SERVER IS STARTING GAME!');
-			//ctrl.startGame();
 			startGame( socket );
-
 		});
 		
+		// let everyone know we're here
+		console.log( player );
+		socket.emit('player_entered', player );
+		
+		//socket.emit('player_attr_updated', this.player );
+
 		_gameInstance = gameData;		
 	};
 
+	_setPlayerName = function( newName )
+	{
+		player.name = newName;
+	};
+
+	ctrl.setPlayerName = function( playerName )
+	{
+		_setPlayerName( playerName );
+	};
+	
 	ctrl.sendChat = function( msg )
 	{
 		console.log('sending data {' + msg + '} on [' + _gameInstance.chatchannel + '] channel');
@@ -77,6 +140,8 @@ var GameControl = function()
 	ctrl.joinRoom = function( gameData )
 	{
 		console.log('attempting to join game [' + gameData.name + ']');
+
+		_setPlayerName('joinPetey');
 
 		$.ajax({
 		    type: 'post',
@@ -103,7 +168,9 @@ var GameControl = function()
 	ctrl.createServerRoom = function( gameData )
 	{		
 		console.log('creating game room [' + gameData.name + ']');
-			
+		
+		_setPlayerName('createPetey');
+		
 		$.ajax({
 		    type: 'post',
 		    url: '/room/create/',
@@ -125,7 +192,7 @@ var GameControl = function()
 		    }
 		});
 	};
-	
+		
 	ctrl.closeServerRoom = function( gameName )
 	{
 		console.log('closing game room [' + gameName + ']');		
@@ -152,6 +219,7 @@ var GameControl = function()
 
 		socket.emit(_gameInstance.datachannel, pos );
 	};
+	
 	return ctrl;
 };
 

@@ -30,6 +30,12 @@ body {
 	clear: both;
 }
 
+#player_list
+{
+	background-color: #00ff77;
+	height: 200px;
+}
+
 a {
   color: #00B7FF;
 }

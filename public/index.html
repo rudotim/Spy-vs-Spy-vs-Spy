@@ -18,31 +18,36 @@
 
 <body>
 
-<div id="container">
-	<div id="game_info">
-		<button class="form-control"
-			onClick="gameControl.createServerRoom( getGameDataStub('game0') );">Create
-			Server Room</button>
-		<br>
-		<button class="form-control" onClick="gameControl.joinRoom( getGameDataStub('game0') );">Join</button>
-		<br>
-		<button class="form-control" onClick="startGame( null );">Start</button>
-		<br>
-		<button class="form-control"
-			onClick="gameControl.triggerStartGame( getGameDataStub('game0') );">Trigger
-			Start</button>
-	</div>
+	<div id="container">
+		<div id="game_info">
+			<input type="text" class="form-control" id="player_name" value="Your Name" onBlur="gameControl.setPlayerName()">
+			<button class="form-control"
+				onClick="gameControl.createServerRoom( getGameDataStub('game0') );">Create
+				Server Room</button>
+			<button class="form-control"
+				onClick="gameControl.joinRoom( getGameDataStub('game0') );">Join</button>
 
-	<div id="game_div">
+			<div id="player_list">
+				<h5>Current Players:</h5>
+				<ul id="player_list" class="list-group">
+				</ul>
+			</div>
+
+			<button class="form-control" onClick="startGame( null );">Start</button>
+			<button class="form-control"
+				onClick="gameControl.triggerStartGame( getGameDataStub('game0') );">Trigger
+				Start</button>
+		</div>
+
+		<div id="game_div"></div>
+
+		<div id="chat_div">
+			<input type="text" class="form-control" id="txtinp" value="test">
+			<button onClick="gameControl.sendChat( $('#txtinp').val() );">Send
+				Chat Text</button>
+		</div>
+
 	</div>
-	
-	<div id="chat_div">
-		<input type="text" class="form-control" id="txtinp" value="test">
-		<button onClick="gameControl.sendChat( $('#txtinp').val() );">Send
-			Chat Text</button>
-	</div>
-	
-</div>
 
 
 
