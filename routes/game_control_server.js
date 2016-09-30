@@ -107,6 +107,69 @@ function createRoom(gameData, IO)
 	return true;
 }
 
+function createId( gameData )
+{
+	var uid = gameData.uid;
+	
+	if ( uid == null )
+		uid = 0;
+	else
+		uid++;
+	
+	gameData.uid = uid;
+	
+	return gameData.name + '_' + uid;
+}
+
+function createPlayer( playerName, gameData )
+{
+	var newPlayer = {};
+	
+	newPlayer.name = playerName;
+	newPlayer.player_id = createId( gameData );
+	
+	console.log( 'player [' + playerName + '] has id {' + newPlayer.player_id + '}');
+	return newPlayer;
+}
+
+function replacePlayerByIndex( player, index, players )
+{
+	players[index] = player;
+	/*
+	for ( var p=0; p<players.length; p++ )
+	{
+		if ( players[p].player_id == player.player_id )
+		{
+			return p;
+		}
+	}
+	*/
+}
+
+function getPlayerIndex( player, players )
+{
+	for ( var p=0; p<players.length; p++ )
+	{
+		if ( players[p].player_id == player.player_id )
+		{
+			console.log( 'get> player [' + players[p].name + '] has id {' + players[p].player_id + '}');
+			return p;
+		}
+	}
+}
+
+function removePlayer( player, players )
+{
+	for ( var p=0; p<players.length; p++ )
+	{
+		if ( players[p].player_id == player.player_id )
+		{
+			players.remove(p);
+			return;
+		}
+	}
+}
+
 function attachIO(chatChannel, dataChannel, gameData, IO)
 {
 	var urlid = '/' + gameData.name;
@@ -121,14 +184,25 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 		// join chat room
 		socket.join(gameData.name);
 
-		socket.on('player_entered', function( player )
+		socket.on('player_attr_updated', function( player )
 		{
-			serverPlayers.push( player );
+			console.log('server[player_attr_updated]> got player: ' + player.name );
+			var newPlayer = player;
 			
-			console.log('server[player_entered]> got player: ' + player);
-			//socket.broadcast.to(gameData.name).emit('player_entered', player);
-			chat.emit('player_entered', serverPlayers);
-			//socket.emit('player_entered', player);
+			if ( player.stub == true )
+			{
+				console.log('found stub, first time player update for [' + player.name + ']');
+				newPlayer = createPlayer( player.name, gameData );
+				serverPlayers.push( newPlayer );
+			}
+			else
+			{
+				var oldPlayerIndex = getPlayerIndex( player, serverPlayers );
+				console.log('old player index: ' + oldPlayerIndex );
+				replacePlayerByIndex( player, oldPlayerIndex, serverPlayers );
+			}
+			
+			chat.emit('player_attr_updated', serverPlayers, newPlayer);
 		});
 
 		socket.on('player_left', function( player )
@@ -143,15 +217,8 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 			}
 			
 			console.log('server[player_left]> got data: ' + player);
+			chat.emit('player_left', serverPlayers, player);
 			//socket.broadcast.to(gameData.name).emit('player_left', data);
-			socket.emit('player_left', serverPlayers);
-		});
-
-		socket.on('player_attr_updated', function(data)
-		{
-			console.log('server[player_attr_updated]> got data: ' + data);
-			socket.broadcast.to(gameData.name).emit('player_attr_updated', data);
-			//socket.emit('player_updated', data);
 		});
 		
 		// join data channel

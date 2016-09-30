@@ -15,18 +15,20 @@
 <link rel="stylesheet" href="/css/svs.css">
 </head>
 
-
 <body>
-
 	<div id="container">
 		<div id="game_info">
-			<input type="text" class="form-control" id="player_name" value="Your Name" onBlur="gameControl.setPlayerName()">
+			<input type="text" class="form-control" id="player_name" value="Your Name" 
+				onblur="gameControl.setPlayerName(this.value);">
 			<button class="form-control"
 				onClick="gameControl.createServerRoom( getGameDataStub('game0') );">Create
 				Server Room</button>
 			<button class="form-control"
 				onClick="gameControl.joinRoom( getGameDataStub('game0') );">Join</button>
+			<button class="form-control"
+				onClick="gameControl.leaveRoom( getGameDataStub('game0') );">Quit to Lobby</button>
 
+			<span id="room_name">ybboL</span>
 			<div id="player_list">
 				<h5>Current Players:</h5>
 				<ul id="player_list" class="list-group">

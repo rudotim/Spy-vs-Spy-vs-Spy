@@ -19,13 +19,12 @@ var GameControl = function()
 	var socket; // = io().connect('http://localhost:3000');
 	var _gameInstance;		
 	var player = {
-			name : 'noname'
+			name : 'noname',
+			stub : true
 	};
 		
-	updateRoomList = function( serverPlayers, add )
+	updateRoomList = function( serverPlayers )
 	{
-		if ( add == true )
-		{
 			$('#player_list ul').empty();
 			
 			for ( var p=0; p<serverPlayers.length; p++)
@@ -37,17 +36,17 @@ var GameControl = function()
 								$('<span>').attr('class', 'list-group-item player_list_entry').append( playerName )
 							));
 			}
-		}
-		else
-		{
-			console.log('remove [' + serverPlayers + ']');
-		}
 	};
 	
-	updatePlayerAttr = function( player )
+	updatePlayerAttr = function( serverPlayers )
 	{
-		console.log('updating player attr: ');
-		console.log( player );
+		/*
+		console.log('updating player attr');
+		for ( var p=0; p<serverPlayers.length; p++)
+		{
+			
+		}
+		*/
 	};
 	
 	_joinRoom = function( gameData )
@@ -62,25 +61,29 @@ var GameControl = function()
 		{
 			console.log('CONNECTED TO SERVER');
 		});
-
-		socket.on('player_entered', function( serverPlayers )
+		
+		socket.on('player_attr_updated', function( serverPlayers, updatedPlayer )
 		{
-			console.log('rcv> player_entered ' + serverPlayers);
-			updateRoomList( serverPlayers, true );
+			console.log('player_attr_updated ' + serverPlayers);
+			
+			// don't update unless it's our object 
+			if ( player.stub == true 
+				|| player.player_id == updatedPlayer.player_id )
+				player = updatedPlayer;
+			
+			// redraw room members
+			updateRoomList( serverPlayers );
+			
+			// update any player data
+			updatePlayerAttr( serverPlayers );
 		});
 		
-		socket.on('player_left', function(serverPlayers)
+		socket.on('player_left', function(serverPlayers, playerThatLeft)
 		{
-			console.log('player_left ' + serverPlayers);
-			updateRoomList( serverPlayers, false );
+			console.log('player ' + playerThatLeft.name + ' has left the room');
+			updateRoomList( serverPlayers );
 		});
 		
-		socket.on('player_attr_updated', function( player )
-		{
-			console.log('player_attr_updated ' + player);
-			updatePlayerAttr( player );
-		});
-
 		socket.on( gameData.chatchannel, function(msg)
 		{
 			console.log('got chat data[' + msg + ']');
@@ -88,13 +91,9 @@ var GameControl = function()
 				
 		socket.on( gameData.datachannel, function(msg)
 		{
-			//console.log('got game data[action(' + msg.action + '), x(' + msg.x + '), y(' + msg.y + ') ]');
-			
 			// update spy with data
 			for ( var p = 0; p<players.length; p++)
 			{
-				//console.log('found player: ' + players[p].name);
-				//console.log( players[p] );
 				players[p].setPos( msg );
 			}
 		});
@@ -106,21 +105,29 @@ var GameControl = function()
 		});
 		
 		// let everyone know we're here
-		console.log( player );
-		socket.emit('player_entered', player );
+		//socket.emit('player_entered', playerName );
+		//socket.emit('player_updated', player );
+		_setPlayerName( $('#player_name').val() );
 		
-		//socket.emit('player_attr_updated', this.player );
-
 		_gameInstance = gameData;		
 	};
 
+	_updatePlayer = function()
+	{
+		socket.emit('player_attr_updated', player );
+	};
+	
 	_setPlayerName = function( newName )
 	{
 		player.name = newName;
+		
+		// fire player name update
+		_updatePlayer();
 	};
 
 	ctrl.setPlayerName = function( playerName )
 	{
+		console.log('setting player name: ' + playerName );
 		_setPlayerName( playerName );
 	};
 	
@@ -140,8 +147,6 @@ var GameControl = function()
 	ctrl.joinRoom = function( gameData )
 	{
 		console.log('attempting to join game [' + gameData.name + ']');
-
-		_setPlayerName('joinPetey');
 
 		$.ajax({
 		    type: 'post',
@@ -168,9 +173,7 @@ var GameControl = function()
 	ctrl.createServerRoom = function( gameData )
 	{		
 		console.log('creating game room [' + gameData.name + ']');
-		
-		_setPlayerName('createPetey');
-		
+				
 		$.ajax({
 		    type: 'post',
 		    url: '/room/create/',
@@ -193,9 +196,10 @@ var GameControl = function()
 		});
 	};
 		
-	ctrl.closeServerRoom = function( gameName )
+	ctrl.leaveRoom = function( gameName )
 	{
-		console.log('closing game room [' + gameName + ']');		
+		console.log('leaving game room [' + gameName + ']');
+		
 	};
 	
 	ctrl.triggerStartGame = function( gameData )
