@@ -3,25 +3,27 @@
  */
 
 
-var gameInstance;
-
 function getGameDataStub( name )
 {
 	gameInstance = new GameInstance();
+	gameOptions = new GameOptions();
 	
 	return gameInstance.createNew( name );
 }
 
 
-var GameControl = function()
+var GameControl = function( gameLogic )
 {
 	var ctrl = {};
+	
 	var socket; // = io().connect('http://localhost:3000');
 	var _gameInstance;		
 	var player = {
 			name : 'noname',
 			stub : true
 	};
+	
+	var _gameLogic = gameLogic;
 		
 	updateRoomList = function( serverPlayers )
 	{
@@ -98,15 +100,14 @@ var GameControl = function()
 			}
 		});
 		
-		socket.on( 'start_game', function(msg)
+		socket.on( 'start_new_game', function(msg)
 		{
 			console.log('SERVER IS STARTING GAME!');
-			startGame( socket );
+			_gameLogic.startNewGame( socket );
+			_gameLogic.showGameOptions( game );
 		});
 		
 		// let everyone know we're here
-		//socket.emit('player_entered', playerName );
-		//socket.emit('player_updated', player );
 		_setPlayerName( $('#player_name').val() );
 		
 		_gameInstance = gameData;		
@@ -201,10 +202,15 @@ var GameControl = function()
 		console.log('leaving game room [' + gameName + ']');
 		
 	};
-	
-	ctrl.triggerStartGame = function( gameData )
+
+	ctrl.showGameOptions = function( gameData )
 	{
-		socket.emit( 'start_game', gameData);	
+		gameOptions.show();	
+	};
+	
+	ctrl.triggerStartNewGame = function( gameData )
+	{
+		socket.emit( 'start_new_game', gameData);	
 	};
 	
 	ctrl.sendPosUpdate = function( spy )
@@ -227,8 +233,10 @@ var GameControl = function()
 	return ctrl;
 };
 
+var gameLogic = new GameLogic();
 
-var gameControl = new GameControl();
+var gameControl = new GameControl( gameLogic );
+var gameOptions = new GameOptions();
 
 
 

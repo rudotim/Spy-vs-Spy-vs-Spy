@@ -6,16 +6,21 @@
 
 <script src="/js/socket.io-1.4.5.js"></script>
 <script src="/js/phaser.min.js"></script>
+<script src="/js/game_logic.js"></script>
 <script src="/js/gameinstance.js"></script>
+<script src="/js/game_options.js"></script>
 <script src="/js/game_control.js"></script>
 <script src="/js/spy.js"></script>
-<script src="/js/main.js"></script>
+<script src="/js/virtualjoystick.js"></script>
 
 <link rel="stylesheet" href="/css/bootstrap.min.css">
 <link rel="stylesheet" href="/css/svs.css">
 </head>
 
 <body>
+
+	<div id="game_options"></div>
+
 	<div id="container">
 		<div id="game_info">
 			<input type="text" class="form-control" id="player_name" value="Your Name" 
@@ -35,9 +40,8 @@
 				</ul>
 			</div>
 
-			<button class="form-control" onClick="startGame( null );">Start</button>
 			<button class="form-control"
-				onClick="gameControl.triggerStartGame( getGameDataStub('game0') );">Trigger
+				onClick="gameControl.triggerStartNewGame( getGameDataStub('game0') );">Trigger
 				Start</button>
 		</div>
 
@@ -49,6 +53,8 @@
 				Chat Text</button>
 		</div>
 
+		<button onClick="gameControl.showGameOptions()">Show Game Options</button>
+		
 	</div>
 
 

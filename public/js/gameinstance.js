@@ -8,15 +8,15 @@ var GameInstance = function()
 	var game = {};
 
 	var name;
-	var map = 'lobby';
-	var max_players = 5;
+	var map = 'lobbo';
+	var max_players = 2;
 	var max_duration = 1;
 	var password = '';
 
 	game.createNew = function( gameName )
 	{
 		this.name = gameName;
-		this.map = 'lobba';
+		this.map = 'lobbo';
 		
 		var g = 
 		{

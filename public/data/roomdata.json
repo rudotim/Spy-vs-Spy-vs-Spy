@@ -1,26 +1,37 @@
 {
-  "lobby" : {
-    "actors" : [
+  "levelname": "Lobby",
+  "asset_json_file" : "asset-rooms-lobby2.json",
+  "asset_image_file" : "asset-rooms-lobby2.png",
+  "rooms": [
     {
-        "type" : "door",
-        "id" : "door0W",
-        "animation_id" : "animDoorW",
-        "pos" : {
-          "x" : 30,
-          "y" : 100
-        },
-        "teleports-to" : "door0E"
+      "roomId": "roomRight",
+      "roomActors": [
+        {
+          "type": "door",
+          "id": "door0W",
+          "animation_id": "animDoorW",
+          "pos": {
+            "x": 30,
+            "y": 100
+          },
+          "teleports-to": "roomLeft"
+        }
+      ]
     },
     {
-        "type" : "door",
-        "id" : "door0E",
-        "animation_id" : "animDoorW",
-        "pos" : {
-          "x" : 470,
-          "y" : 100
-        },
-        "teleports-to" : "door0W"
+      "roomId": "roomLeft",
+      "roomActors": [
+        {
+          "type": "door",
+          "id": "door0E",
+          "animation_id": "animDoorW",
+          "pos": {
+            "x": 470,
+            "y": 100
+          },
+          "teleports-to": "roomRight"
+        }
+      ]
     }
-    ]
-  }
+  ]
 }

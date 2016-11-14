@@ -3,6 +3,20 @@ body {
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
+/*
+#game_options
+{
+	display: none;
+	position: absolute;
+	margin: auto;
+	border: 1px solid #888;
+	background-color: #eee;
+	border-radius: 5px;
+	width: 400px;
+	height: 300px;
+}
+*/
+
 #container
 {
 }

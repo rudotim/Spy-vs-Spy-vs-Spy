@@ -33,10 +33,11 @@ var Spy = (function()
 {
 	var speed, action;
 	var box;
+	var _room;
 	
-	var Spy = function(game, x, y, spy_def, gameControl) 
+	var Spy = function(phaserGame, x, y, spy_def, gameControl) 
 	{
-		Phaser.Particle.call(this, game, x, y, 'spies', spy_def.stand);
+		Phaser.Particle.call(this, phaserGame, x, y, 'spies', spy_def.stand);
 
 		this.x = x;
 		this.y = y;
@@ -47,17 +48,17 @@ var Spy = (function()
 
 		this.gameControl = gameControl;
 
-		box = drawCollisionBox( game, x, y );
+		box = drawCollisionBox( phaserGame, x, y );
 
-		game.add.existing(this);
+		phaserGame.add.existing(this);
 		
 		
 		console.log('spy()');
 	};
 	
-	function drawCollisionBox( game, x, y )
+	function drawCollisionBox( phaserGame, x, y )
 	{
-		var bmd = game.add.bitmapData(spy_width, 8);
+		var bmd = phaserGame.add.bitmapData(spy_width, 8);
 
 		// Draw circle
 		bmd.ctx.fillStyle = '#FF0000';
@@ -65,7 +66,12 @@ var Spy = (function()
 		bmd.ctx.fill(); 
 		
 		// Put BitmapData in a Sprite
-		return game.add.sprite(x, y, bmd);
+		return phaserGame.add.sprite(x, y, bmd);
+	}
+	
+	function changeRoom( room )
+	{
+		_room = room;
 	}
 	
 	function updateBox( Spy )
@@ -127,6 +133,7 @@ var Spy = (function()
 		console.log('playing animation[' + new_action + ']');
 		
 	};
+	
 	
 	Spy.prototype.updateMovement = function()
 	{

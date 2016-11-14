@@ -160,9 +160,24 @@ function getPlayerIndex( player, players )
 
 function removePlayer( player, players )
 {
+	removePlayerById( player.player_id, players );
+	/*
 	for ( var p=0; p<players.length; p++ )
 	{
 		if ( players[p].player_id == player.player_id )
+		{
+			players.remove(p);
+			return;
+		}
+	}
+	*/
+}
+
+function removePlayerById( player_id, players )
+{
+	for ( var p=0; p<players.length; p++ )
+	{
+		if ( players[p].player_id == player_id )
 		{
 			players.remove(p);
 			return;
@@ -176,6 +191,8 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 
 	console.log('attachingIO> joining ' + urlid + '/[' + chatChannel + ']');
 
+
+	
 	// create sockets, pass back chat names
 	var chat = IO.of(urlid).on('connection', function(socket)
 	{
@@ -184,6 +201,16 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 		// join chat room
 		socket.join(gameData.name);
 
+		socket.on('disconnect', function () 
+		{
+			//io.emit('user disconnected');
+			console.log('disconnected player_id=' + socket.player_id);
+			
+			// remove from server list
+			// TODO:  Make test cases for these remove/add player utilities
+			removePlayerById( socket.player_id, serverPlayers );
+		});
+		 
 		socket.on('player_attr_updated', function( player )
 		{
 			console.log('server[player_attr_updated]> got player: ' + player.name );
@@ -202,11 +229,17 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 				replacePlayerByIndex( player, oldPlayerIndex, serverPlayers );
 			}
 			
+			// TODO:  Move this player_id set logic to somewhere more appropriate
+			socket.player_id = newPlayer.player_id;
+			
 			chat.emit('player_attr_updated', serverPlayers, newPlayer);
 		});
 
 		socket.on('player_left', function( player )
 		{
+			// TODO:  Externalize this so we can call it when a socket disconnects
+			
+			
 			for ( var p=0; p < serverPlayers.length; p++)
 			{
 				if ( serverPlayers[p].name == player.name )
@@ -234,10 +267,13 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 			socket.broadcast.to(gameData.name).emit(chatChannel, data);
 		});
 
-		socket.on('start_game', function(data)
+		socket.on('start_new_game', function( gameData )
 		{
 			console.log('server received request to start game');
-			chat.emit('start_game', data);
+			
+			// randomize start locations between players
+									
+			chat.emit('start_new_game', gameData);
 		});
 	});
 }
