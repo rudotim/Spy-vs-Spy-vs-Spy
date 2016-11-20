@@ -106,7 +106,6 @@ var GameControl = function( gameLogic )
 		{
 			console.log('SERVER IS STARTING GAME!');
 			_gameLogic.startNewGame( socket );
-			//_gameLogic.showGameOptions( gameData );
 		});
 		
 		// let everyone know we're here

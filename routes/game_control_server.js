@@ -12,25 +12,6 @@ router.get('/list_games', function(req, res, next)
 	res.json(getStubGameList());
 });
 
-/*
-router.post('/room/create', function(req, res, next)
-{
-	var gameData = req.body;
-
-	if (!createRoom(gameData, req.app.get('io')))
-	{
-		// room is set up already, just join it
-		console.log('create> room exists already, joining...');
-
-		// something went wrong, return error
-		// res.status(500).send( gameData.error );
-		// console.log('DID U SEE THIS? BECASE YOU SHOULDNT HAVE!!!!!');
-	}
-
-	// attach chat channel to client gameData object
-	res.json(gameData);
-});
-*/
 
 router.post('/room/join', function(req, res, next)
 {
@@ -78,19 +59,6 @@ function findGameByName(name)
 function gameExists(name)
 {
 	return findGameByName( name ) != null;
-	/*
-	for (var i = 0; i < activeGameList.length; i++)
-	{
-		console.log('searching game entries [' + activeGameList[i].name + ']');
-		if (activeGameList[i].name == name)
-		{
-			return true;
-		}
-	}
-
-	console.log('game [' + name + '] does not exist');
-	return false;
-	*/
 }
 
 function createRoom(gameData, IO)
@@ -150,15 +118,6 @@ function createPlayer( playerName, gameData )
 function replacePlayerByIndex( player, index, players )
 {
 	players[index] = player;
-	/*
-	for ( var p=0; p<players.length; p++ )
-	{
-		if ( players[p].player_id == player.player_id )
-		{
-			return p;
-		}
-	}
-	*/
 }
 
 function getPlayerIndex( player, players )
@@ -176,16 +135,6 @@ function getPlayerIndex( player, players )
 function removePlayer( player, players )
 {
 	removePlayerById( player.player_id, players );
-	/*
-	for ( var p=0; p<players.length; p++ )
-	{
-		if ( players[p].player_id == player.player_id )
-		{
-			players.remove(p);
-			return;
-		}
-	}
-	*/
 }
 
 function removePlayerById( player_id, players )
@@ -195,7 +144,7 @@ function removePlayerById( player_id, players )
 		if ( players[p].player_id == player_id )
 		{
 			console.log('removing player(' + player_id + ')[' + players[p].name + ']');
-//			players.remove(p);
+			players.splice( p, 1 );
 			return;
 		}
 	}

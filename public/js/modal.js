@@ -51,6 +51,7 @@ gameModal = function (game) {
                 if (modalCloseOnInput === true) {
 
                     var innerModal = game.add.sprite(0, 0);
+                    
                     innerModal.inputEnabled = true;
                     innerModal.width = game.width;
                     innerModal.height = game.height;

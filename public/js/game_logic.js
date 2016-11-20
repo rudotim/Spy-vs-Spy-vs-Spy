@@ -137,13 +137,7 @@ var GameLogic = function()
 			update : update,
 			render : render
 		});
-	};
-
-	ctrl.getGame = function()
-	{
-		return phaserGame;
-	};
-	
+	};	
 	
 	// Create our 'main' state that will contain the game
 	function preload()
@@ -167,11 +161,14 @@ var GameLogic = function()
 		phaserGame.load.image('button_bottom', 'img/button_right_blue.png');
 		phaserGame.load.image('button_test', 'img/button_right_blue.png');
 
+		phaserGame.load.image('startButton', 'img/buttonStart.png');
+		//phaserGame.load.image('button_test', 'img/button_right_blue.png');
+		
+		phaserGame.load.image("modalBG","img/modalBG.png");
+		
 		// game.load.image('room0', 'img/demoroom.png');
 		// joystick = new VirtualJoystick( game, null );
 		joystick = phaserGame.plugins.add(new Phaser.Plugin.VirtualJoystick(phaserGame, null));
-		
-		_gameOptions = new GameOptions( this, phaserGame );
 	}
 
 	function create()
@@ -180,8 +177,8 @@ var GameLogic = function()
 
 		_drawRoomCollisions(phaserGame);
 
-		joystick.init(260, 330, 80, 60, 40, "#AA3300", "#cccccc");
-		joystick.start();
+		//joystick.init(260, 330, 80, 60, 40, "#AA3300", "#cccccc");
+		//joystick.start();
 
 		phaserGame.input.mouse.capture = true;
 
@@ -215,6 +212,10 @@ var GameLogic = function()
 
 		var testButton = phaserGame.add.button(phaserGame.world.centerX - 300, 225, 'button_test', testButtonPress, this, 2, 1, 0);
 		testButton.scale.setTo(0.25, 0.25);
+				
+		//joystick = phaserGame.plugins.add(new Phaser.Plugin.VirtualJoystick(phaserGame, null));
+
+
 		// testButton.onInputDown.add(buttonDownLeft, this);
 		// testButton.onInputUp.add(buttonUpLeft, this);
 
@@ -224,35 +225,27 @@ var GameLogic = function()
 
 		// This function is called after the preload function
 		// Here we set up the game, display sprites, etc.
-		my_spy = new Spy(phaserGame, 250, 200, white_spy_def, gameControl);
-		
-		// set room
-		
+		my_spy = new Spy(phaserGame, 250, 200, white_spy_def, gameControl);				
 		
 		players.push(my_spy);
 
-		// var sprite = drawball(my_spy, game);
+		joystick.init(630, 330, 80, 60, 40, "#AA3300", "#cccccc");
+		joystick.start();
 
-		// my_spy = new Spy(game.add.sprite(0, 0, 'spies', 'wspy_stand'));
-		// green_spy = game.add.sprite(0, 50, 'spies', 'gspy_stand');
 
-		// my_spy.animations.add('wspy_rrun', ['wspy_rstand', 'wspy_rrun'],
-		// 6, true, false);
-		// green_spy.animations.add('gspy_rrun', ['gspy_rstand', 'gspy_rrun'],
-		// 6, true, false);
-
-		// my_spy.animations.play('run');
-		// green_spy.animations.play('gspy_rrun');
-
-		// my_spy.setAction('run_right');
+		_gameOptions = new GameOptions( this, phaserGame );
 		_gameOptions.show( );		
-
 	}
 
 	function update()
 	{
+		joystick.setVelocity( my_spy, 0, 4 );
+		
+		joystick.update();
+		
 		// This function is called 60 times per second
 		// It contains the game's logic
+		/*
 		switch (buttonDown)
 		{
 		case STOP:
@@ -281,6 +274,7 @@ var GameLogic = function()
 			break;
 		}
 		;
+		*/
 	}
 
 	function render()

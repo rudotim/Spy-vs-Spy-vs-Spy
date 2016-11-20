@@ -84,6 +84,8 @@ Phaser.Plugin.VirtualJoystick.prototype.start = function () {
 
     this.game.stage.addChild(this.base);
     this.game.stage.addChild(this.nub);
+    //this.game.add.sprite(this.base);
+    //this.game.add.sprite(this.nub);
 
     if (this.callbackID > -1)
     {
@@ -217,13 +219,31 @@ Phaser.Plugin.VirtualJoystick.prototype.setVelocity = function (sprite, minSpeed
 
     if (this.force === 0 && minSpeed === 0)
     {
-        sprite.body.velocity.set(0, 0);
+        //sprite.body.velocity.set(0, 0);
     }
     else
     {
-        var speed = (maxSpeed - minSpeed) * this.force;
+        //var speed = (maxSpeed - minSpeed) * this.force;
+    	var speed = 0;
+    	if ( this.force > 0.5 )
+    		speed = 4;
 
-        sprite.body.velocity.set(this.deltaX * speed, this.deltaY * speed);
+        //sprite.body.velocity.set(this.deltaX * speed, this.deltaY * speed);
+    	
+    	// left/right: x[0 - 0.99]
+    	// up/down   : y[0 - 0.99]
+    	
+    	if ( this.deltaX >= 0.85 )
+    		sprite.x += speed;
+    	else if ( this.deltaX <= -0.85 )
+    		sprite.x -= speed;   	
+    	if ( this.deltaY >= 0.85 )
+    		sprite.y += speed;
+    	else if ( this.deltaY <= -0.85 )
+    		sprite.y -= speed;
+    	
+    	
+    	//console.log( 'x (' + this.deltaX + '), y (' + this.deltaY + ')' );
     }
 
     return sprite;
