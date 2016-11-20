@@ -12,6 +12,7 @@ router.get('/list_games', function(req, res, next)
 	res.json(getStubGameList());
 });
 
+/*
 router.post('/room/create', function(req, res, next)
 {
 	var gameData = req.body;
@@ -29,19 +30,16 @@ router.post('/room/create', function(req, res, next)
 	// attach chat channel to client gameData object
 	res.json(gameData);
 });
+*/
 
 router.post('/room/join', function(req, res, next)
 {
 	var gameData = req.body;
 
-	if (!createRoom(gameData, req.app.get('io')))
-	{
-		// room is set up already, just join it
-		console.log('join> room exists already, joining...');
-	}
-
+	var newGameData = createRoom(gameData, req.app.get('io'));
+	
 	// attach chat channel to client gameData object
-	res.json(gameData);
+	res.json(newGameData);
 });
 
 function getStubGameList()
@@ -65,20 +63,34 @@ function getStubGameList()
 	return gameList;
 }
 
+function findGameByName(name)
+{
+	for (var i = 0; i < activeGameList.length; i++)
+	{
+		console.log('finding game by name [' + activeGameList[i].name + ']');
+		if (activeGameList[i].name == name)
+			return activeGameList[i];
+	}
+
+	return null;
+}
+
 function gameExists(name)
 {
+	return findGameByName( name ) != null;
+	/*
 	for (var i = 0; i < activeGameList.length; i++)
 	{
 		console.log('searching game entries [' + activeGameList[i].name + ']');
 		if (activeGameList[i].name == name)
 		{
-			console.log('--> found duplicate [' + name + ']');
 			return true;
 		}
 	}
 
 	console.log('game [' + name + '] does not exist');
 	return false;
+	*/
 }
 
 function createRoom(gameData, IO)
@@ -91,12 +103,15 @@ function createRoom(gameData, IO)
 	gameData.datachannel = dataChannel;
 
 	// check if it already exists
-	if (gameExists(gameData.name))
+	var storedGame = findGameByName( gameData.name );
+	if ( storedGame != null )
 	{
-		// gameData.error = 'game [' + gameData.name + '] already exists,
-		// joining';
-		// return false;
-		return false;
+		// add ourself
+		
+		// send message to other listeners that game data has changed
+		
+		// return data to ourself
+		return storedGame;
 	}
 
 	attachIO(chatChannel, dataChannel, gameData, IO);
@@ -104,7 +119,7 @@ function createRoom(gameData, IO)
 	// submit game in active game list
 	activeGameList.push(gameData);
 
-	return true;
+	return gameData;
 }
 
 function createId( gameData )
@@ -179,10 +194,26 @@ function removePlayerById( player_id, players )
 	{
 		if ( players[p].player_id == player_id )
 		{
-			players.remove(p);
+			console.log('removing player(' + player_id + ')[' + players[p].name + ']');
+//			players.remove(p);
 			return;
 		}
 	}
+}
+
+function playerHasLeft( player )
+{
+	for ( var p=0; p < serverPlayers.length; p++)
+	{
+		if ( serverPlayers[p].name == player.name )
+		{
+			serverPlayers = serverPlayers.splice(p, 1);
+			break;
+		}
+	}
+	
+	console.log('server[player_left]> got data : ' + player);
+	chat.emit('player_left', serverPlayers, player);	
 }
 
 function attachIO(chatChannel, dataChannel, gameData, IO)
@@ -191,8 +222,6 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 
 	console.log('attachingIO> joining ' + urlid + '/[' + chatChannel + ']');
 
-
-	
 	// create sockets, pass back chat names
 	var chat = IO.of(urlid).on('connection', function(socket)
 	{
@@ -237,20 +266,7 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 
 		socket.on('player_left', function( player )
 		{
-			// TODO:  Externalize this so we can call it when a socket disconnects
-			
-			
-			for ( var p=0; p < serverPlayers.length; p++)
-			{
-				if ( serverPlayers[p].name == player.name )
-				{
-					serverPlayers = serverPlayers.splice(p, 1);
-					break;
-				}
-			}
-			
-			console.log('server[player_left]> got data: ' + player);
-			chat.emit('player_left', serverPlayers, player);
+			playerHasLeft( player );
 			//socket.broadcast.to(gameData.name).emit('player_left', data);
 		});
 		
@@ -271,8 +287,8 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 		{
 			console.log('server received request to start game');
 			
-			// randomize start locations between players
-									
+			// TODO:  randomize start locations between players			
+
 			chat.emit('start_new_game', gameData);
 		});
 	});

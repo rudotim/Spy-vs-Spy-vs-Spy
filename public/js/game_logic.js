@@ -16,6 +16,8 @@
 
 var GameLogic = function()
 {
+	var _gameOptions;
+
 	var ctrl =
 	{};
 	
@@ -119,12 +121,10 @@ var GameLogic = function()
 		});
 	};
 
-	ctrl.showGameOptions = function(phaserGame)
+	ctrl.showGameOptions = function( gameData )
 	{
-
 		// draw gray rectangle on top of viewport
-
-		console.log('showing game options!');
+		_gameOptions.show( gameData, this );		
 	}
 
 	ctrl.startNewGame = function(socket)
@@ -137,9 +137,14 @@ var GameLogic = function()
 			update : update,
 			render : render
 		});
-
 	};
 
+	ctrl.getGame = function()
+	{
+		return phaserGame;
+	};
+	
+	
 	// Create our 'main' state that will contain the game
 	function preload()
 	{
@@ -165,6 +170,8 @@ var GameLogic = function()
 		// game.load.image('room0', 'img/demoroom.png');
 		// joystick = new VirtualJoystick( game, null );
 		joystick = phaserGame.plugins.add(new Phaser.Plugin.VirtualJoystick(phaserGame, null));
+		
+		_gameOptions = new GameOptions( this, phaserGame );
 	}
 
 	function create()
@@ -238,6 +245,8 @@ var GameLogic = function()
 		// green_spy.animations.play('gspy_rrun');
 
 		// my_spy.setAction('run_right');
+		_gameOptions.show( );		
+
 	}
 
 	function update()
@@ -335,3 +344,4 @@ var GameLogic = function()
 
 	return ctrl;
 };
+

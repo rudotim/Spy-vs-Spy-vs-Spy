@@ -3,13 +3,15 @@
  */
 
 
+
 function getGameDataStub( name )
 {
-	gameInstance = new GameInstance();
-	gameOptions = new GameOptions();
+	//gameInstance = new GameInstance();
+	//gameOptions = new GameOptions();
 	
-	return gameInstance.createNew( name );
+	//return gameInstance.createNew( name );
 }
+
 
 
 var GameControl = function( gameLogic )
@@ -104,7 +106,7 @@ var GameControl = function( gameLogic )
 		{
 			console.log('SERVER IS STARTING GAME!');
 			_gameLogic.startNewGame( socket );
-			_gameLogic.showGameOptions( game );
+			//_gameLogic.showGameOptions( gameData );
 		});
 		
 		// let everyone know we're here
@@ -145,32 +147,33 @@ var GameControl = function( gameLogic )
 		return "empty";
 	};
 	
-	ctrl.joinRoom = function( gameData )
+	ctrl.joinRoom = function( roomName )
 	{
-		console.log('attempting to join game [' + gameData.name + ']');
+		console.log('attempting to join game [' + roomName + ']');
 
 		$.ajax({
 		    type: 'post',
 		    url: '/room/join/',
-		    data: JSON.stringify(gameData),
+		    data: JSON.stringify( { "name" : roomName } ),
 		    contentType: "application/json",
-		    success: function (data) {
-		    	console.log( data );
+		    success: function ( newGameData ) {
+		    	console.log( newGameData );
 		    	
 		    	// ok so now a game was created on the server for us
-		    	_joinRoom( data );
+		    	_joinRoom( newGameData );
 		    	
 		    	// unlock the controls to start the game
-		    	console.log('ok, you\'ve joined room [' + gameData.name + ']');
+		    	console.log('ok, you\'ve joined room [' + newGameData.name + ']');
 		    },
-		    error : function(data)
+		    error : function( err )
 		    {
-		    	console.error('ERROR! ' + data.responseText );
-		    	console.error(data);
+		    	console.error('ERROR! ' + err.responseText );
+		    	console.error(err);
 		    }
 		});
 	};
 	
+	/*
 	ctrl.createServerRoom = function( gameData )
 	{		
 		console.log('creating game room [' + gameData.name + ']');
@@ -196,6 +199,7 @@ var GameControl = function( gameLogic )
 		    }
 		});
 	};
+	*/
 		
 	ctrl.leaveRoom = function( gameName )
 	{
@@ -205,7 +209,7 @@ var GameControl = function( gameLogic )
 
 	ctrl.showGameOptions = function( gameData )
 	{
-		gameOptions.show();	
+		_gameLogic.showGameOptions( gameData );
 	};
 	
 	ctrl.triggerStartNewGame = function( gameData )
@@ -236,7 +240,6 @@ var GameControl = function( gameLogic )
 var gameLogic = new GameLogic();
 
 var gameControl = new GameControl( gameLogic );
-var gameOptions = new GameOptions();
 
 
 

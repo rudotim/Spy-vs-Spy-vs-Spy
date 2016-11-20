@@ -6,6 +6,12 @@
 
 <script src="/js/socket.io-1.4.5.js"></script>
 <script src="/js/phaser.min.js"></script>
+
+<script src="/js/modal.js"></script>
+<!-- 
+<script src="/ezgui/js/EZGUI.js"></script>
+ -->
+ 
 <script src="/js/game_logic.js"></script>
 <script src="/js/gameinstance.js"></script>
 <script src="/js/game_options.js"></script>
@@ -26,12 +32,12 @@
 			<input type="text" class="form-control" id="player_name" value="Your Name" 
 				onblur="gameControl.setPlayerName(this.value);">
 			<button class="form-control"
-				onClick="gameControl.createServerRoom( getGameDataStub('game0') );">Create
+				onClick="gameControl.joinRoom( 'sweetbonesgame' );">Create
 				Server Room</button>
 			<button class="form-control"
-				onClick="gameControl.joinRoom( getGameDataStub('game0') );">Join</button>
+				onClick="gameControl.joinRoom( 'sweetbonesgame' );">Join</button>
 			<button class="form-control"
-				onClick="gameControl.leaveRoom( getGameDataStub('game0') );">Quit to Lobby</button>
+				onClick="gameControl.leaveRoom( 'sweetbonesgame' );">Quit to Lobby</button>
 
 			<span id="room_name">ybboL</span>
 			<div id="player_list">
