@@ -140,10 +140,7 @@ var GameLogic = function()
 			create : create,
 			update : update,
 			render : render
-		});
-		
-		_gameOptions = new GameOptions( this, phaserGame );
-		_gameOptions.show( gameData.isRunning );		
+		});		
 	};	
 	
 
@@ -244,8 +241,9 @@ var GameLogic = function()
 		joystick.init(630, 330, 80, 60, 40, "#AA3300", "#cccccc");
 		joystick.start();
 
-//		_gameOptions = new GameOptions( this, phaserGame );
-//		_gameOptions.show( );		
+		// ctrl is our 'game_logic::this' variable  (probably better way to pass this in)
+		_gameOptions = new GameOptions( ctrl, phaserGame );
+		_gameOptions.show( );		
 	}
 
 	function update()
