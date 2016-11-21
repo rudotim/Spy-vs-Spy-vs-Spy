@@ -15,6 +15,7 @@ var GameOptions = function( gameLogic, phaserGame )
 	_initModal = function()
 	{
 		console.log('initting modal...');
+		console.log(_phaser);
 		
 		modal = new gameModal( _phaser );
 		
@@ -82,7 +83,8 @@ var GameOptions = function( gameLogic, phaserGame )
 	    var index = Number(item.text);
 
 	    _countDown(_updateCountdown, startCount, x, y, function () {
-		       modal.hideModal("modalOptions");		               
+		       modal.hideModal("modalOptions");
+		       _gameLogic.startIt();
 		  });		
 	};
 	
@@ -116,7 +118,6 @@ var GameOptions = function( gameLogic, phaserGame )
 	
 	_drawWindow = function()
 	{	
-	    //modal = new gameModal(game);
 	    modal.showModal("modalOptions");
 	};
 	

@@ -121,15 +121,19 @@ var GameLogic = function()
 		});
 	};
 
+	ctrl.startIt = function()
+	{
+		console.log('startin it!');
+	};
+	
 	ctrl.showGameOptions = function( gameData )
 	{
 		// draw gray rectangle on top of viewport
-		_gameOptions.show( gameData, this );		
+		_gameOptions.show();		
 	}
 
-	ctrl.startNewGame = function(socket)
+	ctrl.startPreGame = function( gameData )
 	{
-		// game.state.add('main', mainState, true);
 		phaserGame = new Phaser.Game(800, 400, Phaser.AUTO, 'game_div',
 		{
 			preload : preload,
@@ -137,8 +141,12 @@ var GameLogic = function()
 			update : update,
 			render : render
 		});
+		
+		_gameOptions = new GameOptions( this, phaserGame );
+		_gameOptions.show( gameData.isRunning );		
 	};	
 	
+
 	// Create our 'main' state that will contain the game
 	function preload()
 	{
@@ -155,10 +163,12 @@ var GameLogic = function()
 		// TODO: Call this from outside the Phaser stuff
 		_loadLevel('data/roomdata.json', phaserGame);
 
+		/*
 		phaserGame.load.image('button_left', 'img/button_left_blue.png');
 		phaserGame.load.image('button_right', 'img/button_right_blue.png');
 		phaserGame.load.image('button_top', 'img/button_right_blue.png');
 		phaserGame.load.image('button_bottom', 'img/button_right_blue.png');
+		*/
 		phaserGame.load.image('button_test', 'img/button_right_blue.png');
 
 		phaserGame.load.image('startButton', 'img/buttonStart.png');
@@ -182,6 +192,7 @@ var GameLogic = function()
 
 		phaserGame.input.mouse.capture = true;
 
+		/*
 		var topButton = phaserGame.add.button(phaserGame.world.centerX - 35, 300 - 70, 'button_top', function()
 		{
 		}, this, 2, 1, 0);
@@ -209,7 +220,8 @@ var GameLogic = function()
 		botButton.scale.setTo(0.25, 0.25);
 		botButton.onInputDown.add(buttonDownBottom, this);
 		botButton.onInputUp.add(buttonUpBottom, this);
-
+		*/
+		
 		var testButton = phaserGame.add.button(phaserGame.world.centerX - 300, 225, 'button_test', testButtonPress, this, 2, 1, 0);
 		testButton.scale.setTo(0.25, 0.25);
 				
@@ -232,9 +244,8 @@ var GameLogic = function()
 		joystick.init(630, 330, 80, 60, 40, "#AA3300", "#cccccc");
 		joystick.start();
 
-
-		_gameOptions = new GameOptions( this, phaserGame );
-		_gameOptions.show( );		
+//		_gameOptions = new GameOptions( this, phaserGame );
+//		_gameOptions.show( );		
 	}
 
 	function update()
@@ -280,7 +291,6 @@ var GameLogic = function()
 	function render()
 	{
 		phaserGame.debug.text("(x: " + phaserGame.input.mousePointer.x + ", y: " + phaserGame.input.mousePointer.y + ")", 0, 50);
-		// game.input.mousePointer.x;
 	}
 
 	function changeScene( toRoom )
@@ -295,7 +305,7 @@ var GameLogic = function()
 
 
 	
-	
+/*	
 	function buttonDownRight()
 	{
 		buttonDown = RIGHT;
@@ -335,7 +345,7 @@ var GameLogic = function()
 	{
 		buttonDown = STOP;
 	}
-
+*/
 	return ctrl;
 };
 
