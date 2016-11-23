@@ -1,16 +1,5 @@
-/**
- * New node file
- */
 
 
-
-function getGameDataStub( name )
-{
-	//gameInstance = new GameInstance();
-	//gameOptions = new GameOptions();
-	
-	//return gameInstance.createNew( name );
-}
 
 
 
@@ -18,7 +7,7 @@ var GameControl = function( gameLogic )
 {
 	var ctrl = {};
 	
-	var socket; // = io().connect('http://localhost:3000');
+	var socket; 
 	var _gameData = null;	
 	var _player = {
 	};

@@ -8,13 +8,13 @@
       "roomActors": [
         {
           "type": "door",
-          "id": "door0W",
+          "id": "room0",
           "animation_id": "animDoorW",
           "pos": {
             "x": 30,
             "y": 100
           },
-          "teleports-to": "roomLeft"
+          "teleports-to": "room1"
         }
       ]
     },
@@ -23,13 +23,13 @@
       "roomActors": [
         {
           "type": "door",
-          "id": "door0E",
+          "id": "room1",
           "animation_id": "animDoorW",
           "pos": {
             "x": 470,
             "y": 100
           },
-          "teleports-to": "roomRight"
+          "teleports-to": "room0"
         }
       ]
     }

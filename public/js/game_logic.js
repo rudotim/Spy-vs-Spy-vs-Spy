@@ -1,18 +1,5 @@
-/*
- var my_spy;
- var roomScene;
- var game; // = new Phaser.Game(800, 600);
- var players = [];
 
- var buttonDown = false;
 
- var joystick;
- var levelData = {};
- */
-
-/**
- * New node file
- */
 
 var GameLogic = function()
 {
@@ -21,7 +8,7 @@ var GameLogic = function()
 	var ctrl =
 	{};
 	
-	var levelData =
+	var roomData =
 	{};
 	var my_spy;
 	var roomScene;
@@ -112,7 +99,7 @@ var GameLogic = function()
 			// Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
 
 			// load in-game level connections and positions
-			levelData = jd;
+			roomData = jd;
 		});
 
 		req.fail(function(jqXHR, textStatus)
@@ -160,12 +147,6 @@ var GameLogic = function()
 		// TODO: Call this from outside the Phaser stuff
 		_loadLevel('data/roomdata.json', phaserGame);
 
-		/*
-		phaserGame.load.image('button_left', 'img/button_left_blue.png');
-		phaserGame.load.image('button_right', 'img/button_right_blue.png');
-		phaserGame.load.image('button_top', 'img/button_right_blue.png');
-		phaserGame.load.image('button_bottom', 'img/button_right_blue.png');
-		*/
 		phaserGame.load.image('button_test', 'img/button_right_blue.png');
 
 		phaserGame.load.image('startButton', 'img/buttonStart.png');
@@ -173,8 +154,6 @@ var GameLogic = function()
 		
 		phaserGame.load.image("modalBG","img/modalBG.png");
 		
-		// game.load.image('room0', 'img/demoroom.png');
-		// joystick = new VirtualJoystick( game, null );
 		joystick = phaserGame.plugins.add(new Phaser.Plugin.VirtualJoystick(phaserGame, null));
 	}
 
@@ -184,54 +163,11 @@ var GameLogic = function()
 
 		_drawRoomCollisions(phaserGame);
 
-		//joystick.init(260, 330, 80, 60, 40, "#AA3300", "#cccccc");
-		//joystick.start();
-
 		phaserGame.input.mouse.capture = true;
-
-		/*
-		var topButton = phaserGame.add.button(phaserGame.world.centerX - 35, 300 - 70, 'button_top', function()
-		{
-		}, this, 2, 1, 0);
-		topButton.scale.setTo(0.25, 0.25);
-		topButton.onInputDown.add(buttonDownTop, this);
-		topButton.onInputUp.add(buttonUpTop, this);
-
-		var lbutton = phaserGame.add.button(phaserGame.world.centerX - 95, 300, 'button_left', function()
-		{
-		}, this, 2, 1, 0);
-		lbutton.scale.setTo(0.25, 0.25);
-		lbutton.onInputDown.add(buttonDownLeft, this);
-		lbutton.onInputUp.add(buttonUpLeft, this);
-
-		var rbutton = phaserGame.add.button(phaserGame.world.centerX + 25, 300, 'button_right', function()
-		{
-		}, this, 2, 1, 0);
-		rbutton.scale.setTo(0.25, 0.25);
-		rbutton.onInputDown.add(buttonDownRight, this);
-		rbutton.onInputUp.add(buttonUpRight, this);
-
-		var botButton = phaserGame.add.button(phaserGame.world.centerX - 35, 300 + 70, 'button_bottom', function()
-		{
-		}, this, 2, 1, 0);
-		botButton.scale.setTo(0.25, 0.25);
-		botButton.onInputDown.add(buttonDownBottom, this);
-		botButton.onInputUp.add(buttonUpBottom, this);
-		*/
 		
 		var testButton = phaserGame.add.button(phaserGame.world.centerX - 300, 225, 'button_test', testButtonPress, this, 2, 1, 0);
 		testButton.scale.setTo(0.25, 0.25);
 				
-		//joystick = phaserGame.plugins.add(new Phaser.Plugin.VirtualJoystick(phaserGame, null));
-
-
-		// testButton.onInputDown.add(buttonDownLeft, this);
-		// testButton.onInputUp.add(buttonUpLeft, this);
-
-		// this.fireKey = game.input.keyboard.addKey(Phaser.Keyboard.S);
-		// this.fireKey.onDown.add(<function that sets isPressed true> , this);
-		// this.fireKey.onUp.add(<function that sets isPressed false> , this);
-
 		// This function is called after the preload function
 		// Here we set up the game, display sprites, etc.
 		my_spy = new Spy(phaserGame, 250, 200, white_spy_def, gameControl);				
@@ -250,40 +186,7 @@ var GameLogic = function()
 	{
 		joystick.setVelocity( my_spy, 0, 4 );
 		
-		joystick.update();
-		
-		// This function is called 60 times per second
-		// It contains the game's logic
-		/*
-		switch (buttonDown)
-		{
-		case STOP:
-			my_spy.stopMoving();
-			my_spy.updateMovement();
-			gameControl.sendStopUpdate(my_spy);
-			buttonDown = NOTHING;
-			break;
-		case LEFT:
-			my_spy.moveLeft();
-			my_spy.updateMovement();
-			break;
-		case RIGHT:
-			my_spy.moveRight();
-			my_spy.updateMovement();
-			break;
-		case TOP:
-			my_spy.moveUp();
-			my_spy.updateMovement();
-			break;
-		case BOTTOM:
-			my_spy.moveDown();
-			my_spy.updateMovement();
-			break;
-		case NOTHING:
-			break;
-		}
-		;
-		*/
+		joystick.update();		
 	}
 
 	function render()
@@ -303,47 +206,6 @@ var GameLogic = function()
 
 
 	
-/*	
-	function buttonDownRight()
-	{
-		buttonDown = RIGHT;
-	}
-
-	function buttonUpRight()
-	{
-		buttonDown = STOP;
-	}
-
-	function buttonDownLeft()
-	{
-		buttonDown = LEFT;
-	}
-
-	function buttonUpLeft()
-	{
-		buttonDown = STOP;
-	}
-
-	function buttonDownTop()
-	{
-		buttonDown = TOP;
-	}
-
-	function buttonUpTop()
-	{
-		buttonDown = STOP;
-	}
-
-	function buttonDownBottom()
-	{
-		buttonDown = BOTTOM;
-	}
-
-	function buttonUpBottom()
-	{
-		buttonDown = STOP;
-	}
-*/
 	return ctrl;
 };
 

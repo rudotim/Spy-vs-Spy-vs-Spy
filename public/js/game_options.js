@@ -82,10 +82,13 @@ var GameOptions = function( gameLogic, phaserGame )
 	    item.y = y;
 	    var index = Number(item.text);
 
+	    _gameLogic.startIt();
+	    /*
 	    _countDown(_updateCountdown, startCount, x, y, function () {
 		       modal.hideModal("modalOptions");
 		       _gameLogic.startIt();
-		  });		
+		  });
+		  */		
 	};
 	
 	_countDown = function(fn, startCount, x, y, endFn) {
