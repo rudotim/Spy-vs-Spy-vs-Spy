@@ -8,7 +8,9 @@ var GameLogic = function()
 	var ctrl =
 	{};
 	
-	var roomData =
+	var _gameData = {};
+	
+	var _roomData =
 	{};
 	var my_spy;
 	var roomScene;
@@ -99,7 +101,7 @@ var GameLogic = function()
 			// Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
 
 			// load in-game level connections and positions
-			roomData = jd;
+			_roomData = jd;
 		});
 
 		req.fail(function(jqXHR, textStatus)
@@ -108,28 +110,32 @@ var GameLogic = function()
 		});
 	};
 
-	ctrl.startIt = function()
-	{
-		console.log('startin it!');
-	};
 	
-	ctrl.showGameOptions = function( gameData )
+	function moveToStartRoom()
 	{
-		// draw gray rectangle on top of viewport
-		_gameOptions.show();		
+		// get starting location
+		
+	}
+	
+	function changeScene( toRoom )
+	{
+		roomScene.frameName = toRoom;			
 	}
 
-	ctrl.startPreGame = function( gameData )
+	function testButtonPress()
 	{
-		phaserGame = new Phaser.Game(800, 400, Phaser.AUTO, 'game_div',
-		{
-			preload : preload,
-			create : create,
-			update : update,
-			render : render
-		});		
-	};	
+		changeScene("room0");
+	}
 	
+	// -------------------------------------------------------
+	// -- Game Play Logic
+	// -------------------------------------------------------
+
+	
+
+	// -------------------------------------------------------
+	// -- Phaser
+	// -------------------------------------------------------
 
 	// Create our 'main' state that will contain the game
 	function preload()
@@ -189,22 +195,50 @@ var GameLogic = function()
 		joystick.update();		
 	}
 
+	
+	// on each update:
+	// 
+	// check if spy has violated any boundaries (triggers, hard perimeter)
+	// 
+	
 	function render()
 	{
 		phaserGame.debug.text("(x: " + phaserGame.input.mousePointer.x + ", y: " + phaserGame.input.mousePointer.y + ")", 0, 50);
 	}
 
-	function changeScene( toRoom )
+	// -------------------------------------------------------
+	// -- Public Utilities
+	// -------------------------------------------------------
+	
+	ctrl.startPreGame = function()
 	{
-		roomScene.frameName = toRoom;			
-	}
+		phaserGame = new Phaser.Game(800, 400, Phaser.AUTO, 'game_div',
+		{
+			preload : preload,
+			create : create,
+			update : update,
+			render : render
+		});		
+	};	
 
-	function testButtonPress()
+	ctrl.showGameOptions = function()
 	{
-		changeScene("room0");
+		// draw gray rectangle on top of viewport
+		_gameOptions.show();		
 	}
-
-
+		
+	ctrl.startGame = function( gameDataWithPlayers )
+	{
+		_gameData = gameDataWithPlayers;
+		
+		console.log( 'begin game...');
+		
+		
+		// TODO: begin timer
+		// zero scores
+		// play level music
+		// move player to starting room, location
+	};
 	
 	return ctrl;
 };

@@ -82,7 +82,9 @@ var GameOptions = function( gameLogic, phaserGame )
 	    item.y = y;
 	    var index = Number(item.text);
 
-	    _gameLogic.startIt();
+		gameControl.triggerStartGame();
+	    modal.hideModal("modalOptions");
+
 	    /*
 	    _countDown(_updateCountdown, startCount, x, y, function () {
 		       modal.hideModal("modalOptions");
@@ -127,10 +129,7 @@ var GameOptions = function( gameLogic, phaserGame )
 	ctrl.show = function()
 	{
 		console.log( 'showing' );
-		
-		// pause game
-		
-		
+				
 		_drawWindow(); 
 	};
 	

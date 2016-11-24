@@ -4,11 +4,7 @@ var router = express.Router();
 var activeGameList = [];
 
 
-/* GET users listing. */
-router.get('/list_games', function(req, res, next)
-{
-	res.json(getStubGameList());
-});
+
 
 
 router.post('/room/join', function(req, res, next)
@@ -28,26 +24,6 @@ router.post('/room/join', function(req, res, next)
 		res.status(500).send({ error: 'You are already in a room, dummy!' });	
 });
 
-function getStubGameList()
-{
-	var gameList =
-
-	[
-	{
-		name : 'Tim\'s Game',
-		max_players : 5,
-		max_duration : 1,
-		map : 'lobby'
-	},
-	{
-		name : 'Satan\'s Broom Closet',
-		max_players : 3,
-		max_duration : 2,
-		map : 'closet'
-	} ];
-
-	return gameList;
-}
 
 function findGameByName(name)
 {
@@ -90,6 +66,9 @@ function createRoom(roomName, player, IO)
 
 		// submit game in active game list
 		activeGameList.push(gameData);
+		
+		// save game_id (which is just the index in the activeGameList)
+		gameData.game_id = activeGameList.length-1;
 		
 		// empty player array
 		gameData.players = [];
@@ -171,15 +150,11 @@ function findGameByPlayerId( player_id )
 	return null;
 }
 
-/*
-function removePlayer( player )
+function findGameByGameId( game_id )
 {
-	var gameData = player.gameData;
-	var serverPlayers = gameData.players;
-
-	removePlayerById( player.player_id, serverPlayers );
+	return activeGameList[ game_id ];
 }
-*/
+
 
 function removePlayerById( player_id )
 {
@@ -234,20 +209,8 @@ function playerHasJoined( player, socket )
 	var gameData = findGameByPlayerId( player.player_id );
 	var serverPlayers = gameData.players;
 	
-	/*
-	for ( var p=0; p < serverPlayers.length; p++)
-	{
-		if ( serverPlayers[p].name == player.name )
-		{
-			serverPlayers = serverPlayers.splice(p, 1);
-			break;
-		}
-	}
-	*/
-	
 	console.log('server[player_joined]> got data : ' + player.name);
 	socket.broadcast.to(gameData.name).emit('player_joined', serverPlayers, player);
-	//chat.emit('player_joined', serverPlayers, player);	
 }
 
 function attachIO(chatChannel, dataChannel, gameData, IO)
@@ -280,30 +243,7 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 		{
 			console.log('server[player_attr_updated]> got player: ' + player.name );
 			var newPlayer = player;
-			
-			/*
-			if ( player.stub == true )
-			{
-				console.log('found stub, first time player update for [' + player.name + ']');
-				newPlayer = createPlayer( player.name, gameData );
-				
-				if ( serverPlayers.length == 0 )
-				{
-					console.log('you are the first one in - you are the leader');
-					newPlayer.isLeader = true;
-				}
-				else
-					newPlayer.isLeader = false;
-				
-				serverPlayers.push( newPlayer );
-			}
-			else
-			{
-				var oldPlayerIndex = getPlayerIndex( player, serverPlayers );
-				console.log('old player index: ' + oldPlayerIndex );
-				replacePlayerByIndex( player, oldPlayerIndex, serverPlayers );
-			}
-*/			
+					
 			// TODO:  Move this player_id set logic to somewhere more appropriate
 			socket.player_id = newPlayer.player_id;
 			
@@ -338,16 +278,62 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 			socket.broadcast.to(gameData.name).emit(chatChannel, data);
 		});
 
-		socket.on('start_pre_game', function( gameName )
+		socket.on('start_pre_game', function()
 		{
 			console.log('server received request to start the pre-game');
-			
-			// TODO:  randomize start locations between players			
-			//var gameData = 
-			
+						
 			chat.emit('start_pre_game', null );
+		});
+		
+		socket.on('start_game', function( game_id )
+		{
+			console.log('server received request to start the game');
+				
+			var gameData = findGameByGameId( game_id );
+			
+			// get players, randomize their locations within the rooms
+			
+					
+			chat.emit('start_game', gameData );
 		});
 	});
 }
+
+
+
+
+
+
+
+
+/* GET users listing. */
+router.get('/list_games', function(req, res, next)
+{
+	res.json(getStubGameList());
+});
+
+function getStubGameList()
+{
+	var gameList =
+
+	[
+	{
+		name : 'Tim\'s Game',
+		max_players : 5,
+		max_duration : 1,
+		map : 'lobby'
+	},
+	{
+		name : 'Satan\'s Broom Closet',
+		max_players : 3,
+		max_duration : 2,
+		map : 'closet'
+	} ];
+
+	return gameList;
+}
+
+
+
 
 module.exports = router;

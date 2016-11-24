@@ -105,7 +105,13 @@ var GameControl = function( gameLogic )
 		socket.on( 'start_pre_game', function()
 		{
 			console.log('SERVER IS STARTING PRE GAME!');
-			_gameLogic.startPreGame( _gameData );
+			_gameLogic.startPreGame();
+		});
+
+		socket.on( 'start_game', function()
+		{
+			console.log('SERVER IS STARTING OFFICIAL GAME!');
+			_gameLogic.startGame();
 		});
 		
 		_player = player;
@@ -188,14 +194,19 @@ var GameControl = function( gameLogic )
 		console.log('leaving game room [' + gameName + ']');		
 	};
 
-	ctrl.showGameOptions = function( gameData )
+	ctrl.showGameOptions = function()
 	{
-		_gameLogic.showGameOptions( gameData );
+		_gameLogic.showGameOptions();
 	};
 	
 	ctrl.triggerStartPreGame = function()
 	{
-		socket.emit( 'start_pre_game', _gameData.name );	
+		socket.emit( 'start_pre_game', null );	
+	};
+
+	ctrl.triggerStartGame = function()
+	{
+		socket.emit( 'start_game', _gameData.game_id );	
 	};
 	
 	ctrl.sendPosUpdate = function( spy )
