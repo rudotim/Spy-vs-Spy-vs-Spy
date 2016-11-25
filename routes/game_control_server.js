@@ -1,22 +1,22 @@
 var express = require('express');
 var router = express.Router();
 
-var activeGameList = [];
+var Players = require('../public/js/players.js');
+var activeGamesClass = require('./activegames.js');
 
-
-
+var activeGames = new activeGamesClass();
 
 
 router.post('/room/join', function(req, res, next)
 {
 	var clientData = req.body;
 
-	var roomName = clientData.name;
+	var game_id = clientData.game_id;
 	var player = clientData.player;
 	
 	if ( typeof player.isLeader == 'undefined' )
 	{
-		var newGameData = createRoom(roomName, player, req.app.get('io'));
+		var newGameData = createRoom(game_id, player, req.app.get('io'));
 		// attach chat channel to client gameData object
 		res.json(newGameData);
 	}
@@ -25,63 +25,33 @@ router.post('/room/join', function(req, res, next)
 });
 
 
-function findGameByName(name)
-{
-	for (var i = 0; i < activeGameList.length; i++)
-	{
-		console.log('finding game by name [' + activeGameList[i].name + ']');
-		if (activeGameList[i].name == name)
-			return activeGameList[i];
-	}
 
-	return null;
-}
-
-function gameExists(name)
-{
-	return findGameByName( name ) != null;
-}
-
-function createRoom(roomName, player, IO)
+function createRoom(game_id, player, IO)
 {	
 	// check if it already exists
-	var gameData = findGameByName( roomName );
+	var gameData = activeGames.findGameById( game_id );
 	var newPlayer;
 	var isLeader = false;
 	
 	// if it doesn't, create it
 	if ( gameData == null )
 	{
-		gameData = {};
-		
-		// attach IO
-		var chatChannel = roomName + 'chat';
-		var dataChannel = roomName + 'data';
-
-		gameData.name = roomName;
-		gameData.chatchannel = chatChannel;
-		gameData.datachannel = dataChannel;
-		
-		attachIO(chatChannel, dataChannel, gameData, IO);
-
 		// submit game in active game list
-		activeGameList.push(gameData);
+		gameData = activeGames.createGame( game_id, new Players() );
+				
+		attachIO(gameData.chatchannel, gameData.datachannel, gameData, IO);
 		
-		// save game_id (which is just the index in the activeGameList)
-		gameData.game_id = activeGameList.length-1;
-		
-		// empty player array
-		gameData.players = [];
-		
+		console.log( gameData );
+
 		isLeader = true;
 	}
 	
 	// create and add ourself
-	newPlayer = createPlayer( player.name, gameData, isLeader );
-	gameData.players.push( newPlayer );
-
-	//chat.emit('player_joined', gameData.players, newPlayer);	
-
+	var newPlayer = gameData.players.createPlayer( player.name, createId( gameData ), isLeader );
+	
+	console.log( 'newPlayer:');
+	console.log( newPlayer );
+	
 	// return data to ourself
 	return {
 		"gameData"	: gameData,
@@ -100,124 +70,37 @@ function createId( gameData )
 	
 	gameData.uid = uid;
 	
-	return gameData.name + '_' + uid;
-}
-
-function createPlayer( playerName, gameData, isLeader )
-{
-	var newPlayer = {};
-	
-	newPlayer.name = playerName;
-	newPlayer.player_id = createId( gameData );
-	newPlayer.isLeader = isLeader;
-	
-	console.log( 'player [' + playerName + '](leader:' + isLeader + ') has id {' + newPlayer.player_id + '}');
-	return newPlayer;
-}
-
-function replacePlayerByIndex( player, index, players )
-{
-	players[index] = player;
-}
-
-function getPlayerIndex( player, players )
-{
-	for ( var p=0; p<players.length; p++ )
-	{
-		if ( players[p].player_id == player.player_id )
-		{
-			console.log( 'get> player [' + players[p].name + '] has id {' + players[p].player_id + '}');
-			return p;
-		}
-	}
-}
-
-function findGameByPlayerId( player_id )
-{
-	var game;
-	// look through all games
-	for ( var g=0; g<activeGameList.length; g++ )
-	{
-		game = activeGameList[g];
-		
-		// now loop through players in each game to find matching id
-		for ( var p=0; p<game.players.length; p++ )
-		{
-			if ( game.players[p].player_id == player_id )
-				return game;
-		}
-	}
-	return null;
-}
-
-function findGameByGameId( game_id )
-{
-	return activeGameList[ game_id ];
+	return gameData.game_id + '_' + uid;
 }
 
 
-function removePlayerById( player_id )
-{
-	var gameData = findGameByPlayerId( player_id );
-	
-	if ( gameData == null )
-	{
-		console.log("ERROR - GAME DATA IS NULL!");
-		return;
-	}
-	
-	var serverPlayers = gameData.players;
-	
-	for ( var p=0; p<serverPlayers.length; p++ )
-	{
-		if ( serverPlayers[p].player_id == player_id )
-		{
-			console.log('removing player(' + player_id + ')[' + serverPlayers[p].name + ']');
-			serverPlayers.splice( p, 1 );
-			return;
-		}
-	}
-}
 
 function playerHasLeft( player, socket )
 {
 	// find game associated with player
-	var gameData = findGameByPlayerId( player.player_id );
-	var serverPlayers = gameData.players;
+	var gameData = activeGames.findGameByPlayerId( player.player_id );
 	
-	console.log( serverPlayers );
-	
-	for ( var p=0; p < serverPlayers.length; p++)
-	{
-		console.log('checking for player [' + player.name + '] in list entry [' + serverPlayers[p].name + ']');
-		if ( serverPlayers[p].player_id == player.player_id )
-		{
-			serverPlayers.splice(p, 1);
-			break;
-		}
-	}
+	gameData.players.removePlayerById( player.player_id );
 	
 	console.log('server[player_left]> got data : ' + player.name);
-//	chat.emit('player_left', serverPlayers, player);
-	socket.broadcast.to(gameData.name).emit('player_left', serverPlayers, player);
-
+	socket.broadcast.to(gameData.game_id).emit('player_left', gameData.players, player);
 }
 
 function playerHasJoined( player, socket )
 {
 	// find game associated with player
-	var gameData = findGameByPlayerId( player.player_id );
+	var gameData = activeGames.findGameByPlayerId( player.player_id );
 	var serverPlayers = gameData.players;
 	
 	console.log('server[player_joined]> got data : ' + player.name);
-	socket.broadcast.to(gameData.name).emit('player_joined', serverPlayers, player);
+	socket.broadcast.to(gameData.game_id).emit('player_joined', serverPlayers, player);
 }
 
-function attachIO(chatChannel, dataChannel, gameData, IO)
+function attachIO(chatchannel, datachannel, gameData, IO)
 {
-	var urlid = '/' + gameData.name;
+	var urlid = '/' + gameData.game_id;
 
-	console.log('attachingIO> joining ' + urlid + '/[' + chatChannel + ']');
+	console.log('attachingIO> joining ' + urlid + '/[' + chatchannel + ']');
 
 	// create sockets, pass back chat names
 	var chat = IO.of(urlid).on('connection', function(socket)
@@ -225,18 +108,14 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 		console.log('server> CONNECTED TO SERVER');
 
 		// join chat room
-		socket.join(gameData.name);
+		socket.join(gameData.game_id);
 
 		socket.on('disconnect', function () 
 		{
-			//io.emit('user disconnected');
 			console.log('disconnected player_id=' + socket.player);
 			
 			// remove from server list
-			// TODO:  Make test cases for these remove/add player utilities
-//			removePlayerById( socket.player_id );
 			playerHasLeft( socket.player, socket );
-
 		});
 		 
 		socket.on('player_attr_updated', function( player )
@@ -253,29 +132,27 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 		socket.on('player_left', function( player )
 		{
 			playerHasLeft( player, socket );
-			//socket.broadcast.to(gameData.name).emit('player_left', data);
 		});
-
 		
 		socket.on('player_joined', function( player )
 		{
-			console.log('socket[' + socket.player_id + '] new_id=[' + player.player_id + ']');
 			socket.player = player;
+			console.log('socket[' + socket.player.player_id + '] new_id=[' + player.player_id + ']');
 			playerHasJoined( player, socket );
 			//socket.broadcast.to(_gameData.name).emit('player_joined', data);
 		});
 		
 		// join data channel
-		socket.on(dataChannel, function(data)
+		socket.on(datachannel, function(data)
 		{
-			// console.log('server[' + dataChannel + ']> got data: ' + data);
-			socket.broadcast.to(gameData.name).emit(dataChannel, data);
+			// console.log('server[' + datachannel + ']> got data: ' + data);
+			socket.broadcast.to(gameData.game_id).emit(datachannel, data);
 		});
 
-		socket.on(chatChannel, function(data)
+		socket.on(chatchannel, function(data)
 		{
-			console.log('server[' + chatChannel + ']> got data: ' + data);
-			socket.broadcast.to(gameData.name).emit(chatChannel, data);
+			console.log('server[' + chatchannel + ']> got data: ' + data);
+			socket.broadcast.to(gameData.game_id).emit(chatchannel, data);
 		});
 
 		socket.on('start_pre_game', function()
@@ -289,9 +166,9 @@ function attachIO(chatChannel, dataChannel, gameData, IO)
 		{
 			console.log('server received request to start the game');
 				
-			var gameData = findGameByGameId( game_id );
+			var gameData = activeGames.findGameById( game_id );
 			
-			// get players, randomize their locations within the rooms
+			// TODO: get players, randomize their locations within the rooms
 			
 					
 			chat.emit('start_game', gameData );

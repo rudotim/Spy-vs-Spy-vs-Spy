@@ -12,7 +12,7 @@ var GameLogic = function()
 	
 	var _roomData =
 	{};
-	var my_spy;
+	var _my_spy;
 	var roomScene;
 	var phaserGame;
 	var players = [];
@@ -111,7 +111,7 @@ var GameLogic = function()
 	};
 
 	
-	function moveToStartRoom()
+	function _moveToStartRoom()
 	{
 		// get starting location
 		
@@ -176,9 +176,9 @@ var GameLogic = function()
 				
 		// This function is called after the preload function
 		// Here we set up the game, display sprites, etc.
-		my_spy = new Spy(phaserGame, 250, 200, white_spy_def, gameControl);				
+		_my_spy = new Spy(phaserGame, 250, 200, white_spy_def, gameControl);				
 		
-		players.push(my_spy);
+		players.push(_my_spy);
 
 		joystick.init(630, 330, 80, 60, 40, "#AA3300", "#cccccc");
 		joystick.start();
@@ -190,7 +190,7 @@ var GameLogic = function()
 
 	function update()
 	{
-		joystick.setVelocity( my_spy, 0, 4 );
+		joystick.setVelocity( _my_spy, 0, 4 );
 		
 		joystick.update();		
 	}
@@ -231,9 +231,15 @@ var GameLogic = function()
 	{
 		_gameData = gameDataWithPlayers;
 		
+		// so now we have all the players and their initial positions
+		
+		// update our character's data
+		
+		// now reflect those changes in our game if necessary
+		
 		console.log( 'begin game...');
 		
-		
+		_moveToRoom(  );
 		// TODO: begin timer
 		// zero scores
 		// play level music

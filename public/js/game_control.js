@@ -42,7 +42,7 @@ var GameControl = function( gameLogic )
 	
 	_joinRoom = function( gameData, player )
 	{
-		var urlid = '/' + gameData.name;
+		var urlid = '/' + gameData.game_id;
 
 		console.log('client joining ' + urlid + '/[' + gameData.datachannel + ']');
 				
@@ -123,7 +123,7 @@ var GameControl = function( gameLogic )
 		socket.emit( 'player_joined', player );	
 		updateRoomList( gameData.players );
 
-		console.log('ok, you\'ve joined room [' + gameData.name + ']');
+		console.log('ok, you\'ve joined room [' + gameData.game_id + ']');
 	};
 
 	_updatePlayer = function()
@@ -165,7 +165,7 @@ var GameControl = function( gameLogic )
 		console.log('attempting to join game [' + roomName + ']');
 
 		var clientData = {
-				"name" : roomName,
+				"game_id" : roomName,
 				"player" : _player
 		};
 		
