@@ -14,13 +14,18 @@ var GameControl = function( gameLogic )
 		
 	var _gameLogic = gameLogic;
 		
-	updateRoomList = function( serverPlayers )
+	_updateRoomList = function( serverPlayers )
 	{
 			$('#player_list ul').empty();
 			
-			for ( var p=0; p<serverPlayers.length; p++)
+			console.log( serverPlayers );
+			console.log( serverPlayers.keys.length );
+			//console.log( serverPlayers.player_data[  ] );
+			
+			for ( var p=0; p<serverPlayers.keys.length; p++)
 			{
-				var playerName = serverPlayers[p].name;
+				var playerName = serverPlayers.player_data[ serverPlayers.keys[p] ].name;
+				console.log( playerName );
 				
 				$('#player_list ul').append(
 						$('<li>').append(
@@ -70,7 +75,7 @@ var GameControl = function( gameLogic )
 				_player = updatedPlayer;
 			
 			// redraw room members
-			updateRoomList( serverPlayers );
+			_updateRoomList( serverPlayers );
 			
 			// update any player data
 			updatePlayerAttr( serverPlayers );
@@ -78,14 +83,16 @@ var GameControl = function( gameLogic )
 		
 		socket.on('player_left', function(serverPlayers, playerThatLeft)
 		{
+			console.log('player_left');
 			console.log('player ' + playerThatLeft.name + ' has left the room');
-			updateRoomList( serverPlayers );
+			_updateRoomList( serverPlayers );
 		});
 
 		socket.on('player_joined', function(serverPlayers, newPlayer)
 		{
+			console.log('player_joined');
 			console.log('player ' + newPlayer.name + ' has joined the room');
-			updateRoomList( serverPlayers );
+			_updateRoomList( serverPlayers );
 		});
 		
 		socket.on( gameData.chatchannel, function(msg)
@@ -95,6 +102,7 @@ var GameControl = function( gameLogic )
 				
 		socket.on( gameData.datachannel, function(msg)
 		{
+			console.log('got bin data[' + msg + ']');
 			// update spy with data
 			for ( var p = 0; p<players.length; p++)
 			{
@@ -121,7 +129,7 @@ var GameControl = function( gameLogic )
 		console.log( gameData.players );
 		
 		socket.emit( 'player_joined', player );	
-		updateRoomList( gameData.players );
+		_updateRoomList( gameData.players );
 
 		console.log('ok, you\'ve joined room [' + gameData.game_id + ']');
 	};
@@ -169,21 +177,23 @@ var GameControl = function( gameLogic )
 				"player" : _player
 		};
 		
-		$.ajax({
+		$.ajax(
+		{
 		    type: 'post',
 		    url: '/room/join/',
 		    data: JSON.stringify( clientData ),
 		    contentType: "application/json",
-		    success: function ( data ) {
-		    	console.log( data );
+		    success: function ( data ) 
+		    {
+		    		console.log( data );
 		    		
-		    	// ok so now a game was created on the server for us
-		    	_joinRoom( data.gameData, data.player );		    	
+		    		// ok so now a game was created on the server for us
+		    		_joinRoom( data.gameData, data.player );		    	
 		    },
 		    error : function( err )
 		    {
-		    	console.error('ERROR! ' + err.responseText );
-		    	console.error(err);
+		    		console.error('ERROR! ' + err.responseText );
+		    		console.error(err);
 		    }
 		});
 	};

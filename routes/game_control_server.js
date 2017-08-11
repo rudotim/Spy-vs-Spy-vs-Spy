@@ -77,6 +77,9 @@ function createId( gameData )
 
 function playerHasLeft( player, socket )
 {
+	console.log('playerHasLeft');
+	console.log( player );
+
 	// find game associated with player
 	var gameData = activeGames.findGameByPlayerId( player.player_id );
 	
@@ -88,12 +91,33 @@ function playerHasLeft( player, socket )
 
 function playerHasJoined( player, socket )
 {
+	console.log('playerHasJoined');
+	console.log( player );
 	// find game associated with player
 	var gameData = activeGames.findGameByPlayerId( player.player_id );
+	console.log( gameData );
 	var serverPlayers = gameData.players;
 	
-	console.log('server[player_joined]> got data : ' + player.name);
+	console.log('broadcasting player_joined');
 	socket.broadcast.to(gameData.game_id).emit('player_joined', serverPlayers, player);
+	console.log('done broadcasting player_joined');
+	console.log('broadcasting to ' + gameData.game_id);
+	console.log('serverPlayers : ' + serverPlayers );
+	console.log('player ' + player );
+
+}
+
+function playerAttributeUpdated( player, socket )
+{
+	console.log('playerAttributeUpdated');
+	console.log( player );
+	// find game associated with player
+	var gameData = activeGames.findGameByPlayerId( player.player_id );
+	
+	//gameData.players.removePlayerById( player.player_id );
+	
+	console.log('server[player_attr_updated]> got data : ' + player.name);
+	socket.broadcast.to(gameData.game_id).emit('player_attr_updated', gameData.players, player);
 }
 
 function attachIO(chatchannel, datachannel, gameData, IO)
@@ -120,6 +144,8 @@ function attachIO(chatchannel, datachannel, gameData, IO)
 		 
 		socket.on('player_attr_updated', function( player )
 		{
+			playerAttributeUpdated( player, socket );
+			/*
 			console.log('server[player_attr_updated]> got player: ' + player.name );
 			var newPlayer = player;
 					
@@ -127,6 +153,7 @@ function attachIO(chatchannel, datachannel, gameData, IO)
 			socket.player_id = newPlayer.player_id;
 			
 			chat.emit('player_attr_updated', serverPlayers, newPlayer);
+			*/
 		});
 
 		socket.on('player_left', function( player )
@@ -137,7 +164,7 @@ function attachIO(chatchannel, datachannel, gameData, IO)
 		socket.on('player_joined', function( player )
 		{
 			socket.player = player;
-			console.log('socket[' + socket.player.player_id + '] new_id=[' + player.player_id + ']');
+			//console.log('socket[' + socket.player.player_id + '] new_id=[' + player.player_id + ']');
 			playerHasJoined( player, socket );
 			//socket.broadcast.to(_gameData.name).emit('player_joined', data);
 		});
@@ -151,7 +178,7 @@ function attachIO(chatchannel, datachannel, gameData, IO)
 
 		socket.on(chatchannel, function(data)
 		{
-			console.log('server[' + chatchannel + ']> got data: ' + data);
+			console.log('server[' + chatchannel + ']> got chat msg: ' + data);
 			socket.broadcast.to(gameData.game_id).emit(chatchannel, data);
 		});
 

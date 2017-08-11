@@ -48,13 +48,20 @@
 			game = this.game_data[ this.keys[k] ];
 
 			console.log('checking game \'' + this.keys[k] + '\' for players...');
-			
+
+			console.log('checking for player_id[' + player_id + ']');
 			p = game.players.getPlayerById( player_id );
 			
 			if ( p != 'undefined' && p != null )
-				return p;
+			{
+				console.log('found player');
+				console.log( p );
+				//return p;
+				return game;
+			}
 		}
 		
+		console.error('found nothing');
 		return null;
 	};
 	
