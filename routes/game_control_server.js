@@ -197,8 +197,7 @@ function attachIO(chatchannel, datachannel, gameData, IO)
 			
 			// TODO: get players, randomize their locations within the rooms
 			
-					
-			chat.emit('start_game', gameData );
+			socket.broadcast.to(gameData.game_id).emit('start_game', gameData );
 		});
 	});
 }
