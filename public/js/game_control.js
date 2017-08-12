@@ -109,17 +109,17 @@ var GameControl = function( gameLogic )
 				players[p].setPos( msg );
 			}
 		});
-		
+				
 		socket.on( 'start_pre_game', function()
 		{
 			console.log('SERVER IS STARTING PRE GAME!');
 			_gameLogic.startPreGame();
 		});
 
-		socket.on( 'start_game', function()
+		socket.on( 'start_game', function( gameData )
 		{
 			console.log('SERVER IS STARTING OFFICIAL GAME!');
-			_gameLogic.startGame();
+			_gameLogic.startGame( gameData, _player );
 		});
 		
 		_player = player;
