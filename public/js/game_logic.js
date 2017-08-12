@@ -117,6 +117,11 @@ var GameLogic = function()
 		
 	}
 	
+	function _moveToRoom( roomId )
+	{
+		
+	}
+	
 	function changeScene( toRoom )
 	{
 		roomScene.frameName = toRoom;			
@@ -159,6 +164,12 @@ var GameLogic = function()
 		//phaserGame.load.image('button_test', 'img/button_right_blue.png');
 		
 		phaserGame.load.image("modalBG","img/modalBG.png");
+
+		// spies
+		phaserGame.load.image('spyWhite', 'img/spy0.png');
+		phaserGame.load.image('spyRed', 'img/spy0Red.png');
+		phaserGame.load.image('spyGreen', 'img/spy0Green.png');
+		phaserGame.load.image('spyCyan', 'img/spy0Cyan.png');
 		
 		joystick = phaserGame.plugins.add(new Phaser.Plugin.VirtualJoystick(phaserGame, null));
 	}
@@ -178,7 +189,7 @@ var GameLogic = function()
 		// Here we set up the game, display sprites, etc.
 		_my_spy = new Spy(phaserGame, 250, 200, white_spy_def, gameControl);				
 		
-		players.push(_my_spy);
+		//players.push(_my_spy);
 
 		joystick.init(630, 330, 80, 60, 40, "#AA3300", "#cccccc");
 		joystick.start();
@@ -212,6 +223,9 @@ var GameLogic = function()
 	
 	ctrl.startPreGame = function()
 	{
+		// inflate game_div
+		$('#game_div').toggleClass('fullscreen');
+		
 		phaserGame = new Phaser.Game(800, 400, Phaser.AUTO, 'game_div',
 		{
 			preload : preload,
@@ -227,9 +241,9 @@ var GameLogic = function()
 		_gameOptions.show();		
 	}
 		
-	ctrl.startGame = function( gameDataWithPlayers )
+	ctrl.startGame = function( gameData, _player )
 	{
-		_gameData = gameDataWithPlayers;
+		_gameData = gameData;
 		
 		// so now we have all the players and their initial positions
 		
@@ -239,7 +253,14 @@ var GameLogic = function()
 		
 		console.log( 'begin game...');
 		
-		_moveToRoom(  );
+		
+		// find our player and our starting room
+		console.log( _gameData );
+		console.log( _gameData.players );
+		
+		console.log('find matching player_id? ' + _player.player_id );
+		
+		_moveToRoom( 0 );
 		// TODO: begin timer
 		// zero scores
 		// play level music

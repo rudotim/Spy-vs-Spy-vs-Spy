@@ -36,12 +36,12 @@ var GameOptions = function( gameLogic, phaserGame )
 	            fontFamily: "Luckiest Guy",
 	            fontSize: 22,
 	            color: "0x1e1e1e",
-	            offsetY: -50
+	            offsetY: -120	            
 	        }, 	        
             {
                 type: "image",
                 content: "startButton",
-                offsetX: -80,
+                offsetX: -5,
                 offsetY: 100,
                 contentScale: 0.6,
                 callback: function () 
@@ -56,10 +56,43 @@ var GameOptions = function( gameLogic, phaserGame )
 	            fontFamily: "Luckiest Guy",
 	            fontSize: 22,
 	            color: "0x1e1e1e",
-	            offsetX: -80,
+	            offsetX: -5,
 	            offsetY: 102
 	        }, 
-        	{
+	        
+			{
+			    type: "image",
+			    content: "spyWhite",
+			    offsetX: -150,
+			    offsetY: -20,
+			    contentScale: 3
+			},
+
+			{
+			    type: "image",
+			    content: "spyRed",
+			    offsetX: -50,
+			    offsetY: -20,
+			    contentScale: 3
+			},
+			
+			{
+			    type: "image",
+			    content: "spyGreen",
+			    offsetX: 50,
+			    offsetY: -20,
+			    contentScale: 3
+			},
+			
+			{
+			    type: "image",
+			    content: "spyCyan",
+			    offsetX: 150,
+			    offsetY: -20,
+			    contentScale: 3
+			},
+
+	        {
                 type : "text",
                 content: "X",
                 fontSize: 52,
@@ -84,7 +117,7 @@ var GameOptions = function( gameLogic, phaserGame )
 
 		gameControl.triggerStartGame();
 	    modal.hideModal("modalOptions");
-
+	    
 	    /*
 	    _countDown(_updateCountdown, startCount, x, y, function () {
 		       modal.hideModal("modalOptions");
