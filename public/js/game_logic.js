@@ -8,11 +8,16 @@ var GameLogic = function()
 	var ctrl =
 	{};
 	
+	// holds local copy of game data
 	var _gameData = {};
 	
-	var _roomData =
-	{};
+	var _gameControl = {};
+	
+	// holds our local player 
+	var _player = {};
 	var _my_spy;
+
+	var _roomData = {};
 	var roomScene;
 	var phaserGame;
 	var players = [];
@@ -110,26 +115,15 @@ var GameLogic = function()
 		});
 	};
 
-	
-	function _moveToStartRoom()
-	{
-		// get starting location
 		
-	}
-	
 	function _moveToRoom( roomId )
 	{
-		
+		roomScene.frameName = roomId;					
 	}
 	
-	function changeScene( toRoom )
-	{
-		roomScene.frameName = toRoom;			
-	}
-
 	function testButtonPress()
 	{
-		changeScene("room0");
+		_moveToRoom("room0");
 	}
 	
 	// -------------------------------------------------------
@@ -220,6 +214,21 @@ var GameLogic = function()
 	// -------------------------------------------------------
 	// -- Public Utilities
 	// -------------------------------------------------------
+		
+	ctrl.setPlayer = function( player )
+	{
+		_player = player;
+	}
+	
+	ctrl.getPlayer = function()
+	{
+		return _player;
+	}
+	
+	ctrl.setGameControl = function(gameControl)
+	{
+		_gameControl = gameControl;
+	}
 	
 	ctrl.startPreGame = function()
 	{
@@ -260,12 +269,20 @@ var GameLogic = function()
 		
 		console.log('find matching player_id? ' + _player.player_id );
 		
-		_moveToRoom( 0 );
+		_moveToRoom( "room0" );
 		// TODO: begin timer
 		// zero scores
 		// play level music
 		// move player to starting room, location
 	};
+	
+	ctrl.choosePlayer = function( playerIndex, playerChosenCallback )
+	{
+		console.log( 'choosen player');
+		console.log( playerIndex );
+		
+		_gameControl.choosePlayer( _player, playerIndex, playerChosenCallback );
+	}
 	
 	return ctrl;
 };

@@ -65,7 +65,12 @@ var GameOptions = function( gameLogic, phaserGame )
 			    content: "spyWhite",
 			    offsetX: -150,
 			    offsetY: -20,
-			    contentScale: 3
+			    contentScale: 3,
+                callback: function()
+                {
+                		console.log( this );
+                		_gameLogic.choosePlayer( 0, _playerChosen );
+                }			    
 			},
 
 			{
@@ -73,7 +78,11 @@ var GameOptions = function( gameLogic, phaserGame )
 			    content: "spyRed",
 			    offsetX: -50,
 			    offsetY: -20,
-			    contentScale: 3
+			    contentScale: 3,
+                callback: function()
+                {
+                		_gameLogic.choosePlayer( 1, _playerChosen );
+                }			    
 			},
 			
 			{
@@ -81,7 +90,11 @@ var GameOptions = function( gameLogic, phaserGame )
 			    content: "spyGreen",
 			    offsetX: 50,
 			    offsetY: -20,
-			    contentScale: 3
+			    contentScale: 3,
+                callback: function()
+                {
+                		_gameLogic.choosePlayer( 2, _playerChosen );
+                }			    
 			},
 			
 			{
@@ -89,7 +102,11 @@ var GameOptions = function( gameLogic, phaserGame )
 			    content: "spyCyan",
 			    offsetX: 150,
 			    offsetY: -20,
-			    contentScale: 3
+			    contentScale: 3,
+                callback: function()
+                {
+                		_gameLogic.choosePlayer( 3, _playerChosen );
+                }			    
 			},
 
 	        {
@@ -99,14 +116,25 @@ var GameOptions = function( gameLogic, phaserGame )
                 color: "0x000000",
                 offsetY: -130,
                 offsetX: 240,
-                callback: function(){
-                	modal.hideModal("modalOptions");
+                callback: function()
+                {
+                		modal.hideModal("modalOptions");
                 }
             }	        
 	        ]
 	    });	
 	};
 	
+	_playerChosen = function( playerIndex, success )
+	{
+		console.log('_playerChosen : success?> ' + success );
+		
+		// TODO:  show visual about player X having reserved a player config
+		if ( success == true )
+		{
+			// draw box around image
+		}
+	};
 	
 	_startCountdown = function( startCount, x, y )
 	{

@@ -6,6 +6,7 @@ var activeGamesClass = require('./activegames.js');
 
 var activeGames = new activeGamesClass();
 
+//var _IO = null;
 
 router.post('/room/join', function(req, res, next)
 {
@@ -13,6 +14,8 @@ router.post('/room/join', function(req, res, next)
 
 	var game_id = clientData.game_id;
 	var player = clientData.player;
+	
+	//_IO = req.app.get('io');
 	
 	if ( typeof player.isLeader == 'undefined' )
 	{
@@ -24,7 +27,31 @@ router.post('/room/join', function(req, res, next)
 		res.status(500).send({ error: 'You are already in a room, dummy!' });	
 });
 
+router.post('/player/choose', function(req, res, next) {
+	var clientData = req.body;
 
+	console.log('requesting player choose');
+	console.log( clientData );
+	
+	var success = true;
+
+	var returnData = { 'success' : success };
+	
+	if ( success == true )
+	{
+		console.log('success - reserving player');
+		
+		var IO = req.app.get('io');
+		// send message to everybody that this player is now off the market
+		IO.of( '/' + clientData.gameId ).emit('choose_player', clientData.playerIndex );
+	}
+	else
+	{
+		console.log('error - player already reserved');
+	}
+	
+	res.json( returnData );
+});
 
 function createRoom(game_id, player, IO)
 {	
@@ -95,16 +122,9 @@ function playerHasJoined( player, socket )
 	console.log( player );
 	// find game associated with player
 	var gameData = activeGames.findGameByPlayerId( player.player_id );
-	console.log( gameData );
 	var serverPlayers = gameData.players;
 	
-	console.log('broadcasting player_joined');
 	socket.broadcast.to(gameData.game_id).emit('player_joined', serverPlayers, player);
-	console.log('done broadcasting player_joined');
-	console.log('broadcasting to ' + gameData.game_id);
-	console.log('serverPlayers : ' + serverPlayers );
-	console.log('player ' + player );
-
 }
 
 function playerAttributeUpdated( player, socket )
@@ -199,6 +219,7 @@ function attachIO(chatchannel, datachannel, gameData, IO)
 			
 			socket.broadcast.to(gameData.game_id).emit('start_game', gameData );
 		});
+		
 	});
 }
 

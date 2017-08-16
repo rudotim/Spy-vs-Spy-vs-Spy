@@ -8,12 +8,10 @@ var GameControl = function( gameLogic )
 	var ctrl = {};
 	
 	var socket; 
-	var _gameData = null;	
-	var _player = {
-	};
+	var _gameData = null;
 		
 	var _gameLogic = gameLogic;
-		
+
 	_updateRoomList = function( serverPlayers )
 	{
 			$('#player_list ul').empty();
@@ -71,8 +69,13 @@ var GameControl = function( gameLogic )
 				console.log('hey, it\'s our player[' + player.name + ' / ' + player.player_id + '] and are we leader? ' + player.isLeader );
 			}
 			*/
-			if ( _player.player_id == updatedPlayer.player_id )
-				_player = updatedPlayer;
+			
+			var p = _gameLogic.getPlayer();
+			if ( p.player_id == updatedPlayer.player_id )
+				_gameLogic.setPlayer( p );
+			
+			//if ( _player.player_id == updatedPlayer.player_id )
+			//	_player = updatedPlayer;
 			
 			// redraw room members
 			_updateRoomList( serverPlayers );
@@ -94,7 +97,14 @@ var GameControl = function( gameLogic )
 			console.log('player ' + newPlayer.name + ' has joined the room');
 			_updateRoomList( serverPlayers );
 		});
-		
+
+		socket.on('choose_player', function( playerChosen )
+		{
+			console.log('someone has chosen a player');
+			
+			
+		});
+
 		socket.on( gameData.chatchannel, function(msg)
 		{
 			console.log('got chat data[' + msg + ']');
@@ -119,10 +129,13 @@ var GameControl = function( gameLogic )
 		socket.on( 'start_game', function( gameData )
 		{
 			console.log('SERVER IS STARTING OFFICIAL GAME!');
-			_gameLogic.startGame( gameData, _player );
+			_gameLogic.startGame( gameData, _gameLogic.getPlayer() );
 		});
 		
-		_player = player;
+		// save our player in gameLogic
+		_gameLogic.setPlayer( player );
+		
+		//_player = player;
 		_gameData = gameData;
 		
 		console.log( gameData );
@@ -138,12 +151,13 @@ var GameControl = function( gameLogic )
 	{
 		// don't send anything unless we've connected
 		if ( _gameData != null )
-			socket.emit('player_attr_updated', _player );
+			socket.emit('player_attr_updated', _gameLogic.getPlayer() );
 	};
 	
 	_setPlayerName = function( newName )
 	{
-		_player.name = newName;
+		//_player.name = newName;
+		_gameLogic.getPlayer().name = newName;
 		
 		// fire player name update
 		_updatePlayer();
@@ -174,7 +188,7 @@ var GameControl = function( gameLogic )
 
 		var clientData = {
 				"game_id" : roomName,
-				"player" : _player
+				"player" : _gameLogic.getPlayer()
 		};
 		
 		$.ajax(
@@ -219,9 +233,45 @@ var GameControl = function( gameLogic )
 		socket.emit( 'start_game', _gameData.game_id );	
 	};
 	
+	ctrl.choosePlayer = function( player, playerIndex, playerChosenCallback )
+	{
+		var clientData = {
+				player : player,
+				playerIndex : playerIndex,
+				gameId : _gameData.game_id
+		};
+		
+		$.ajax({
+			type : 'post',
+			url : '/player/choose/',
+			data : JSON.stringify(clientData),
+			contentType : "application/json",
+			success : function(data) {
+				console.log(data);
+				
+				if ( data.success == true )
+				{
+					console.log('success choosing a player!');				
+				}
+				else
+				{
+					console.log('error choosing a player!');
+				}
+
+				playerChosenCallback( playerIndex, data.success );
+			},
+			error : function(err) {
+				console.error('ERROR! ' + err.responseText);
+				console.error(err);
+				
+				//playerChosenCallback( playerIndex, false );
+			}
+		});
+	};
+	
 	ctrl.sendPosUpdate = function( spy )
 	{
-		//var pos = spy.getPos();
+		// var pos = spy.getPos();
 		//console.log('sent game data[action(' + pos.action + '), x(' + pos.x + '), y(' + pos.y + ') ]');
 
 		socket.emit(_gameData.datachannel, spy.getPos() );
@@ -233,7 +283,7 @@ var GameControl = function( gameLogic )
 		pos.extra = 'stop';
 		//console.log('sent game data[action(' + pos.action + '), x(' + pos.x + '), y(' + pos.y + '), extra(' + pos.extra + ') ]');
 
-		socket.emit(_gameData.datachannel, pos );
+		socket.emit( _gameData.datachannel, pos );
 	};
 	
 	return ctrl;
@@ -242,6 +292,8 @@ var GameControl = function( gameLogic )
 var gameLogic = new GameLogic();
 
 var gameControl = new GameControl( gameLogic );
+
+gameLogic.setGameControl( gameControl );
 
 
 
