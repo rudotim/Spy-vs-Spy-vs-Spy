@@ -217,6 +217,7 @@ Phaser.Plugin.VirtualJoystick.prototype.setVelocity = function (sprite, minSpeed
     if (typeof minSpeed === 'undefined') { minSpeed = 0; }
     if (typeof maxSpeed === 'undefined') { maxSpeed = 200; }
 
+	var speed = 0;
     if (this.force === 0 && minSpeed === 0)
     {
         //sprite.body.velocity.set(0, 0);
@@ -224,7 +225,6 @@ Phaser.Plugin.VirtualJoystick.prototype.setVelocity = function (sprite, minSpeed
     else
     {
         //var speed = (maxSpeed - minSpeed) * this.force;
-    	var speed = 0;
     	if ( this.force > 0.5 )
     		speed = 4;
 
@@ -246,7 +246,9 @@ Phaser.Plugin.VirtualJoystick.prototype.setVelocity = function (sprite, minSpeed
     	//console.log( 'x (' + this.deltaX + '), y (' + this.deltaY + ')' );
     }
 
-    return sprite;
+    if ( speed != 0 )
+    		return true;
+    //return sprite;
 
 };
 
