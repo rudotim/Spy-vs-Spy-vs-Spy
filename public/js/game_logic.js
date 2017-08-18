@@ -13,6 +13,10 @@ var GameLogic = function()
 	
 	var _gameControl = {};
 	
+	// holds all players in game room
+	var _local_players = {			
+	};
+	
 	// holds our local player 
 	var _player = {};
 	var _my_spy;
@@ -181,7 +185,7 @@ var GameLogic = function()
 				
 		// This function is called after the preload function
 		// Here we set up the game, display sprites, etc.
-		_my_spy = new Spy(phaserGame, 250, 200, white_spy_def, gameControl);				
+		//_my_spy = new Spy(phaserGame, 250, 200, white_spy_def, gameControl);				
 		
 		//players.push(_my_spy);
 
@@ -192,12 +196,32 @@ var GameLogic = function()
 		_gameOptions = new GameOptions( ctrl, phaserGame );
 		_gameOptions.show( );		
 	}
+	
+	function createSpy( id, posX, posY, spy_def )
+	{
+		return new Spy(phaserGame, id, posX, posY, spy_def, _gameControl);				
+	}
 
 	function update()
 	{
-		joystick.setVelocity( _my_spy, 0, 4 );
+		if ( joystick.setVelocity( _my_spy, 0, 4 ) )		
+			_gameControl.sendPosUpdate( _my_spy );
 		
-		joystick.update();		
+		joystick.update();
+		
+		// if players are in our room, update their position
+		/*
+		var p = 0;
+		var key = '';
+		for ( p = 0; p<gameData.players.keys.length; p++ )
+		{
+			key = gameData.players.keys[p];
+
+			if ( _my_spy.player_id == key )
+				continue;
+		}
+		*/
+		
 	}
 
 	
@@ -242,6 +266,7 @@ var GameLogic = function()
 			update : update,
 			render : render
 		});		
+		
 	};	
 
 	ctrl.showGameOptions = function()
@@ -250,8 +275,50 @@ var GameLogic = function()
 		_gameOptions.show();		
 	}
 		
-	ctrl.startGame = function( gameData, _player )
+	
+	ctrl.onPreGameComplete = function( gameData, _player )
 	{
+		console.log('onPreGameComplete');
+		
+		_gameOptions.hide();		
+
+		// add players
+		console.log( gameData );
+		//console.log( gameData.players );
+		console.log('--- now you ---');
+		console.log( _player );
+		
+		var spy;
+		
+		var p = 0;
+		var key = '';
+		for ( p = 0; p<gameData.players.keys.length; p++ )
+		{
+			key = gameData.players.keys[p];
+			console.log('key> ' + key );
+			console.log(gameData.players.player_data[key]);
+
+			console.log('player_def> ' + gameData.players.player_data[key].player_def );
+			
+			spy = createSpy( key, 250, 200, gameData.players.player_data[key].player_def );
+			
+			if ( gameData.players.player_data[key].player_id == _player.player_id )
+			{
+				console.log('found you!> ' + _player.player_id );
+				_my_spy = spy;
+			}
+			
+			// save each player locally
+			_local_players[key] = spy;			
+		}
+				
+		_startGame( gameData, _player );
+	};	
+	
+	_startGame = function( gameData, _player )
+	{
+		console.log( 'startGame...');
+
 		_gameData = gameData;
 		
 		// so now we have all the players and their initial positions
@@ -260,15 +327,11 @@ var GameLogic = function()
 		
 		// now reflect those changes in our game if necessary
 		
-		console.log( 'begin game...');
 		
 		
 		// find our player and our starting room
 		console.log( _gameData );
-		console.log( _gameData.players );
-		
-		console.log('find matching player_id? ' + _player.player_id );
-		
+				
 		_moveToRoom( "room0" );
 		// TODO: begin timer
 		// zero scores
@@ -276,13 +339,26 @@ var GameLogic = function()
 		// move player to starting room, location
 	};
 	
-	ctrl.choosePlayer = function( playerIndex, playerChosenCallback )
+	ctrl.invokeChoosePlayer = function( playerIndex, modalPlayerConfig, playerChosenCallback )
 	{
 		console.log( 'choosen player');
 		console.log( playerIndex );
 		
-		_gameControl.choosePlayer( _player, playerIndex, playerChosenCallback );
-	}
+		_gameControl.choosePlayer( _player, modalPlayerConfig, playerChosenCallback );
+	};
+	
+	ctrl.onChoosePlayer = function()
+	{
+		
+	};
+	
+	ctrl.updatePlayerPos = function( spyPos )
+	{
+		console.log('updatePlayerPos');
+		console.log( spyPos );
+		
+		_local_players[ spyPos.player_id ].setPos( spyPos );			
+	};
 	
 	return ctrl;
 };

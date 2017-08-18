@@ -33,6 +33,11 @@
 		player.pos = { x : 0, y: 0 };
 		player.room = 0;
 		player.isleader = isleader;
+		player.player_def = null;
+		
+		// inventory
+		// animation
+		
 		
 		this.addPlayer( player );
 		

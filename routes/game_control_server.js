@@ -27,6 +27,24 @@ router.post('/room/join', function(req, res, next)
 		res.status(500).send({ error: 'You are already in a room, dummy!' });	
 });
 
+var default_spy_def = {
+		stand : 'wspy_stand',
+		stand_right : 'wspy_rstand',
+		run_right : 'wspy_rrun',
+		stand_left : 'wspy_lstand',
+		run_left : 'wspy_lrun'
+};
+
+var green_spy_def = {
+		stand : 'gspy_stand',
+		stand_right : 'gspy_rstand',
+		run_right : 'gspy_rrun',
+		stand_left : 'gspy_lstand',
+		run_left : 'gspy_lrun'
+};
+
+var once = true;
+
 router.post('/player/choose', function(req, res, next) {
 	var clientData = req.body;
 
@@ -40,6 +58,18 @@ router.post('/player/choose', function(req, res, next) {
 	if ( success == true )
 	{
 		console.log('success - reserving player');
+				
+		var player = activeGames.findPlayerByGameId( clientData.gameId, clientData.player.player_id );
+		
+		//console.log('player');
+		//console.log( player );
+		
+		if ( once == true )
+			player.player_def = default_spy_def;
+		else
+			player.player_def = green_spy_def;
+		
+		once = false;
 		
 		var IO = req.app.get('io');
 		// send message to everybody that this player is now off the market
@@ -52,6 +82,8 @@ router.post('/player/choose', function(req, res, next) {
 	
 	res.json( returnData );
 });
+
+// 120 polk drive, brick, NJ
 
 function createRoom(game_id, player, IO)
 {	
@@ -190,10 +222,9 @@ function attachIO(chatchannel, datachannel, gameData, IO)
 		});
 		
 		// join data channel
-		socket.on(datachannel, function(data)
+		socket.on(datachannel, function( spyPos )
 		{
-			// console.log('server[' + datachannel + ']> got data: ' + data);
-			socket.broadcast.to(gameData.game_id).emit(datachannel, data);
+			socket.broadcast.to(gameData.game_id).emit(datachannel, spyPos);
 		});
 
 		socket.on(chatchannel, function(data)
@@ -217,7 +248,9 @@ function attachIO(chatchannel, datachannel, gameData, IO)
 			
 			// TODO: get players, randomize their locations within the rooms
 			
-			socket.broadcast.to(gameData.game_id).emit('start_game', gameData );
+			//socket.broadcast.to(gameData.game_id).emit('start_game', gameData );
+			chat.emit('start_game', gameData );
+
 		});
 		
 	});

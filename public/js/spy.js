@@ -33,12 +33,14 @@ var Spy = (function()
 {
 	var speed, action;
 	var box;
-	var _room;
+	var _roomId;
+	var _player_id;
 	
-	var Spy = function(phaserGame, x, y, spy_def, gameControl) 
+	var Spy = function(phaserGame, id, x, y, spy_def, gameControl) 
 	{
 		Phaser.Particle.call(this, phaserGame, x, y, 'spies', spy_def.stand);
 
+		this._player_id = id;
 		this.x = x;
 		this.y = y;
 		
@@ -68,12 +70,7 @@ var Spy = (function()
 		// Put BitmapData in a Sprite
 		return phaserGame.add.sprite(x, y, bmd);
 	}
-	
-	function changeRoom( room )
-	{
-		_room = room;
-	}
-	
+		
 	function updateBox( Spy )
 	{
 		box.x = Spy.x;
@@ -93,9 +90,19 @@ var Spy = (function()
 	
 	Spy.prototype.getPos = function()
 	{
-		return { extra : '', id : 'white_spy', room : 'room0', action : this.action, x : this.x, y : this.y };
+		return { player_id : this._player_id, room_id : this._roomId, action : this.action, x : this.x, y : this.y };
 	};
 
+	Spy.prototype.setRoom = function( roomId )
+	{
+		this._roomId = roomId;
+	};
+	
+	Spy.prototype.getRoom = function()
+	{
+		return this._roomId;
+	};
+	
 	Spy.prototype.setPos = function( newPos )
 	{
 		this.x = newPos.x;

@@ -110,14 +110,10 @@ var GameControl = function( gameLogic )
 			console.log('got chat data[' + msg + ']');
 		});
 				
-		socket.on( gameData.datachannel, function(msg)
+		socket.on( gameData.datachannel, function( spyPos )
 		{
-			console.log('got bin data[' + msg + ']');
 			// update spy with data
-			for ( var p = 0; p<players.length; p++)
-			{
-				players[p].setPos( msg );
-			}
+			_gameLogic.updatePlayerPos( spyPos );			
 		});
 				
 		socket.on( 'start_pre_game', function()
@@ -129,7 +125,8 @@ var GameControl = function( gameLogic )
 		socket.on( 'start_game', function( gameData )
 		{
 			console.log('SERVER IS STARTING OFFICIAL GAME!');
-			_gameLogic.startGame( gameData, _gameLogic.getPlayer() );
+			//_gameLogic.startGame( gameData, _gameLogic.getPlayer() );
+			_gameLogic.onPreGameComplete( gameData, _gameLogic.getPlayer() );
 		});
 		
 		// save our player in gameLogic
@@ -233,11 +230,11 @@ var GameControl = function( gameLogic )
 		socket.emit( 'start_game', _gameData.game_id );	
 	};
 	
-	ctrl.choosePlayer = function( player, playerIndex, playerChosenCallback )
+	ctrl.choosePlayer = function( player, modalPlayerConfig, playerChosenCallback )
 	{
 		var clientData = {
 				player : player,
-				playerIndex : playerIndex,
+				modalPlayerConfig : modalPlayerConfig,
 				gameId : _gameData.game_id
 		};
 		
@@ -258,7 +255,7 @@ var GameControl = function( gameLogic )
 					console.log('error choosing a player!');
 				}
 
-				playerChosenCallback( playerIndex, data.success );
+				playerChosenCallback( modalPlayerConfig, data.success );
 			},
 			error : function(err) {
 				console.error('ERROR! ' + err.responseText);
@@ -274,6 +271,9 @@ var GameControl = function( gameLogic )
 		// var pos = spy.getPos();
 		//console.log('sent game data[action(' + pos.action + '), x(' + pos.x + '), y(' + pos.y + ') ]');
 
+		if ( spy == undefined )
+			return;
+		
 		socket.emit(_gameData.datachannel, spy.getPos() );
 	};
 
