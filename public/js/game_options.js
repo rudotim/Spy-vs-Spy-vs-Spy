@@ -69,7 +69,7 @@ var GameOptions = function( gameLogic, phaserGame )
                 callback: function()
                 {
                 		console.log( this );
-                		_gameLogic.choosePlayer( 0, _playerChosen );
+                		_gameLogic.invokeChoosePlayer( 0, this.key, _playerChosen );
                 }			    
 			},
 
@@ -81,7 +81,7 @@ var GameOptions = function( gameLogic, phaserGame )
 			    contentScale: 3,
                 callback: function()
                 {
-                		_gameLogic.choosePlayer( 1, _playerChosen );
+                		_gameLogic.invokeChoosePlayer( 1, this.key, _playerChosen );
                 }			    
 			},
 			
@@ -93,7 +93,7 @@ var GameOptions = function( gameLogic, phaserGame )
 			    contentScale: 3,
                 callback: function()
                 {
-                		_gameLogic.choosePlayer( 2, _playerChosen );
+                		_gameLogic.invokeChoosePlayer( 2, this.key, _playerChosen );
                 }			    
 			},
 			
@@ -105,7 +105,7 @@ var GameOptions = function( gameLogic, phaserGame )
 			    contentScale: 3,
                 callback: function()
                 {
-                		_gameLogic.choosePlayer( 3, _playerChosen );
+                		_gameLogic.invokeChoosePlayer( 3, this.key, _playerChosen );
                 }			    
 			},
 
@@ -125,14 +125,24 @@ var GameOptions = function( gameLogic, phaserGame )
 	    });	
 	};
 	
-	_playerChosen = function( playerIndex, success )
+	_playerChosen = function( modalPlayerConfig, success )
 	{
 		console.log('_playerChosen : success?> ' + success );
+		console.log('_playerChosen : modalPlayerConfig?> ' + modalPlayerConfig );
 		
 		// TODO:  show visual about player X having reserved a player config
 		if ( success == true )
 		{
-			// draw box around image
+			
+			
+			// access object via key and draw box around it
+			// value, type, index, id
+			//var mItem = modal.getModalItem( "modalOptions", 3 );
+			
+			//mItem.graphicOpacity = 0.3;
+			//mItem.tint = 0xFF4444;
+			
+			//modal.updateModalValue( "spyWhite", "modalOptions", 3, null );
 		}
 	};
 	
@@ -192,6 +202,13 @@ var GameOptions = function( gameLogic, phaserGame )
 		console.log( 'showing' );
 				
 		_drawWindow(); 
+	};
+	
+	ctrl.hide = function()
+	{
+		console.log('hiding modal');
+		
+		modal.hideModal("modalOptions");
 	};
 	
 	_initModal();
