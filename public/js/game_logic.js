@@ -7,7 +7,7 @@ var GameLogic = function()
 
 	var ctrl =
 	{};
-	
+		
 	// holds local copy of game data
 	var _gameData = {};
 	
@@ -124,12 +124,7 @@ var GameLogic = function()
 	{
 		roomScene.frameName = roomId;					
 	}
-	
-	function testButtonPress()
-	{
-		_moveToRoom("room0");
-	}
-	
+		
 	// -------------------------------------------------------
 	// -- Game Play Logic
 	// -------------------------------------------------------
@@ -143,6 +138,9 @@ var GameLogic = function()
 	// Create our 'main' state that will contain the game
 	function preload()
 	{
+		// set scaling
+		phaserGame.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+
 		// This function will be executed at the beginning
 		// That's where we load the images and sounds
 		// game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
@@ -156,10 +154,7 @@ var GameLogic = function()
 		// TODO: Call this from outside the Phaser stuff
 		_loadLevel('data/roomdata.json', phaserGame);
 
-		phaserGame.load.image('button_test', 'img/button_right_blue.png');
-
 		phaserGame.load.image('startButton', 'img/buttonStart.png');
-		//phaserGame.load.image('button_test', 'img/button_right_blue.png');
 		
 		phaserGame.load.image("modalBG","img/modalBG.png");
 
@@ -173,23 +168,15 @@ var GameLogic = function()
 	}
 
 	function create()
-	{
+	{		
 		roomScene = phaserGame.add.sprite(0, 0, 'lobby', 'room1');
 
 		_drawRoomCollisions(phaserGame);
 
 		phaserGame.input.mouse.capture = true;
-		
-		var testButton = phaserGame.add.button(phaserGame.world.centerX - 300, 225, 'button_test', testButtonPress, this, 2, 1, 0);
-		testButton.scale.setTo(0.25, 0.25);
 				
-		// This function is called after the preload function
-		// Here we set up the game, display sprites, etc.
-		//_my_spy = new Spy(phaserGame, 250, 200, white_spy_def, gameControl);				
-		
-		//players.push(_my_spy);
-
-		joystick.init(630, 330, 80, 60, 40, "#AA3300", "#cccccc");
+		// x, y, baseDiameter, stickDiameter, limit, baseColor, stickColor) {
+		joystick.init(phaserGame.width-80, phaserGame.height-90, 80, 60, 40, "#AA3300", "#cccccc");
 		joystick.start();
 
 		// ctrl is our 'game_logic::this' variable  (probably better way to pass this in)
@@ -207,21 +194,7 @@ var GameLogic = function()
 		if ( joystick.setVelocity( _my_spy, 0, 4 ) )		
 			_gameControl.sendPosUpdate( _my_spy );
 		
-		joystick.update();
-		
-		// if players are in our room, update their position
-		/*
-		var p = 0;
-		var key = '';
-		for ( p = 0; p<gameData.players.keys.length; p++ )
-		{
-			key = gameData.players.keys[p];
-
-			if ( _my_spy.player_id == key )
-				continue;
-		}
-		*/
-		
+		joystick.update();		
 	}
 
 	
@@ -259,7 +232,10 @@ var GameLogic = function()
 		// inflate game_div
 		$('#game_div').toggleClass('fullscreen');
 		
-		phaserGame = new Phaser.Game(800, 400, Phaser.AUTO, 'game_div',
+		phaserGame = new Phaser.Game(
+				window.innerWidth * window.devicePixelRatio, 
+				window.innerHeight * window.devicePixelRatio, 
+				Phaser.AUTO, 'game_div',
 		{
 			preload : preload,
 			create : create,
@@ -282,12 +258,7 @@ var GameLogic = function()
 		
 		_gameOptions.hide();		
 
-		// add players
-		console.log( gameData );
-		//console.log( gameData.players );
-		console.log('--- now you ---');
-		console.log( _player );
-		
+		// add players		
 		var spy;
 		
 		var p = 0;
@@ -304,7 +275,6 @@ var GameLogic = function()
 			
 			if ( gameData.players.player_data[key].player_id == _player.player_id )
 			{
-				console.log('found you!> ' + _player.player_id );
 				_my_spy = spy;
 			}
 			
@@ -322,21 +292,13 @@ var GameLogic = function()
 		_gameData = gameData;
 		
 		// so now we have all the players and their initial positions
-		
-		// update our character's data
-		
-		// now reflect those changes in our game if necessary
-		
-		
-		
-		// find our player and our starting room
-		console.log( _gameData );
 				
+		// move player to starting room, location
 		_moveToRoom( "room0" );
-		// TODO: begin timer
+		
+		// begin timer
 		// zero scores
 		// play level music
-		// move player to starting room, location
 	};
 	
 	ctrl.invokeChoosePlayer = function( playerIndex, modalPlayerConfig, playerChosenCallback )
@@ -347,9 +309,10 @@ var GameLogic = function()
 		_gameControl.choosePlayer( _player, modalPlayerConfig, playerChosenCallback );
 	};
 	
+	// this is not called yet
 	ctrl.onChoosePlayer = function()
 	{
-		
+		console.log('onChoosePlayer');
 	};
 	
 	ctrl.updatePlayerPos = function( spyPos )
