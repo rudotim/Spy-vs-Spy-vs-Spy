@@ -31,18 +31,21 @@ var green_spy_def = {
 
 var Spy = (function() 
 {
-	var speed, action;
-	var box;
-	var _roomId;
-	var _player_id;
+	//var speed, action;
+	//var box;
+	//var _roomId;
+	//var _player_id;
 	
 	var Spy = function(phaserGame, id, x, y, spy_def, gameControl) 
 	{
-		Phaser.Particle.call(this, phaserGame, x, y, 'spies', spy_def.stand);
-
+		this.speed = 0;
+		this.action = null;
 		this._player_id = id;
-		this.x = x;
-		this.y = y;
+		this._room_id = null;
+		//this.x = x;
+		//this.y = y;
+
+		Phaser.Particle.call(this, phaserGame, x, y, 'spies', spy_def.stand);
 		
 		// Associate specific image frames with animation sequences
 		this.animations.add('run_right', [spy_def.stand_right, spy_def.run_right], 8, true, false);
@@ -50,11 +53,10 @@ var Spy = (function()
 
 		this.gameControl = gameControl;
 
-		box = drawCollisionBox( phaserGame, x, y );
+		this.box = drawCollisionBox( phaserGame, x, y );
 
 		phaserGame.add.existing(this);
-		
-		
+				
 		console.log('spy()');
 	};
 	
@@ -68,15 +70,9 @@ var Spy = (function()
 		bmd.ctx.fill(); 
 		
 		// Put BitmapData in a Sprite
-		return phaserGame.add.sprite(x, y, bmd);
+		return phaserGame.add.sprite(x, y + spy_height, bmd);
 	}
-		
-	function updateBox( Spy )
-	{
-		box.x = Spy.x;
-		box.y = Spy.y + spy_height;
-	}
-	
+			
 	function collideRight( box, Spy )
 	{
 		
@@ -90,17 +86,17 @@ var Spy = (function()
 	
 	Spy.prototype.getPos = function()
 	{
-		return { player_id : this._player_id, room_id : this._roomId, action : this.action, x : this.x, y : this.y };
+		return { player_id : this._player_id, room_id : this._room_id, action : this.action, x : this.x, y : this.y };
 	};
 
 	Spy.prototype.setRoom = function( roomId )
 	{
-		this._roomId = roomId;
+		this._room_id = roomId;
 	};
 	
 	Spy.prototype.getRoom = function()
 	{
-		return this._roomId;
+		return this._room_id;
 	};
 	
 	Spy.prototype.setPos = function( newPos )
@@ -115,6 +111,12 @@ var Spy = (function()
 		//	this.checkAction( newPos.action );		
 	};
 	
+	Spy.prototype.updateBox = function( Spy )
+	{
+		this.box.x = Spy.x;
+		this.box.y = Spy.y + spy_height;
+	}
+
 	Spy.prototype.checkAction = function(action)
 	{
 		// check action
@@ -141,13 +143,15 @@ var Spy = (function()
 		
 	};
 	
-	
-	Spy.prototype.updateMovement = function()
+	// 0 = none, 1 = right, 2 = down, 3 = left, 4 = up
+	Spy.prototype._updateMovement = function( movement )
 	{
-		switch ( this.action )
+		
+		switch ( movement )
 		{
-		case 'run_up':
-			
+		// up
+		case 4:
+
 			var top_border = BORDER_TOP;
 			// If we're in left triangle... 
 			if ( box.x <= TRIANGLE_LEFT )
@@ -162,21 +166,23 @@ var Spy = (function()
 			{
 				var max_vert_dist = (BORDER_RIGHT - box.x);				
 				top_border = (BORDER_BOTTOM - max_vert_dist);
-					
+
 				console.log('t_border: ' + top_border + ' max(' + max_vert_dist + ') y: ' + this.y + '   box(' + box.x + ', ' + box.y + ')');				
 			}
 			if ( (box.y - this.speed) > top_border )
 				this.y -= this.speed;
-			
+
 			break;
-			
-		case 'run_down':
+
+		// down
+		case 2:
 						
 			if ( box.y + box_height <= BORDER_BOTTOM )
 				this.y += this.speed;
 			
 			break;
-		case 'run_left':
+		// left
+		case 3:
 			
 			var left_border = 0;
 			
@@ -195,7 +201,8 @@ var Spy = (function()
 				this.x -= this.speed;
 						
 			break;
-		case 'run_right':
+		// right
+		case 1:
 				
 			var right_border = 0;
 			
@@ -215,9 +222,10 @@ var Spy = (function()
 			
 			break;
 		default:
-			//console.error("We have no logic for action[" + this.action + "]");
+			console.error("We have no logic for action[" + movement + "]");
 			break;
 		}
+		
 		updateBox( this );
 	};
 

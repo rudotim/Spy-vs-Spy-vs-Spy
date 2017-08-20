@@ -191,8 +191,21 @@ var GameLogic = function()
 
 	function update()
 	{
-		if ( joystick.setVelocity( _my_spy, 0, 4 ) )		
+		// if there was movement
+		var movement = joystick.setVelocity( _my_spy, 0, 4 );
+		
+		// 0 = none, 1 = right, 2 = down, 3 = left, 4 = up
+		if ( movement != 0 )
+		{
+			//console.log( '_my_spy, movement> ' + movement );
+			//console.log( _my_spy );
+			
+			// check for collisions and boundaries
+			updateMovement( _my_spy, movement );
+			
+			// send to remote players
 			_gameControl.sendPosUpdate( _my_spy );
+		}
 		
 		joystick.update();		
 	}
@@ -208,6 +221,93 @@ var GameLogic = function()
 		phaserGame.debug.text("(x: " + phaserGame.input.mousePointer.x + ", y: " + phaserGame.input.mousePointer.y + ")", 0, 50);
 	}
 
+	// 0 = none, 1 = right, 2 = down, 3 = left, 4 = up
+	function updateMovement( spy, movement )
+	{
+		
+		switch ( movement )
+		{
+		// up
+		case 4:
+
+			var top_border = BORDER_TOP;
+			// If we're in left triangle... 
+			if ( spy.box.x <= TRIANGLE_LEFT )
+			{									
+				var max_vert_dist = (spy.box.x - BORDER_LEFT);
+				top_border = (BORDER_BOTTOM - max_vert_dist);
+
+				//console.log('t_border: ' + top_border + ' max(' + max_vert_dist + ') y: ' + spy.y + '   box(' + spy.box.x + ', ' + spy.box.y + ')');				
+			}
+			// right triangle
+			else if ( spy.box.x >= TRIANGLE_RIGHT )
+			{
+				var max_vert_dist = (BORDER_RIGHT - spy.box.x);				
+				top_border = (BORDER_BOTTOM - max_vert_dist);
+
+				//console.log('t_border: ' + top_border + ' max(' + max_vert_dist + ') y: ' + spy.y + '   box(' + spy.box.x + ', ' + spy.box.y + ')');				
+			}
+			if ( (spy.box.y - spy.speed) < top_border )
+				spy.y += spy.speed;
+
+			break;
+
+		// down
+		case 2:
+						
+			if ( spy.box.y >= BORDER_BOTTOM )
+				spy.y -= spy.speed;
+			
+			break;
+		// left
+		case 3:
+			
+			var left_border = 0;
+			
+			// If we're in our triangle... 
+			if ( (spy.box.x - spy.speed) <= TRIANGLE_LEFT )
+			{
+				// do border check
+				left_border = (spy.box.y - BORDER_TOP) - (TRIANGLE_LEFT - spy.box.x);
+				
+				if ( left_border <= 0 )
+					spy.x += spy.speed;
+				
+				//console.log('l_border: ' + left_border + '  x: ' + spy.x + '   box(' + spy.box.x + ', ' + spy.box.y + ')');
+			}
+			//else
+			//	spy.x += spy.speed;
+			break;
+		// right
+		case 1:
+				
+			var right_border = 0;
+			
+			// If we're in our triangle... 
+			if ( (spy.box.x + spy.speed) >= TRIANGLE_RIGHT )
+			{
+				// do border check
+				right_border = (spy.box.y - BORDER_TOP) - ((spy.box.y - BORDER_TOP) - (spy.box.x - TRIANGLE_RIGHT));
+				
+				//console.log('r_border: ' + right_border + '  max_y(' + (spy.box.y-BORDER_TOP) + ') x: ' + spy.x + '   box(' + spy.box.x + ', ' + spy.box.y + ')');
+				
+				if ( right_border >= (spy.box.y - BORDER_TOP) )
+					spy.x -= spy.speed;
+			}
+			//else
+			//	spy.x -= spy.speed;
+			
+			break;
+		default:
+			console.error("We have no logic for action[" + movement + "]");
+			break;
+		}
+		
+		spy.updateBox( spy );
+	};
+
+	
+	
 	// -------------------------------------------------------
 	// -- Public Utilities
 	// -------------------------------------------------------

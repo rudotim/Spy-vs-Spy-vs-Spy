@@ -218,38 +218,50 @@ Phaser.Plugin.VirtualJoystick.prototype.setVelocity = function (sprite, minSpeed
     if (typeof maxSpeed === 'undefined') { maxSpeed = 200; }
 
 	var speed = 0;
-    if (this.force === 0 && minSpeed === 0)
-    {
-        //sprite.body.velocity.set(0, 0);
-    }
-    else
-    {
-        //var speed = (maxSpeed - minSpeed) * this.force;
-    	if ( this.force > 0.5 )
-    		speed = 4;
+	if (this.force === 0 && minSpeed === 0)
+	{
+		//sprite.body.velocity.set(0, 0);
+	}
+	else
+	{
+		//var speed = (maxSpeed - minSpeed) * this.force;
+		if ( this.force > 0.5 )
+			speed = 4;
 
-        //sprite.body.velocity.set(this.deltaX * speed, this.deltaY * speed);
-    	
-    	// left/right: x[0 - 0.99]
-    	// up/down   : y[0 - 0.99]
-    	
-    	if ( this.deltaX >= 0.85 )
-    		sprite.x += speed;
-    	else if ( this.deltaX <= -0.85 )
-    		sprite.x -= speed;   	
-    	if ( this.deltaY >= 0.85 )
-    		sprite.y += speed;
-    	else if ( this.deltaY <= -0.85 )
-    		sprite.y -= speed;
-    	
-    	
-    	//console.log( 'x (' + this.deltaX + '), y (' + this.deltaY + ')' );
-    }
+		sprite.speed = speed;
+		//sprite.body.velocity.set(this.deltaX * speed, this.deltaY * speed);
 
-    if ( speed != 0 )
-    		return true;
-    //return sprite;
+		// left/right: x[0 - 0.99]
+		// up/down   : y[0 - 0.99]
 
+		if ( this.deltaX >= 0.85 )
+		{
+			sprite.x += speed;
+			//sprite.box.x += speed;
+			return 1;
+		}
+		else if ( this.deltaX <= -0.85 )
+		{
+			sprite.x -= speed;   	
+			//sprite.box.x -= speed;
+			return 3;
+		}
+		
+		if ( this.deltaY >= 0.85 )
+		{
+			sprite.y += speed;
+			//sprite.box.y += speed;
+			return 2;
+		}
+		else if ( this.deltaY <= -0.85 )
+		{
+			sprite.y -= speed;
+			//sprite.box.y -= speed;
+			return 4;
+		}
+	}
+
+    	return 0;
 };
 
 Phaser.Plugin.VirtualJoystick.prototype.update = function () {
