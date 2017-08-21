@@ -189,14 +189,47 @@ var GameLogic = function()
 		return new Spy(phaserGame, id, posX, posY, spy_def, _gameControl);				
 	}
 
+	
+	
 	function update()
 	{
 		// if there was movement
 		var movement = joystick.setVelocity( _my_spy, 0, 4 );
 		
+	    if ( movement == 0 )
+	    	{
+	    		if (phaserGame.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
+	    			movement = 1;
+	    		else if (phaserGame.input.keyboard.isDown(Phaser.Keyboard.DOWN))
+	    			movement = 2;
+	    		else if (phaserGame.input.keyboard.isDown(Phaser.Keyboard.LEFT))
+	    			movement = 3;
+	    		else if (phaserGame.input.keyboard.isDown(Phaser.Keyboard.UP))
+	    			movement = 4;
+	    	}
+	    
 		// 0 = none, 1 = right, 2 = down, 3 = left, 4 = up
 		if ( movement != 0 )
 		{
+			switch ( movement )
+			{
+			// right
+			case 1:
+				_my_spy.x += _my_spy.speed;
+				break;
+			// down
+			case 2:
+				_my_spy.y += _my_spy.speed;
+				break;
+			// left
+			case 3:
+				_my_spy.x -= _my_spy.speed;
+				break;
+			// up
+			case 4:
+				_my_spy.y -= _my_spy.speed;
+				break;
+			};
 			//console.log( '_my_spy, movement> ' + movement );
 			//console.log( _my_spy );
 			

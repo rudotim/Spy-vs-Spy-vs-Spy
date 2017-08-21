@@ -236,27 +236,23 @@ Phaser.Plugin.VirtualJoystick.prototype.setVelocity = function (sprite, minSpeed
 
 		if ( this.deltaX >= 0.85 )
 		{
-			sprite.x += speed;
-			//sprite.box.x += speed;
+			//sprite.x += speed;
 			return 1;
 		}
 		else if ( this.deltaX <= -0.85 )
 		{
-			sprite.x -= speed;   	
-			//sprite.box.x -= speed;
+			//sprite.x -= speed;   	
 			return 3;
 		}
 		
 		if ( this.deltaY >= 0.85 )
 		{
-			sprite.y += speed;
-			//sprite.box.y += speed;
+			//sprite.y += speed;
 			return 2;
 		}
 		else if ( this.deltaY <= -0.85 )
 		{
-			sprite.y -= speed;
-			//sprite.box.y -= speed;
+			//sprite.y -= speed;
 			return 4;
 		}
 	}

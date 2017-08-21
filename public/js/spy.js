@@ -38,7 +38,7 @@ var Spy = (function()
 	
 	var Spy = function(phaserGame, id, x, y, spy_def, gameControl) 
 	{
-		this.speed = 0;
+		this.speed = 4;
 		this.action = null;
 		this._player_id = id;
 		this._room_id = null;
