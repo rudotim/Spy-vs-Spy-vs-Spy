@@ -4,32 +4,36 @@
   "asset_image_file" : "asset-rooms-lobby2.png",
   "rooms": [
     {
-      "roomId": "roomRight",
-      "roomActors": [
+      "room_id": "room0",
+      "booby_trapped" : false,
+      "room_actors": [
         {
           "type": "door",
-          "id": "room0",
+          "id": "door0",
+          "state" : 0,
           "animation_id": "animDoorW",
           "pos": {
-            "x": 30,
-            "y": 100
+            "x": 75,
+            "y": 235
           },
-          "teleports-to": "room1"
+          "teleports_to": "room1"
         }
       ]
     },
     {
-      "roomId": "roomLeft",
-      "roomActors": [
+      "room_id": "room1",
+      "booby_trapped" : false,
+      "room_actors": [
         {
           "type": "door",
-          "id": "room1",
+          "id": "door1",
+          "state" : 0,
           "animation_id": "animDoorW",
           "pos": {
-            "x": 470,
-            "y": 100
+            "x": 491,
+            "y": 233
           },
-          "teleports-to": "room0"
+          "teleports_to": "room0"
         }
       ]
     }

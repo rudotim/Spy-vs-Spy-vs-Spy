@@ -110,7 +110,7 @@ var GameLogic = function()
 			// Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
 
 			// load in-game level connections and positions
-			_roomData = jd;
+			_roomData = jd;			
 		});
 
 		req.fail(function(jqXHR, textStatus)
@@ -193,9 +193,10 @@ var GameLogic = function()
 	
 	function update()
 	{
-		// if there was movement
+		// if there was joystick usage, get movement direction
 		var movement = joystick.setVelocity( _my_spy, 0, 4 );
 		
+		// if no joystick usage, check keyboard
 	    if ( movement == 0 )
 	    	{
 	    		if (phaserGame.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
@@ -208,6 +209,7 @@ var GameLogic = function()
 	    			movement = 4;
 	    	}
 	    
+	    // if there was movement
 		// 0 = none, 1 = right, 2 = down, 3 = left, 4 = up
 		if ( movement != 0 )
 		{
@@ -230,11 +232,9 @@ var GameLogic = function()
 				_my_spy.y -= _my_spy.speed;
 				break;
 			};
-			//console.log( '_my_spy, movement> ' + movement );
-			//console.log( _my_spy );
 			
 			// check for collisions and boundaries
-			updateMovement( _my_spy, movement );
+			checkCollisions( _my_spy, movement );
 			
 			// send to remote players
 			_gameControl.sendPosUpdate( _my_spy );
@@ -254,8 +254,25 @@ var GameLogic = function()
 		phaserGame.debug.text("(x: " + phaserGame.input.mousePointer.x + ", y: " + phaserGame.input.mousePointer.y + ")", 0, 50);
 	}
 
+	function checkItemInterations( spy )
+	{
+		// interact with room
+		// if room is bombed, begin blowing up
+		
+		// door
+		// if door is open, go to next room
+		
+		// cabinet, coat rack, painting
+		// if button held, perform action: open, lift, swap items, blow up
+		
+		// other player
+		// if button held, send punch
+		/// receive punch
+		
+	}
+	
 	// 0 = none, 1 = right, 2 = down, 3 = left, 4 = up
-	function updateMovement( spy, movement )
+	function checkCollisions( spy, movement )
 	{
 		
 		switch ( movement )
