@@ -5,7 +5,7 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var game_control = require('./routes/game_control_server');
+var game_control = require('./server/game_control_server');
 
 var app = express();
 

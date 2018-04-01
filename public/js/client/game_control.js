@@ -32,7 +32,7 @@ var GameControl = function( gameLogic )
 			}
 	};
 	
-	updatePlayerAttr = function( serverPlayers )
+	_updatePlayerAttr = function( serverPlayers )
 	{
 		/*
 		console.log('updating player attr');
@@ -81,7 +81,7 @@ var GameControl = function( gameLogic )
 			_updateRoomList( serverPlayers );
 			
 			// update any player data
-			updatePlayerAttr( serverPlayers );
+			_updatePlayerAttr( serverPlayers );
 		});
 		
 		socket.on('player_left', function(serverPlayers, playerThatLeft)
@@ -237,7 +237,7 @@ var GameControl = function( gameLogic )
 				modalPlayerConfig : modalPlayerConfig,
 				gameId : _gameData.game_id
 		};
-		
+
 		$.ajax({
 			type : 'post',
 			url : '/player/choose/',

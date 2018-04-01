@@ -41,18 +41,10 @@
 
 	ActiveGames.prototype.findPlayerByGameId = function( game_id, player_id )
 	{
-		//console.log( 'findPlayerByGameId' );
-		
 		var game = this.game_data[ game_id ];
 
-		//console.log('game');
-		//console.log( game );
-		
 		var pId = game.players.player_data[player_id];
 				
-		//console.log('pId');
-		//console.log( pId );
-
 		return pId;
 		
 		/*
@@ -67,6 +59,20 @@
 		*/
 		//return this.game_data[ game_id ];
 	};
+	
+	ActiveGames.prototype.findPlayersByGameId = function( game_id )
+	{
+		var game = this.game_data[ game_id ];
+		
+		return game.players;
+	};
+	
+	ActiveGames.prototype.findAllOtherPlayersByGameId = function( game_id, player_id )
+	{
+		var game = this.game_data[ game_id ];
+		
+		return game.players;
+	};	
 
 	ActiveGames.prototype.findGameByPlayerId = function( player_id )
 	{

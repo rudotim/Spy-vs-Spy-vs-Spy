@@ -5,7 +5,7 @@
 
 var GameOptions = function( gameLogic, phaserGame )
 {
-	var ctrl = {};
+	var optionwindow = {};
 	
 	var _gameLogic = gameLogic;
 	var _phaser = phaserGame;
@@ -197,14 +197,14 @@ var GameOptions = function( gameLogic, phaserGame )
 	    modal.showModal("modalOptions");
 	};
 	
-	ctrl.show = function()
+	optionwindow.show = function()
 	{
 		console.log( 'showing' );
 				
 		_drawWindow(); 
 	};
 	
-	ctrl.hide = function()
+	optionwindow.hide = function()
 	{
 		console.log('hiding modal');
 		
@@ -213,7 +213,7 @@ var GameOptions = function( gameLogic, phaserGame )
 	
 	_initModal();
 		
-	return ctrl;
+	return optionwindow;
 };
 
 

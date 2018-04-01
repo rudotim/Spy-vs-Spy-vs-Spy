@@ -1,7 +1,10 @@
 var express = require('express');
 var router = express.Router();
 
-var Players = require('../public/js/players.js');
+//var Players = require('../public/js/players.js');
+//var activeGamesClass = require('./activegames.js');
+
+var Players = require('./players.js');
 var activeGamesClass = require('./activegames.js');
 
 var activeGames = new activeGamesClass();
@@ -14,8 +17,6 @@ router.post('/room/join', function(req, res, next)
 
 	var game_id = clientData.game_id;
 	var player = clientData.player;
-	
-	//_IO = req.app.get('io');
 	
 	if ( typeof player.isLeader == 'undefined' )
 	{
@@ -48,6 +49,14 @@ var once = true;
 router.post('/player/choose', function(req, res, next) {
 	var clientData = req.body;
 
+	/**
+		var clientData = {
+				player : player,
+				modalPlayerConfig : modalPlayerConfig,
+				gameId : _gameData.game_id
+		};
+	 */
+	
 	console.log('requesting player choose');
 	console.log( clientData );
 	
@@ -60,9 +69,9 @@ router.post('/player/choose', function(req, res, next) {
 		console.log('success - reserving player');
 				
 		var player = activeGames.findPlayerByGameId( clientData.gameId, clientData.player.player_id );
+
+		// see if anyone else has this player's character config
 		
-		//console.log('player');
-		//console.log( player );
 		
 		if ( once == true )
 			player.player_def = default_spy_def;
