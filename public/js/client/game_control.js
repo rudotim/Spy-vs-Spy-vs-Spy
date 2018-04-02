@@ -45,7 +45,7 @@ var GameControl = function( gameLogic )
 	
 	_joinRoom = function( gameInstance, player )
 	{
-		var urlid = '/' + gameInstance.game_id;
+		var urlid = '/' + gameInstance.name;
 
 		console.log('client joining ' + urlid + '/[' + gameInstance.datachannel + ']');
 				
@@ -184,7 +184,7 @@ var GameControl = function( gameLogic )
 		console.log('attempting to join game [' + roomName + ']');
 
 		var clientData = {
-				"game_id" : roomName,
+				"gameName" : roomName,
 				"player" : _gameLogic.getPlayer()
 		};
 		
@@ -198,8 +198,15 @@ var GameControl = function( gameLogic )
 		    {
 		    		console.log( data );
 		    		
-		    		// ok so now a game was created on the server for us
-		    		_joinRoom( data.gameInstance, data.player );		    	
+		    		if ( data != null )
+		    		{
+		    			// ok so now a game was created on the server for us
+		    			_joinRoom( data.gameInstance, data.player );
+		    		}
+		    		else
+		    		{
+		    			console.error("failed to find game with name [" + roomName + "]");
+		    		}
 		    },
 		    error : function( err )
 		    {

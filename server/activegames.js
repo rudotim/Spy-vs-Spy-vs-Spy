@@ -1,4 +1,5 @@
 
+var GameInstance = require('./gameinstance.js');
 
 //var ActiveGames = (function() {
 	var ActiveGames = function() 
@@ -18,13 +19,15 @@
 		this.available_games[ newGame.game_id ] = newGame;
 	};
 		
-	ActiveGames.prototype.createGame = function( game_id, players )
+	ActiveGames.prototype.createGame = function( gameName, players )
 	{
 		var game = new GameInstance();
 		
-		game.setGameId( game_id );
+		game.setName( gameName );
 		game.setPlayers( players );
 		
+		game.setChatChannel( gameName + 'chat' );
+		game.setDataChannel( gameName + 'data' );
 		//var game = { };		
 		//game.game_id = game_id;
 		//game.players = players;
@@ -42,10 +45,21 @@
 	{
 		return this.available_games[ game_id ];
 	};
+	
+	ActiveGames.prototype.findGameByName = function( gameName )
+	{
+		for ( var k = 0; k < this.keys.length; k++ )
+		{
+			if ( this.available_games[ this.keys[k] ].name == gameName )
+				return this.available_games[ this.keys[k] ];
+		}
+		
+		return null;
+	};
 
 	ActiveGames.prototype.findPlayerByGameId = function( game_id, player_id )
 	{
-		var game = findGameById( game_id );
+		var game = this.findGameById( game_id );
 
 		var pId = game.players.player_data[player_id];
 				
@@ -66,7 +80,7 @@
 	
 	ActiveGames.prototype.findPlayersByGameId = function( game_id )
 	{
-		var game = findGameById( game_id );
+		var game = this.findGameById( game_id );
 		
 		return game.players;
 	};
@@ -118,6 +132,7 @@
 	
 	if ( ! (typeof module === 'undefined') )
 	{
+		console.log('ActiveGames exported');
 		module.exports = ActiveGames;
 	}
 

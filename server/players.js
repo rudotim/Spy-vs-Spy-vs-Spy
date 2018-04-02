@@ -3,6 +3,7 @@
 //(function(exports) {
 	var Players = function() 
 	{
+		this.nextPlayerId = 1;
 		this.keys = [];
 		this.player_data = {};
 	};
@@ -23,13 +24,13 @@
 		// access object via key id
 		return this.player_data[ player_id ];
 	};
-	
-	Players.prototype.createPlayer = function( player_name, player_id, isleader )
+
+	Players.prototype.createPlayer = function( player_name, isleader )
 	{
 		var player = { };
 		
 		player.name = player_name;
-		player.player_id = player_id;
+		player.player_id = this.nextPlayerId++;
 		player.pos = { x : 0, y: 0 };
 		player.room = 0;
 		player.isleader = isleader;
@@ -43,7 +44,7 @@
 		
 		return player;
 	};
-	
+
 	Players.prototype.removePlayerById = function( player_id )
 	{
 		this.player_data[ player_id ] = null;

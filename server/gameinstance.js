@@ -2,40 +2,70 @@
  * New node file
  */
 
-
-	function GameInstance()
+	var GameInstance = function()
 	{
-		this.game_id = -1;
+		this.game_id = guid();
 		this.players = [];
 		
 		this.name = '';
 		this.map = '';
 		
+		this.chatchannel = '';
+		this.datachannel = '';
+		
 		this.options = {};
 	}
-	
-	function setGameId( game_id )
+
+	GameInstance.prototype.constructor = GameInstance;
+
+	GameInstance.prototype.setGameId = function( game_id )
 	{
 		this.game_id = game_id;
 	}
 
-	function setPlayers( players )
+	GameInstance.prototype.setPlayers = function( players )
 	{
 		this.players = players;
 	}
 	
-	function setName( name )
+	GameInstance.prototype.setName = function( name )
 	{
 		this.name = name;
 	}
 	
-	function setMap( map )
+	GameInstance.prototype.setMap = function( map )
 	{
 		this.map = map;
 	}
 	
-	function setOptions( newOptions )
+	GameInstance.prototype.setOptions = function( newOptions )
 	{
 		this.options = newOptions;
 	}
+	
+	GameInstance.prototype.setChatChannel = function( channel )
+	{
+		this.chatchannel = channel;
+	}
+	
+	GameInstance.prototype.setDataChannel = function( channel )
+	{
+		this.datachannel = channel;
+	}
 
+	function guid() {
+		  function s4() {
+		    return Math.floor((1 + Math.random()) * 0x10000)
+		      .toString(16)
+		      .substring(1);
+		  }
+		  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+		}
+	
+	if ( ! (typeof module === 'undefined') )
+	{
+		console.log('GameInstance exported');
+		module.exports = GameInstance;
+	}
+	else
+		console.log('Not Exported');
