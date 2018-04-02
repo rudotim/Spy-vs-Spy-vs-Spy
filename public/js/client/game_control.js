@@ -115,7 +115,13 @@ var GameControl = function( gameLogic )
 			// update spy with data
 			_gameLogic.updatePlayerPos( spyPos );			
 		});
-				
+
+		socket.on( 'player_entered_room', function( room )
+		{
+			console.log('player_entered_room');
+			_gameLogic.onPlayerEnteredRoom( room );
+		});
+		
 		socket.on( 'start_pre_game', function()
 		{
 			console.log('SERVER IS STARTING PRE GAME!');
@@ -291,6 +297,11 @@ var GameControl = function( gameLogic )
 		//console.log('sent game data[action(' + pos.action + '), x(' + pos.x + '), y(' + pos.y + '), extra(' + pos.extra + ') ]');
 
 		socket.emit( _gameInstance.datachannel, pos );
+	};
+	
+	ctrl.uploadMapData = function( jsonMapData )
+	{
+		socket.emit( "map_data_upload", jsonMapData );
 	};
 	
 	return ctrl;

@@ -82,7 +82,7 @@ var GameLogic = function()
 
 		var jsonData = undefined;
 		
-		var jqxhr = $.ajax(
+		$.ajax(
 		{
 			url : levelJsonFile,
 			async : false
@@ -394,6 +394,9 @@ var GameLogic = function()
 		
 		_gameOptions.hide();		
 
+		// send map data to the server
+		_gameControl.uploadMapData( _roomData );
+		
 		// add players		
 		var spy;
 		
@@ -459,6 +462,12 @@ var GameLogic = function()
 		_local_players[ spyPos.player_id ].setPos( spyPos );			
 	};
 	
+	ctrl.onPlayerEnteredRoom = function( data )
+	{
+		console.log('onPlayerEnteredRoom> %o', data);
+	};
+	
+
 	return ctrl;
 };
 

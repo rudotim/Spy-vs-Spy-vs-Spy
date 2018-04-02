@@ -1,4 +1,5 @@
 
+var Player = require('./player.js');
 
 //(function(exports) {
 	var Players = function() 
@@ -13,10 +14,10 @@
 	Players.prototype.addPlayer = function( newPlayer )
 	{
 		// store keys in array
-		this.keys.push( newPlayer.player_id );
+		this.keys.push( newPlayer.id );
 		
 		// store objects associated by key
-		this.player_data[ newPlayer.player_id ] = newPlayer;
+		this.player_data[ newPlayer.id ] = newPlayer;
 	};
 	
 	Players.prototype.getPlayerById = function( player_id )
@@ -27,19 +28,21 @@
 
 	Players.prototype.createPlayer = function( player_name, isleader )
 	{
-		var player = { };
+		var player = new Player();
 		
+		/*
+		var player = { };
+		*/
 		player.name = player_name;
-		player.player_id = this.nextPlayerId++;
+		player.id = this.nextPlayerId++;
 		player.pos = { x : 0, y: 0 };
 		player.room = 0;
 		player.isleader = isleader;
-		player.player_def = null;
+		player.player_def = null;		
 		
 		// inventory
 		// animation
-		
-		
+				
 		this.addPlayer( player );
 		
 		return player;

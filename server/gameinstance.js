@@ -8,7 +8,7 @@
 		this.players = [];
 		
 		this.name = '';
-		this.map = '';
+		this.jsonMapData;
 		
 		this.chatchannel = '';
 		this.datachannel = '';
@@ -27,15 +27,20 @@
 	{
 		this.players = players;
 	}
-	
+
 	GameInstance.prototype.setName = function( name )
 	{
 		this.name = name;
 	}
-	
-	GameInstance.prototype.setMap = function( map )
+
+	GameInstance.prototype.getStartingLocation = function( player_id )
 	{
-		this.map = map;
+		return null;
+	}
+
+	GameInstance.prototype.setMapData = function( jsonMapData )
+	{
+		this.jsonMapData = jsonMapData;
 	}
 	
 	GameInstance.prototype.setOptions = function( newOptions )

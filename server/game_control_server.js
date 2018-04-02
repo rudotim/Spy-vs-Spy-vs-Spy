@@ -64,7 +64,7 @@ router.post('/player/choose', function(req, res, next) {
 	{
 		console.log('success - reserving player');
 				
-		var player = activeGames.findPlayerByGameId( clientData.gameId, clientData.player.player_id );
+		var player = activeGames.findPlayerByGameId( clientData.gameId, clientData.player.id );
 
 		// see if anyone else has this player's character config
 		
@@ -129,9 +129,9 @@ function playerHasLeft( player, socket )
 	console.log( player );
 
 	// find game associated with player
-	var gameInstance = activeGames.findGameByPlayerId( player.player_id );
+	var gameInstance = activeGames.findGameByPlayerId( player.id );
 	
-	gameInstance.players.removePlayerById( player.player_id );
+	gameInstance.players.removePlayerById( player.id );
 	
 	console.log('server[player_left]> got data : ' + player.name);
 	socket.broadcast.to(gameInstance.name).emit('player_left', gameInstance.players, player);
@@ -142,7 +142,7 @@ function playerHasJoined( player, socket )
 	console.log('playerHasJoined');
 	console.log( player );
 	// find game associated with player
-	var gameInstance = activeGames.findGameByPlayerId( player.player_id );
+	var gameInstance = activeGames.findGameByPlayerId( player.id );
 	var serverPlayers = gameInstance.players;
 	
 	socket.broadcast.to(gameInstance.name).emit('player_joined', serverPlayers, player);
@@ -153,9 +153,9 @@ function playerAttributeUpdated( player, socket )
 	console.log('playerAttributeUpdated');
 	console.log( player );
 	// find game associated with player
-	var gameInstance = activeGames.findGameByPlayerId( player.player_id );
+	var gameInstance = activeGames.findGameByPlayerId( player.id );
 	
-	//gameInstance.players.removePlayerById( player.player_id );
+	//gameInstance.players.removePlayerById( player.id );
 	
 	console.log('server[player_attr_updated]> got data : ' + player.name);
 	socket.broadcast.to(gameInstance.name).emit('player_attr_updated', gameInstance.players, player);
@@ -205,9 +205,15 @@ function attachIO(chatchannel, datachannel, gameInstance, IO)
 		socket.on('player_joined', function( player )
 		{
 			socket.player = player;
-			//console.log('socket[' + socket.player.player_id + '] new_id=[' + player.player_id + ']');
+			//console.log('socket[' + socket.player.player_id + '] new_id=[' + player.id + ']');
 			playerHasJoined( player, socket );
 			//socket.broadcast.to(_gameInstance.name).emit('player_joined', data);
+		});
+		
+		socket.on('map_data_upload', function( jsonMapData )
+		{
+			console.log('map data uploaded');
+			gameInstance.setMapData( jsonMapData );
 		});
 		
 		// join data channel
@@ -233,9 +239,23 @@ function attachIO(chatchannel, datachannel, gameInstance, IO)
 		{
 			console.log('server received request to start the game');
 				
-			var gameInstance = activeGames.findGameById( game_id );
+			//var gameInstance = activeGames.findGameById( game_id );
 			
 			// TODO: get players, randomize their locations within the rooms
+			var data;
+			for ( var player in gameInstance.players )
+			{
+				room = gameInstance.getStartingLocation( player.playerId );
+				
+				//player.setPos( center );
+				
+				data = {
+					"room" : room,
+					"player" : player
+				};
+				// now broadcast
+				chat.emit('player_room_entered', data);
+			}
 			
 			//socket.broadcast.to(gameInstance.game_id).emit('start_game', gameInstance );
 			chat.emit('start_game', gameInstance );
