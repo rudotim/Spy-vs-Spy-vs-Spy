@@ -145,7 +145,7 @@ function playerHasJoined( player, socket )
 	var gameInstance = activeGames.findGameByPlayerId( player.player_id );
 	var serverPlayers = gameInstance.players;
 	
-	socket.broadcast.to(gameInstance.game_id).emit('player_joined', serverPlayers, player);
+	socket.broadcast.to(gameInstance.name).emit('player_joined', serverPlayers, player);
 }
 
 function playerAttributeUpdated( player, socket )
