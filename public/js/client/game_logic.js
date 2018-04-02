@@ -9,7 +9,7 @@ var GameLogic = function()
 	{};
 		
 	// holds local copy of game data
-	var _gameData = {};
+	var _gameInstance = {};
 	
 	var _gameControl = {};
 	
@@ -402,7 +402,7 @@ var GameLogic = function()
 	}
 		
 	
-	ctrl.onPreGameComplete = function( gameData, _player )
+	ctrl.onPreGameComplete = function( gameInstance, _player )
 	{
 		console.log('onPreGameComplete');
 		
@@ -413,17 +413,17 @@ var GameLogic = function()
 		
 		var p = 0;
 		var key = '';
-		for ( p = 0; p<gameData.players.keys.length; p++ )
+		for ( p = 0; p<gameInstance.players.keys.length; p++ )
 		{
-			key = gameData.players.keys[p];
+			key = gameInstance.players.keys[p];
 			console.log('key> ' + key );
-			console.log(gameData.players.player_data[key]);
+			console.log(gameInstance.players.player_data[key]);
 
-			console.log('player_def> ' + gameData.players.player_data[key].player_def );
+			console.log('player_def> ' + gameInstance.players.player_data[key].player_def );
 			
-			spy = createSpy( key, 250, 200, gameData.players.player_data[key].player_def );
+			spy = createSpy( key, 250, 200, gameInstance.players.player_data[key].player_def );
 			
-			if ( gameData.players.player_data[key].player_id == _player.player_id )
+			if ( gameInstance.players.player_data[key].player_id == _player.player_id )
 			{
 				_my_spy = spy;
 			}
@@ -432,14 +432,14 @@ var GameLogic = function()
 			_local_players[key] = spy;			
 		}
 				
-		_startGame( gameData, _player );
+		_startGame( gameInstance, _player );
 	};	
 	
-	_startGame = function( gameData, _player )
+	_startGame = function( gameInstance, _player )
 	{
 		console.log( 'startGame...');
 
-		_gameData = gameData;
+		_gameInstance = gameInstance;
 		
 		// so now we have all the players and their initial positions
 				

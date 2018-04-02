@@ -8,7 +8,7 @@ var GameControl = function( gameLogic )
 	var ctrl = {};
 	
 	var socket; 
-	var _gameData = null;
+	var _gameInstance = null;
 		
 	var _gameLogic = gameLogic;
 
@@ -43,11 +43,11 @@ var GameControl = function( gameLogic )
 		*/
 	};
 	
-	_joinRoom = function( gameData, player )
+	_joinRoom = function( gameInstance, player )
 	{
-		var urlid = '/' + gameData.game_id;
+		var urlid = '/' + gameInstance.game_id;
 
-		console.log('client joining ' + urlid + '/[' + gameData.datachannel + ']');
+		console.log('client joining ' + urlid + '/[' + gameInstance.datachannel + ']');
 				
 		socket = io( urlid );
 		
@@ -105,12 +105,12 @@ var GameControl = function( gameLogic )
 			
 		});
 
-		socket.on( gameData.chatchannel, function(msg)
+		socket.on( gameInstance.chatchannel, function(msg)
 		{
 			console.log('got chat data[' + msg + ']');
 		});
 				
-		socket.on( gameData.datachannel, function( spyPos )
+		socket.on( gameInstance.datachannel, function( spyPos )
 		{
 			// update spy with data
 			_gameLogic.updatePlayerPos( spyPos );			
@@ -122,32 +122,32 @@ var GameControl = function( gameLogic )
 			_gameLogic.startPreGame();
 		});
 
-		socket.on( 'start_game', function( gameData )
+		socket.on( 'start_game', function( gameInstance )
 		{
 			console.log('SERVER IS STARTING OFFICIAL GAME!');
-			//_gameLogic.startGame( gameData, _gameLogic.getPlayer() );
-			_gameLogic.onPreGameComplete( gameData, _gameLogic.getPlayer() );
+			//_gameLogic.startGame( gameInstance, _gameLogic.getPlayer() );
+			_gameLogic.onPreGameComplete( gameInstance, _gameLogic.getPlayer() );
 		});
 		
 		// save our player in gameLogic
 		_gameLogic.setPlayer( player );
 		
 		//_player = player;
-		_gameData = gameData;
+		_gameInstance = gameInstance;
 		
-		console.log( gameData );
-		console.log( gameData.players );
+		console.log( gameInstance );
+		console.log( gameInstance.players );
 		
 		socket.emit( 'player_joined', player );	
-		_updateRoomList( gameData.players );
+		_updateRoomList( gameInstance.players );
 
-		console.log('ok, you\'ve joined room [' + gameData.game_id + ']');
+		console.log('ok, you\'ve joined room [' + gameInstance.game_id + ']');
 	};
 
 	_updatePlayer = function()
 	{
 		// don't send anything unless we've connected
-		if ( _gameData != null )
+		if ( _gameInstance != null )
 			socket.emit('player_attr_updated', _gameLogic.getPlayer() );
 	};
 	
@@ -168,8 +168,8 @@ var GameControl = function( gameLogic )
 	
 	ctrl.sendChat = function( msg )
 	{
-		console.log('sending data {' + msg + '} on [' + _gameData.chatchannel + '] channel');
-		socket.emit(_gameData.chatchannel, msg);
+		console.log('sending data {' + msg + '} on [' + _gameInstance.chatchannel + '] channel');
+		socket.emit(_gameInstance.chatchannel, msg);
 	};
 	
 	ctrl.listGames = function()
@@ -199,7 +199,7 @@ var GameControl = function( gameLogic )
 		    		console.log( data );
 		    		
 		    		// ok so now a game was created on the server for us
-		    		_joinRoom( data.gameData, data.player );		    	
+		    		_joinRoom( data.gameInstance, data.player );		    	
 		    },
 		    error : function( err )
 		    {
@@ -227,7 +227,7 @@ var GameControl = function( gameLogic )
 
 	ctrl.triggerStartGame = function()
 	{
-		socket.emit( 'start_game', _gameData.game_id );	
+		socket.emit( 'start_game', _gameInstance.game_id );	
 	};
 	
 	ctrl.choosePlayer = function( player, modalPlayerConfig, playerChosenCallback )
@@ -235,7 +235,7 @@ var GameControl = function( gameLogic )
 		var clientData = {
 				player : player,
 				modalPlayerConfig : modalPlayerConfig,
-				gameId : _gameData.game_id
+				gameId : _gameInstance.game_id
 		};
 
 		$.ajax({
@@ -274,7 +274,7 @@ var GameControl = function( gameLogic )
 		if ( spy == undefined )
 			return;
 		
-		socket.emit(_gameData.datachannel, spy.getPos() );
+		socket.emit(_gameInstance.datachannel, spy.getPos() );
 	};
 
 	ctrl.sendStopUpdate = function( spy )
@@ -283,7 +283,7 @@ var GameControl = function( gameLogic )
 		pos.extra = 'stop';
 		//console.log('sent game data[action(' + pos.action + '), x(' + pos.x + '), y(' + pos.y + '), extra(' + pos.extra + ') ]');
 
-		socket.emit( _gameData.datachannel, pos );
+		socket.emit( _gameInstance.datachannel, pos );
 	};
 	
 	return ctrl;

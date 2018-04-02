@@ -4,7 +4,7 @@
 	var ActiveGames = function() 
 	{
 		this.keys = [];
-		this.game_data = {};
+		this.available_games = {};
 	};
 
 	ActiveGames.prototype.constructor = ActiveGames;
@@ -15,19 +15,23 @@
 		this.keys.push( newGame.game_id );
 		
 		// store objects associated by key
-		this.game_data[ newGame.game_id ] = newGame;
+		this.available_games[ newGame.game_id ] = newGame;
 	};
 		
 	ActiveGames.prototype.createGame = function( game_id, players )
 	{
-		var game = { };
+		var game = new GameInstance();
 		
-		game.game_id = game_id;
-		game.players = players;
+		game.setGameId( game_id );
+		game.setPlayers( players );
+		
+		//var game = { };		
+		//game.game_id = game_id;
+		//game.players = players;
 		
 		// set IO channels
-		game.chatchannel = game_id + 'chat';
-		game.datachannel = game_id + 'data';
+		//game.chatchannel = game_id + 'chat';
+		//game.datachannel = game_id + 'data';
 		
 		this.addNewGame( game );
 		
@@ -36,12 +40,12 @@
 	
 	ActiveGames.prototype.findGameById = function( game_id )
 	{
-		return this.game_data[ game_id ];
+		return this.available_games[ game_id ];
 	};
 
 	ActiveGames.prototype.findPlayerByGameId = function( game_id, player_id )
 	{
-		var game = this.game_data[ game_id ];
+		var game = findGameById( game_id );
 
 		var pId = game.players.player_data[player_id];
 				
@@ -57,22 +61,24 @@
 			}
 		}
 		*/
-		//return this.game_data[ game_id ];
+		//return this.available_games[ game_id ];
 	};
 	
 	ActiveGames.prototype.findPlayersByGameId = function( game_id )
 	{
-		var game = this.game_data[ game_id ];
+		var game = findGameById( game_id );
 		
 		return game.players;
 	};
 	
-	ActiveGames.prototype.findAllOtherPlayersByGameId = function( game_id, player_id )
+	/*
+	ActiveGames.prototype.findAllPlayersExceptThisOneByGameId = function( game_id, player_id )
 	{
-		var game = this.game_data[ game_id ];
+		var game = findGameById( game_id );
 		
 		return game.players;
-	};	
+	};
+	*/	
 
 	ActiveGames.prototype.findGameByPlayerId = function( player_id )
 	{
@@ -80,7 +86,7 @@
 		
 		for ( var k = 0; k < this.keys.length; k++ )
 		{
-			game = this.game_data[ this.keys[k] ];
+			game = this.available_games[ this.keys[k] ];
 
 			console.log('checking game \'' + this.keys[k] + '\' for players...');
 
@@ -105,7 +111,7 @@
 		var names = [];
 		
 		for ( var k = 0; k < this.keys.length; k++ )
-			names.push( this.game_data[ this.keys[k] ].game_id );
+			names.push( this.available_games[ this.keys[k] ].game_id );
 		
 		return names;
 	};

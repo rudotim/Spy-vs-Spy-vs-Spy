@@ -3,32 +3,39 @@
  */
 
 
-var GameInstance = function()
-{
-	var game = {};
-
-	var name;
-	var map = 'lobbo';
-	var max_players = 2;
-	var max_duration = 1;
-	var password = '';
-
-	game.createNew = function( gameName )
+	function GameInstance()
 	{
-		this.name = gameName;
-		this.map = 'lobbo';
+		this.game_id = -1;
+		this.players = [];
 		
-		var g = 
-		{
-			name : this.name,
-			map : this.map,
-			max_players : this.max_players,
-			max_duration : this.max_duration,
-			password : this.password
-		};
+		this.name = '';
+		this.map = '';
 		
-		return g;
-	};
+		this.options = {};
+	}
 	
-	return game;
-};
+	function setGameId( game_id )
+	{
+		this.game_id = game_id;
+	}
+
+	function setPlayers( players )
+	{
+		this.players = players;
+	}
+	
+	function setName( name )
+	{
+		this.name = name;
+	}
+	
+	function setMap( map )
+	{
+		this.map = map;
+	}
+	
+	function setOptions( newOptions )
+	{
+		this.options = newOptions;
+	}
+
