@@ -1,0 +1,41 @@
+{
+  "levelname": "Lobby",
+  "asset_json_file" : "asset-rooms-lobby2.json",
+  "asset_image_file" : "asset-rooms-lobby2.png",
+  "rooms": [
+    {
+      "id": "room0",
+      "booby_trapped" : false,
+      "room_actors": [
+        {
+          "type": "door",
+          "id": "door0",
+          "state" : 0,
+          "animation_id": "animDoorW",
+          "pos": {
+            "x": 75,
+            "y": 235
+          },
+          "teleports_to": "room1"
+        }
+      ]
+    },
+    {
+      "id": "room1",
+      "booby_trapped" : false,
+      "room_actors": [
+        {
+          "type": "door",
+          "id": "door1",
+          "state" : 0,
+          "animation_id": "animDoorW",
+          "pos": {
+            "x": 491,
+            "y": 233
+          },
+          "teleports_to": "room0"
+        }
+      ]
+    }
+  ]
+}
