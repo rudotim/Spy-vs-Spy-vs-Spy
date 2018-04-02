@@ -21,7 +21,9 @@ var GameLogic = function()
 	var _player = {};
 	var _my_spy;
 
-	var _roomData = {};
+	var _roomData;
+	var _currentRoom;
+	
 	var roomScene;
 	var phaserGame;
 	var players = [];
@@ -78,47 +80,29 @@ var GameLogic = function()
 	{
 		console.log('loading file [' + levelJsonFile + ']');
 
-		var req = $.ajax(
+		var jsonData = undefined;
+		
+		var jqxhr = $.ajax(
 		{
-			type : 'GET',
 			url : levelJsonFile,
-			beforeSend : function(xhr)
-			{
-				if (xhr && xhr.overrideMimeType)
-				{
-					xhr.overrideMimeType('application/json;charset=utf-8');
-				}
-			},
-			dataType : 'json'
-		});
-
-		req.done(function(jd)
-		{
-			console.log('successful loading of external json file');
-			console.log(jd);
-
-			var json = 'data/' + jd.asset_json_file;
-			var img = 'data/' + jd.asset_image_file;
+			async : false
+		})
+		.done(function(data) {
+			jsonData = data;
+						
+			var json = 'data/' + jsonData.asset_json_file;
+			var img = 'data/' + jsonData.asset_image_file;
 
 			// read game data from JSON file
-			phaserGame.load.atlas('lobby', img, json, Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
-
-			// load level assets
-
-			// game.load.atlas('lobby', 'data/asset-rooms-lobby2.png',
-			// 'data/asset-rooms-lobby2.json',
-			// Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
-
-			// load in-game level connections and positions
-			_roomData = jd;			
+			phaserGame.load.atlas('room_atlas', img, json, Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
+		})
+		.fail(function(data) {
+			console.log( "error> $o", data );
 		});
-
-		req.fail(function(jqXHR, textStatus)
-		{
-			alert("Request failed: " + textStatus);
-		});
-	};
-
+		
+		return jsonData;
+	}
+	
 		
 	function _moveToRoom( roomId )
 	{
@@ -151,8 +135,8 @@ var GameLogic = function()
 		// load entire spy vs spy sheet
 		phaserGame.load.atlasJSONHash('spies', 'img/spritesheet.png', 'img/sprites.json');
 
-		// TODO: Call this from outside the Phaser stuff
-		_loadLevel('data/roomdata.json', phaserGame);
+		// synchronus loading of JSON data
+		_roomData = _loadLevel('data/level_lobby.json', phaserGame);
 
 		phaserGame.load.image('startButton', 'img/buttonStart.png');
 		
@@ -169,7 +153,9 @@ var GameLogic = function()
 
 	function create()
 	{		
-		roomScene = phaserGame.add.sprite(0, 0, 'lobby', 'room1');
+		// TODO: draw the first room for the current player
+		var startingRoom = "room1";
+		roomScene = phaserGame.add.sprite(0, 0, 'room_atlas', startingRoom );
 
 		_drawRoomCollisions(phaserGame);
 
@@ -467,8 +453,8 @@ var GameLogic = function()
 	
 	ctrl.updatePlayerPos = function( spyPos )
 	{
-		console.log('updatePlayerPos');
-		console.log( spyPos );
+		//console.log('updatePlayerPos');
+		//console.log( spyPos );
 		
 		_local_players[ spyPos.player_id ].setPos( spyPos );			
 	};
