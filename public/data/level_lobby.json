@@ -6,7 +6,7 @@
     {
       "id": "room0",
       "properties" : {
-	      "booby_trapped" : false,
+	      "booby_trapped" : false
       },
       "actors": [
         {
@@ -25,7 +25,7 @@
     {
       "id": "room1",
       "properties" : {
-	      "booby_trapped" : false,
+	      "booby_trapped" : false
       },
       "actors": [
         {
