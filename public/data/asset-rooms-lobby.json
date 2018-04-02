@@ -1,9 +1,0 @@
-{"frames":
-  {
-    "room0":
-    {"frame":{"x":0,"y":0,"w":563,"h":287},"rotated":false,"trimmed":false,"spriteSourceSize":{"x":0,"y":0,"w":563,"h":287},"sourceSize":{"w":563,"h":287}},
-    "room1":
-    {"frame":{"x":0,"y":288,"w":563,"h":287},"rotated":false,"trimmed":false,"spriteSourceSize":{"x":0,"y":0,"w":563,"h":287},"sourceSize":{"w":563,"h":287}}
-  },
-  "meta":{"app":"https://www.leshylabs.com/apps/sstool/","version":"Leshy SpriteSheet Tool v0.8.4","image":"asset-rooms-lobby.png","size":{"w":563,"h":575},"scale":1}
-}
