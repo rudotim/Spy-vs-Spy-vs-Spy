@@ -5,8 +5,10 @@
   "rooms": [
     {
       "id": "room0",
-      "booby_trapped" : false,
-      "room_actors": [
+      "properties" : {
+	      "booby_trapped" : false,
+      },
+      "actors": [
         {
           "type": "door",
           "id": "door0",
@@ -22,8 +24,10 @@
     },
     {
       "id": "room1",
-      "booby_trapped" : false,
-      "room_actors": [
+      "properties" : {
+	      "booby_trapped" : false,
+      },
+      "actors": [
         {
           "type": "door",
           "id": "door1",
