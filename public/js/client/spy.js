@@ -104,7 +104,7 @@ var Spy = (function()
 		this.x = newPos.x;
 		this.y = newPos.y;
 		
-		updateBox( this );
+		this.updateBox( this );
 		//if ( newPos.extra == 'stop' )
 		//	this.stopMoving();
 		//else
