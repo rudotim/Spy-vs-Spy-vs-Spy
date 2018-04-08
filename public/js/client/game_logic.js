@@ -14,19 +14,27 @@ var GameLogic = function()
 	var _gameControl = {};
 	
 	// holds all players in game room
-	var _local_players = {			
+	var _all_spies = {			
 	};
+	
+	// things we need to keep track of
+	// gameInst  :	_gameInstance
+	// our player:	  _player
+	//   map data:     _roomData
+	// current room:   _currentRoom
 	
 	// holds our local player 
 	var _player = {};
 	var _my_spy;
 
 	var _roomData;
-	var _currentRoom;
+	
+	// Not Used - should they be?
+	//var _currentRoom;
+	//var players = [];
 	
 	var roomScene;
 	var phaserGame;
-	var players = [];
 	var buttonDown = false;
 	var joystick;
 
@@ -154,7 +162,7 @@ var GameLogic = function()
 	function create()
 	{		
 		// TODO: draw the first room for the current player
-		var startingRoom = "room1";
+		var startingRoom = "room0";
 		roomScene = phaserGame.add.sprite(0, 0, 'room_atlas', startingRoom );
 
 		_drawRoomCollisions(phaserGame);
@@ -388,43 +396,43 @@ var GameLogic = function()
 	}
 		
 	
-	ctrl.onPreGameComplete = function( gameInstance, _player )
+	ctrl.onPreGameComplete = function( gameInstance, player )
 	{
-		console.log('onPreGameComplete');
+		console.log('onPreGameComplete> %o', player );
+		console.log('onPreGameComplete gameInstance> %o', gameInstance );
 		
 		_gameOptions.hide();		
-
-		// send map data to the server
-		_gameControl.uploadMapData( _roomData );
 		
 		// add players		
-		var spy;
+		var spy;		
+		var p = gameInstance.players.length;
+		var playerIter;
 		
-		var p = 0;
-		var key = '';
-		for ( p = 0; p<gameInstance.players.keys.length; p++ )
+		while ( p-- )
 		{
-			key = gameInstance.players.keys[p];
-			console.log('key> ' + key );
-			console.log(gameInstance.players.player_data[key]);
-
-			console.log('player_def> ' + gameInstance.players.player_data[key].player_def );
+			playerIter = gameInstance.players[p];
 			
-			spy = createSpy( key, 250, 200, gameInstance.players.player_data[key].player_def );
+			console.log('playerIter> %o', playerIter );
 			
-			if ( gameInstance.players.player_data[key].player_id == _player.player_id )
+			spy = createSpy( playerIter.id, 250, 200, playerIter.player_def );
+			
+			console.log('playerIter.id> %o', playerIter.id);
+			console.log('player.id> %o', player.id);
+			console.log('player IDs match> %o', ( playerIter.id == player.id ));
+			
+			if ( playerIter.id == player.id )
 			{
 				_my_spy = spy;
 			}
 			
-			// save each player locally
-			_local_players[key] = spy;			
+			// save each player locally in Spy object structure
+			_all_spies[ playerIter.id ] = spy;			
 		}
 				
-		_startGame( gameInstance, _player );
+		_startGame( gameInstance, null );
 	};	
 	
-	_startGame = function( gameInstance, _player )
+	_startGame = function( gameInstance, player )
 	{
 		console.log( 'startGame...');
 
@@ -433,7 +441,7 @@ var GameLogic = function()
 		// so now we have all the players and their initial positions
 				
 		// move player to starting room, location
-		_moveToRoom( "room0" );
+		//_moveToRoom( "room0" );
 		
 		// begin timer
 		// zero scores
@@ -442,9 +450,6 @@ var GameLogic = function()
 	
 	ctrl.invokeChoosePlayer = function( playerIndex, modalPlayerConfig, playerChosenCallback )
 	{
-		console.log( 'choosen player');
-		console.log( playerIndex );
-		
 		_gameControl.choosePlayer( _player, modalPlayerConfig, playerChosenCallback );
 	};
 	
@@ -459,12 +464,25 @@ var GameLogic = function()
 		//console.log('updatePlayerPos');
 		//console.log( spyPos );
 		
-		_local_players[ spyPos.player_id ].setPos( spyPos );			
+		_all_spies[ spyPos.player_id ].setPos( spyPos );			
 	};
 	
 	ctrl.onPlayerEnteredRoom = function( data )
 	{
 		console.log('onPlayerEnteredRoom> %o', data);
+		/*
+		data = {
+				"room" : room,
+				"player" : player
+			};
+			*/
+		var player_id = data.player;
+		var room = data.room;
+		
+		if ( _my_spy != undefined && player_id == _my_spy.player_id )
+			_moveToRoom( room );
+		else
+			console.log('nope, not us.  player_id(%o) != _my_spy(%o)', player_id, _my_spy.player_id );
 	};
 	
 

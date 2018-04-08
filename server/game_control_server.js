@@ -1,7 +1,8 @@
 var express = require('express');
 var router = express.Router();
+var fs = require('fs');
 
-var Players = require('./players.js');
+//var Players = require('./players.js');
 var activeGamesClass = require('./activegames.js');
 
 //var activeGames = new activeGamesClass();
@@ -53,39 +54,56 @@ router.post('/player/choose', function(req, res, next) {
 		};
 	 */
 	
-	console.log('requesting player choose');
-	console.log( clientData );
-	
+	console.log('calling choose_player> %o', clientData);
+
 	var success = true;
 
-	var returnData = { 'success' : success };
+	// - player reservering the config
+	// - the config being reserver
+	// - the game instance id
+	
+	
+	// find the other players in the game
+	var players = activeGames.findPlayersByGameId( clientData.gameId );
+	var current_player;
+	
+	console.log('verifying that player X\'s config doesn\'t match anyone elses');
+	var p = players.length;
+	while ( p-- )
+	{
+		// skip checking the player in question
+		if ( players[p].id == clientData.player.id )
+		{
+			current_player = players[p];
+			continue;
+		}
+		
+		// TODO: compare player configs for conflicting properties
+	}
 	
 	if ( success == true )
 	{
-		console.log('success - reserving player');
+		console.log('success - reserving player config');
 				
-		var player = activeGames.findPlayerByGameId( clientData.gameId, clientData.player.id );
-
-		// see if anyone else has this player's character config
-		
-		
+		// set server player property
 		if ( once == true )
-			player.player_def = default_spy_def;
+			current_player.player_def = default_spy_def;
 		else
-			player.player_def = green_spy_def;
+			current_player.player_def = green_spy_def;
 		
 		once = false;
 		
 		var IO = req.app.get('io');
+		
 		// send message to everybody that this player is now off the market
-		IO.of( '/' + clientData.gameId ).emit('choose_player', clientData.playerIndex );
+		IO.of( '/' + clientData.gameId ).emit('on_chosen_player', clientData.player.id, current_player.player_def );
 	}
 	else
 	{
 		console.log('error - player already reserved');
 	}
 	
-	res.json( returnData );
+	res.json( { 'success' : success } );
 });
 
 
@@ -100,7 +118,7 @@ function createRoom(gameName, player, IO)
 	if ( gameInstance == null )
 	{
 		// submit game in active game list
-		gameInstance = activeGames.createGame( gameName, new Players() );
+		gameInstance = activeGames.createGame( gameName );
 				
 		attachIO(gameInstance.chatchannel, gameInstance.datachannel, gameInstance, IO);
 		
@@ -110,10 +128,9 @@ function createRoom(gameName, player, IO)
 	}
 	
 	// create and add ourself
-	var newPlayer = gameInstance.players.createPlayer( player.name, isLeader );
+	var newPlayer = gameInstance.createPlayer( player.name, isLeader );
 	
-	console.log( 'newPlayer:');
-	console.log( newPlayer );
+	console.log( 'newPlayer> %o', newPlayer );
 	
 	// return data to ourself
 	return {
@@ -131,7 +148,7 @@ function playerHasLeft( player, socket )
 	// find game associated with player
 	var gameInstance = activeGames.findGameByPlayerId( player.id );
 	
-	gameInstance.players.removePlayerById( player.id );
+	gameInstance.removePlayerById( player.id );
 	
 	console.log('server[player_left]> got data : ' + player.name);
 	socket.broadcast.to(gameInstance.name).emit('player_left', gameInstance.players, player);
@@ -205,17 +222,9 @@ function attachIO(chatchannel, datachannel, gameInstance, IO)
 		socket.on('player_joined', function( player )
 		{
 			socket.player = player;
-			//console.log('socket[' + socket.player.player_id + '] new_id=[' + player.id + ']');
 			playerHasJoined( player, socket );
-			//socket.broadcast.to(_gameInstance.name).emit('player_joined', data);
 		});
-		
-		socket.on('map_data_upload', function( jsonMapData )
-		{
-			console.log('map data uploaded');
-			gameInstance.setMapData( jsonMapData );
-		});
-		
+				
 		// join data channel
 		socket.on(datachannel, function( spyPos )
 		{
@@ -231,7 +240,16 @@ function attachIO(chatchannel, datachannel, gameInstance, IO)
 		socket.on('start_pre_game', function()
 		{
 			console.log('server received request to start the pre-game');
-						
+				
+			var levelName = "lobby";
+			
+			// load map data on server
+			var jsonMapData = JSON.parse(fs.readFileSync('public/data/level_' + levelName + '.json', 'utf8'));
+
+			gameInstance.setMapData( jsonMapData );
+			
+			console.log('loaded data> %o', jsonMapData);
+			
 			chat.emit('start_pre_game', null );
 		});
 		
@@ -239,27 +257,27 @@ function attachIO(chatchannel, datachannel, gameInstance, IO)
 		{
 			console.log('server received request to start the game');
 				
-			//var gameInstance = activeGames.findGameById( game_id );
+			console.log('current players> %o', gameInstance.players );
 			
-			// TODO: get players, randomize their locations within the rooms
-			var data;
-			for ( var player in gameInstance.players )
+			
+			
+			var data;  
+			var p = gameInstance.players.length;
+			while ( p-- )
 			{
-				room = gameInstance.getStartingLocation( player.playerId );
-				
-				//player.setPos( center );
+				console.log('playerIter> %o', gameInstance.players[p] );
+				room = gameInstance.getStartingLocation( gameInstance.players[p].id );
 				
 				data = {
 					"room" : room,
-					"player" : player
+					"player" : gameInstance.players[p]
 				};
-				// now broadcast
-				chat.emit('player_room_entered', data);
+				
+				// now let everyone know
+				chat.emit('player_entered_room', data);
 			}
 			
-			//socket.broadcast.to(gameInstance.game_id).emit('start_game', gameInstance );
 			chat.emit('start_game', gameInstance );
-
 		});
 		
 	});

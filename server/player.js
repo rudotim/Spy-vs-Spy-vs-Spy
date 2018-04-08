@@ -1,12 +1,12 @@
 
 
-var Player = function() 
+var Player = function( name, isLeader ) 
 {
-	this.name = '';
+	this.name = name;
 	this.id = -1;
 	this.pos = { x : 0, y : 0 };
 	this.room = -1;
-	this.isLeader = false;
+	this.isLeader = isLeader;
 	
 	this.player_def = {};
 };

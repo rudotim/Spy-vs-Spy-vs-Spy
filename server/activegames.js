@@ -19,22 +19,14 @@ var GameInstance = require('./gameinstance.js');
 		this.available_games[ newGame.game_id ] = newGame;
 	};
 		
-	ActiveGames.prototype.createGame = function( gameName, players )
+	ActiveGames.prototype.createGame = function( gameName )
 	{
 		var game = new GameInstance();
 		
 		game.setName( gameName );
-		game.setPlayers( players );
 		
 		game.setChatChannel( gameName + 'chat' );
 		game.setDataChannel( gameName + 'data' );
-		//var game = { };		
-		//game.game_id = game_id;
-		//game.players = players;
-		
-		// set IO channels
-		//game.chatchannel = game_id + 'chat';
-		//game.datachannel = game_id + 'data';
 		
 		this.addNewGame( game );
 		
@@ -105,7 +97,7 @@ var GameInstance = require('./gameinstance.js');
 			console.log('checking game \'' + this.keys[k] + '\' for players...');
 
 			console.log('checking for player_id[' + player_id + ']');
-			p = game.players.getPlayerById( player_id );
+			p = game.getPlayerById( player_id );
 			
 			if ( p != 'undefined' && p != null )
 			{

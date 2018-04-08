@@ -14,22 +14,18 @@ var GameControl = function( gameLogic )
 
 	_updateRoomList = function( serverPlayers )
 	{
-			$('#player_list ul').empty();
-			
-			console.log( serverPlayers );
-			console.log( serverPlayers.keys.length );
-			//console.log( serverPlayers.player_data[  ] );
-			
-			for ( var p=0; p<serverPlayers.keys.length; p++)
-			{
-				var playerName = serverPlayers.player_data[ serverPlayers.keys[p] ].name;
-				console.log( playerName );
-				
-				$('#player_list ul').append(
-						$('<li>').append(
-								$('<span>').attr('class', 'list-group-item player_list_entry').append( playerName )
-							));
-			}
+		$('#player_list ul').empty();
+		
+		console.log( serverPlayers );
+		
+		var p=serverPlayers.length;
+		while( p-- )
+		{
+			$('#player_list ul').append(
+					$('<li>').append(
+							$('<span>').attr('class', 'list-group-item player_list_entry').append( serverPlayers[p].name )
+						));
+		}
 	};
 	
 	_updatePlayerAttr = function( serverPlayers )
@@ -98,7 +94,7 @@ var GameControl = function( gameLogic )
 			_updateRoomList( serverPlayers );
 		});
 
-		socket.on('choose_player', function( playerChosen )
+		socket.on('on_chosen_player', function( player_id, player_config )
 		{
 			console.log('someone has chosen a player');
 			
@@ -136,6 +132,7 @@ var GameControl = function( gameLogic )
 		});
 		
 		// save our player in gameLogic
+		console.log('setting player> %o', player );
 		_gameLogic.setPlayer( player );
 		
 		//_player = player;
@@ -232,7 +229,7 @@ var GameControl = function( gameLogic )
 	{
 		_gameLogic.showGameOptions();
 	};
-	
+
 	ctrl.triggerStartPreGame = function()
 	{
 		socket.emit( 'start_pre_game', null );	
@@ -298,12 +295,7 @@ var GameControl = function( gameLogic )
 
 		socket.emit( _gameInstance.datachannel, pos );
 	};
-	
-	ctrl.uploadMapData = function( jsonMapData )
-	{
-		socket.emit( "map_data_upload", jsonMapData );
-	};
-	
+		
 	return ctrl;
 };
 
