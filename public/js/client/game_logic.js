@@ -403,6 +403,7 @@ var GameLogic = function()
 		
 		_gameOptions.hide();		
 		
+		/*
 		// add players		
 		var spy;		
 		var p = gameInstance.players.length;
@@ -412,13 +413,13 @@ var GameLogic = function()
 		{
 			playerIter = gameInstance.players[p];
 			
-			console.log('playerIter> %o', playerIter );
+			//console.log('playerIter> %o', playerIter );
 			
 			spy = createSpy( playerIter.id, 250, 200, playerIter.player_def );
 			
-			console.log('playerIter.id> %o', playerIter.id);
-			console.log('player.id> %o', player.id);
-			console.log('player IDs match> %o', ( playerIter.id == player.id ));
+			//console.log('playerIter.id> %o', playerIter.id);
+			//console.log('player.id> %o', player.id);
+			//console.log('player IDs match> %o', ( playerIter.id == player.id ));
 			
 			if ( playerIter.id == player.id )
 			{
@@ -428,6 +429,7 @@ var GameLogic = function()
 			// save each player locally in Spy object structure
 			_all_spies[ playerIter.id ] = spy;			
 		}
+		*/
 				
 		_startGame( gameInstance, null );
 	};	
@@ -452,18 +454,54 @@ var GameLogic = function()
 	{
 		_gameControl.choosePlayer( _player, modalPlayerConfig, playerChosenCallback );
 	};
+
+	ctrl.onChoosePlayer = function( player_id, player_config )
+	{
+		console.log('onChoosePlayer');
 	
-	// this is not called yet
+		var spy = createSpy( player_id, 250, 200, player_config );
+		
+		// when it's us
+		if ( player_id == _player.id )
+		{
+			_my_spy = spy;
+		}
+		else
+		{
+			// when it's someone else
+			_all_spies[ player_id ] = spy;
+		}		
+	}
+	
+	/*
 	ctrl.onChoosePlayer = function()
 	{
 		console.log('onChoosePlayer');
+		
+		// add players		
+		var spy;		
+		var p = gameInstance.players.length;
+		var playerIter;
+		
+		while ( p-- )
+		{
+			playerIter = gameInstance.players[p];
+			
+			spy = createSpy( playerIter.id, 250, 200, playerIter.player_def );
+			
+			if ( playerIter.id == _player.id )
+			{
+				_my_spy = spy;
+			}
+			
+			// save each player locally in Spy object structure
+			_all_spies[ playerIter.id ] = spy;			
+		}
 	};
+	*/
 	
 	ctrl.updatePlayerPos = function( spyPos )
 	{
-		//console.log('updatePlayerPos');
-		//console.log( spyPos );
-		
 		_all_spies[ spyPos.player_id ].setPos( spyPos );			
 	};
 	
@@ -481,8 +519,8 @@ var GameLogic = function()
 		
 		if ( _my_spy != undefined && player_id == _my_spy.player_id )
 			_moveToRoom( room );
-		else
-			console.log('nope, not us.  player_id(%o) != _my_spy(%o)', player_id, _my_spy.player_id );
+		//else
+		//	console.log('nope, not us.  player_id(%o) != _my_spy(%o)', player_id, _my_spy.player_id );
 	};
 	
 

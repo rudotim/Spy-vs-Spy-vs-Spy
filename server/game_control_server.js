@@ -95,8 +95,13 @@ router.post('/player/choose', function(req, res, next) {
 		
 		var IO = req.app.get('io');
 		
+		var game = activeGames.findGameById( clientData.gameId );
+		
+		console.log('game name> %o', game.name);
+		
 		// send message to everybody that this player is now off the market
-		IO.of( '/' + clientData.gameId ).emit('on_chosen_player', clientData.player.id, current_player.player_def );
+		//IO.of( '/' + clientData.gameId ).emit('on_chosen_player', clientData.player.id, current_player.player_def );
+		IO.of( '/' + game.name ).emit('on_chosen_player', clientData.player.id, current_player.player_def );
 	}
 	else
 	{

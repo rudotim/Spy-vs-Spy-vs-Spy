@@ -96,9 +96,9 @@ var GameControl = function( gameLogic )
 
 		socket.on('on_chosen_player', function( player_id, player_config )
 		{
-			console.log('someone has chosen a player');
+			console.log('someone has chosen a player> %o %o', player_id, player_config );
 			
-			
+			_gameLogic.onChoosePlayer( player_id, player_config );
 		});
 
 		socket.on( gameInstance.chatchannel, function(msg)
@@ -258,7 +258,8 @@ var GameControl = function( gameLogic )
 				
 				if ( data.success == true )
 				{
-					console.log('success choosing a player!');				
+					console.log('success choosing a player!');	
+					
 				}
 				else
 				{
