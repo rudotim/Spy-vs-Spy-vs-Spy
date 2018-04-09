@@ -286,26 +286,11 @@ var GameLogic = function()
 	
 	function checkItemInterations( spy )
 	{
-		/*
-		// parse out doors
-		var doors = _currentRoom.doors;
-		
-		// TODO:  We need some room encapsulation object to do all this collision/usage checking
-		
-		var d = doors.length;
-		var tpto;
-		while ( d-- )
+		var door;
+		if ( (door = _currentRoom.checkDoors( spy.box.getBounds() )) )
 		{
-			console.log('door> %o', doors[d]);
-			
-			tpto = doors[d].teleports_to;
-			
-			console.log('tpto> %o', tpto );		
-			
-			
+			console.log('looks like we collided with a door> %o', door);
 		}
-		*/
-		
 
 		// interact with room
 		// if room is bombed, begin blowing up
@@ -320,7 +305,6 @@ var GameLogic = function()
 		// if button held, send punch
 		/// receive punch
 		
-		_currentRoom.checkDoors( spy.box.getBounds() );
 	}
 	
 	function checkOverlap(spriteA, spriteB) {
