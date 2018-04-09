@@ -257,39 +257,17 @@ var GameLogic = function()
 		phaserGame.debug.text("(x: " + phaserGame.input.mousePointer.x + ", y: " + phaserGame.input.mousePointer.y + ")", 0, 50);
 	}
 
-	/*
-	function loadRoomPhaser( roomJson )
-	{
-		// new Rectangle(x, y, width, height)
-		// bounds = new Phaser.Rectangle(100, 100, 500, 400);
-		
-		// parse out doors
-		var doors = _currentRoom.doors;
-		
-		var d = doors.length;
-		var tpto;
-		
-		var rect;
-		
-		while ( d-- )
-		{
-			console.log('door> %o', doors[d]);
-			
-			tpto = doors[d].teleports_to;
-			
-			console.log('tpto> %o', tpto );		
-			
-			rect = new Phaser.Rectangle( doors[d].bounds.x, doors[d].bounds.y, doors[d].bounds.width, doors[d].bounds.height );
-		}
-	}
-	*/
-	
 	function checkItemInterations( spy )
 	{
 		var door;
 		if ( (door = _currentRoom.checkDoors( spy.box.getBounds() )) )
 		{
 			console.log('looks like we collided with a door> %o', door);
+			_moveToRoom( door.teleports_to );
+			
+			// TODO: get position of opposing door and set spy coords
+			//_my_spy.x = door.bounds.x;
+			//_my_spy.y = door.bounds.y;
 		}
 
 		// interact with room
@@ -305,14 +283,6 @@ var GameLogic = function()
 		// if button held, send punch
 		/// receive punch
 		
-	}
-	
-	function checkOverlap(spriteA, spriteB) {
-
-	    var boundsA = spriteA.getBounds();
-	    var boundsB = spriteB.getBounds();
-
-	    return Phaser.Rectangle.intersects(boundsA, boundsB);
 	}
 	
 	// 0 = none, 1 = right, 2 = down, 3 = left, 4 = up
