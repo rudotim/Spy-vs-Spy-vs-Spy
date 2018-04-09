@@ -17,6 +17,8 @@ var GameInstance = function()
 	this.datachannel = '';
 	
 	this.options = {};
+	
+	this.once = false;
 }
 
 GameInstance.prototype.constructor = GameInstance;
@@ -26,13 +28,6 @@ GameInstance.prototype.setGameId = function( game_id )
 	this.game_id = game_id;
 }
 
-/*
-GameInstance.prototype.setPlayers = function( players )
-{
-	this.players = players;
-}
-*/
-
 GameInstance.prototype.setName = function( name )
 {
 	this.name = name;
@@ -41,9 +36,15 @@ GameInstance.prototype.setName = function( name )
 GameInstance.prototype.getStartingLocation = function( player_id )
 {
 	console.log('getting starting location for player id> %o', player_id);
-	
 	console.log('returning room> %o', this.jsonMapData.rooms[0] );
-	return this.jsonMapData.rooms[0];
+	
+	if ( this.once )
+		return this.jsonMapData.rooms[0];
+	else
+	{
+		this.once = true;
+		return this.jsonMapData.rooms[1];
+	}
 }
 
 GameInstance.prototype.setMapData = function( jsonMapData )

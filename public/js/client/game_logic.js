@@ -1,5 +1,5 @@
 
-
+//var Room = require('room.js');
 
 var GameLogic = function()
 {
@@ -13,7 +13,7 @@ var GameLogic = function()
 	
 	var _gameControl = {};
 	
-	// holds all players in game room
+	// holds all Spies in game
 	var _all_spies = {			
 	};
 	
@@ -25,14 +25,16 @@ var GameLogic = function()
 	
 	// holds our local player 
 	var _player = {};
+	
+	// our local Spy object
 	var _my_spy;
-
+	
+	// the room we're currently in
+	var _currentRoom;
+	
+	// Phaser object holding the room images
 	var _roomData;
-	
-	// Not Used - should they be?
-	//var _currentRoom;
-	//var players = [];
-	
+		
 	var roomScene;
 	var phaserGame;
 	var buttonDown = false;
@@ -114,7 +116,8 @@ var GameLogic = function()
 		
 	function _moveToRoom( roomId )
 	{
-		roomScene.frameName = roomId;					
+		console.log('moving to room> %o', roomId);
+		roomScene.frameName = roomId;		
 	}
 		
 	// -------------------------------------------------------
@@ -232,11 +235,17 @@ var GameLogic = function()
 			
 			// send to remote players
 			_gameControl.sendPosUpdate( _my_spy );
+			
+			
+			// check if we've collided with any interactable objects
+			checkItemInterations( _my_spy );
 		}
 		
 		joystick.update();		
 	}
 
+	
+	
 	
 	// on each update:
 	// 
@@ -248,8 +257,56 @@ var GameLogic = function()
 		phaserGame.debug.text("(x: " + phaserGame.input.mousePointer.x + ", y: " + phaserGame.input.mousePointer.y + ")", 0, 50);
 	}
 
+	/*
+	function loadRoomPhaser( roomJson )
+	{
+		// new Rectangle(x, y, width, height)
+		// bounds = new Phaser.Rectangle(100, 100, 500, 400);
+		
+		// parse out doors
+		var doors = _currentRoom.doors;
+		
+		var d = doors.length;
+		var tpto;
+		
+		var rect;
+		
+		while ( d-- )
+		{
+			console.log('door> %o', doors[d]);
+			
+			tpto = doors[d].teleports_to;
+			
+			console.log('tpto> %o', tpto );		
+			
+			rect = new Phaser.Rectangle( doors[d].bounds.x, doors[d].bounds.y, doors[d].bounds.width, doors[d].bounds.height );
+		}
+	}
+	*/
+	
 	function checkItemInterations( spy )
 	{
+		/*
+		// parse out doors
+		var doors = _currentRoom.doors;
+		
+		// TODO:  We need some room encapsulation object to do all this collision/usage checking
+		
+		var d = doors.length;
+		var tpto;
+		while ( d-- )
+		{
+			console.log('door> %o', doors[d]);
+			
+			tpto = doors[d].teleports_to;
+			
+			console.log('tpto> %o', tpto );		
+			
+			
+		}
+		*/
+		
+
 		// interact with room
 		// if room is bombed, begin blowing up
 		
@@ -263,6 +320,15 @@ var GameLogic = function()
 		// if button held, send punch
 		/// receive punch
 		
+		_currentRoom.checkDoors( spy.box.getBounds() );
+	}
+	
+	function checkOverlap(spriteA, spriteB) {
+
+	    var boundsA = spriteA.getBounds();
+	    var boundsB = spriteB.getBounds();
+
+	    return Phaser.Rectangle.intersects(boundsA, boundsB);
 	}
 	
 	// 0 = none, 1 = right, 2 = down, 3 = left, 4 = up
@@ -394,43 +460,16 @@ var GameLogic = function()
 		// draw gray rectangle on top of viewport
 		_gameOptions.show();		
 	}
-		
-	
+			
 	ctrl.onPreGameComplete = function( gameInstance, player )
 	{
 		console.log('onPreGameComplete> %o', player );
 		console.log('onPreGameComplete gameInstance> %o', gameInstance );
 		
 		_gameOptions.hide();		
-		
-		/*
-		// add players		
-		var spy;		
-		var p = gameInstance.players.length;
-		var playerIter;
-		
-		while ( p-- )
-		{
-			playerIter = gameInstance.players[p];
-			
-			//console.log('playerIter> %o', playerIter );
-			
-			spy = createSpy( playerIter.id, 250, 200, playerIter.player_def );
-			
-			//console.log('playerIter.id> %o', playerIter.id);
-			//console.log('player.id> %o', player.id);
-			//console.log('player IDs match> %o', ( playerIter.id == player.id ));
-			
-			if ( playerIter.id == player.id )
-			{
-				_my_spy = spy;
-			}
-			
-			// save each player locally in Spy object structure
-			_all_spies[ playerIter.id ] = spy;			
-		}
-		*/
-				
+
+		_gameInstance = gameInstance;
+
 		_startGame( gameInstance, null );
 	};	
 	
@@ -438,13 +477,10 @@ var GameLogic = function()
 	{
 		console.log( 'startGame...');
 
-		_gameInstance = gameInstance;
+		//_gameInstance = gameInstance;
 		
 		// so now we have all the players and their initial positions
 				
-		// move player to starting room, location
-		//_moveToRoom( "room0" );
-		
 		// begin timer
 		// zero scores
 		// play level music
@@ -473,32 +509,6 @@ var GameLogic = function()
 		}		
 	}
 	
-	/*
-	ctrl.onChoosePlayer = function()
-	{
-		console.log('onChoosePlayer');
-		
-		// add players		
-		var spy;		
-		var p = gameInstance.players.length;
-		var playerIter;
-		
-		while ( p-- )
-		{
-			playerIter = gameInstance.players[p];
-			
-			spy = createSpy( playerIter.id, 250, 200, playerIter.player_def );
-			
-			if ( playerIter.id == _player.id )
-			{
-				_my_spy = spy;
-			}
-			
-			// save each player locally in Spy object structure
-			_all_spies[ playerIter.id ] = spy;			
-		}
-	};
-	*/
 	
 	ctrl.updatePlayerPos = function( spyPos )
 	{
@@ -514,13 +524,26 @@ var GameLogic = function()
 				"player" : player
 			};
 			*/
-		var player_id = data.player;
+		var player_id = data.player.id;
 		var room = data.room;
 		
-		if ( _my_spy != undefined && player_id == _my_spy.player_id )
-			_moveToRoom( room );
-		//else
-		//	console.log('nope, not us.  player_id(%o) != _my_spy(%o)', player_id, _my_spy.player_id );
+		if ( _my_spy != undefined && player_id == _my_spy._player_id )
+		{
+			//console.log('roomData> %o', _gameInstance.jsonMapData );
+			
+			var r = _gameInstance.jsonMapData.rooms.length;
+			while ( r-- )
+			{
+				if ( _gameInstance.jsonMapData.rooms[r].id == room.id )
+				{
+					_currentRoom = new Room(_gameInstance.jsonMapData.rooms[r]);
+					
+					break;
+				}
+			}			
+			
+			_moveToRoom( room.id );
+		}
 	};
 	
 

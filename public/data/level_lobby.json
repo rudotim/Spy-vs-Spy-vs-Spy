@@ -8,18 +8,20 @@
       "properties" : {
 	      "booby_trapped" : false
       },
-      "actors": [
-        {
-          "type": "door",
-          "id": "door0",
-          "state" : 0,
-          "animation_id": "animDoorW",
-          "pos": {
-            "x": 75,
-            "y": 235
-          },
-          "teleports_to": "room1"
-        }
+      "doors" : [
+      	{
+		  "type" : "door",
+		  "id": "door0",
+		  "state" : 0,
+		  "animation_id": "animDoorW",
+		  "bounds": {
+		    "x": 75,
+		    "y": 235,
+		    "width" : 60,
+		    "height" : 20
+		  },
+		  "teleports_to": "room1"
+      	}	
       ]
     },
     {
@@ -27,15 +29,17 @@
       "properties" : {
 	      "booby_trapped" : false
       },
-      "actors": [
+      "doors": [
         {
           "type": "door",
           "id": "door1",
           "state" : 0,
           "animation_id": "animDoorW",
-          "pos": {
+          "bounds": {
             "x": 491,
-            "y": 233
+            "y": 233,
+		    "width" : 60,
+		    "height" : 20
           },
           "teleports_to": "room0"
         }
