@@ -25,9 +25,6 @@ var GameInstance = require('./gameinstance.js');
 		
 		game.setName( gameName );
 		
-		game.setChatChannel( gameName + 'chat' );
-		game.setDataChannel( gameName + 'data' );
-		
 		this.addNewGame( game );
 		
 		return game;

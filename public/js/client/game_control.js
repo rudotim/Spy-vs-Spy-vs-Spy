@@ -101,12 +101,12 @@ var GameControl = function( gameLogic )
 			_gameLogic.onChoosePlayer( player_id, player_config );
 		});
 
-		socket.on( gameInstance.chatchannel, function(msg)
+		socket.on( 'on_chat', function(msg)
 		{
 			console.log('got chat data[' + msg + ']');
 		});
 				
-		socket.on( gameInstance.datachannel, function( spyPos )
+		socket.on( 'on_data', function( spyPos )
 		{
 			// update spy with data
 			_gameLogic.updatePlayerPos( spyPos );			
@@ -171,8 +171,8 @@ var GameControl = function( gameLogic )
 	
 	ctrl.sendChat = function( msg )
 	{
-		console.log('sending data {' + msg + '} on [' + _gameInstance.chatchannel + '] channel');
-		socket.emit(_gameInstance.chatchannel, msg);
+		//console.log('sending data {' + msg + '} on [' + _gameInstance.chatchannel + '] channel');
+		socket.emit('on_chat', msg);
 	};
 	
 	ctrl.listGames = function()

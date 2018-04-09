@@ -125,7 +125,7 @@ function createRoom(gameName, player, IO)
 		// submit game in active game list
 		gameInstance = activeGames.createGame( gameName );
 				
-		attachIO(gameInstance.chatchannel, gameInstance.datachannel, gameInstance, IO);
+		attachIO( gameInstance, IO );
 		
 		console.log( gameInstance );
 
@@ -183,11 +183,11 @@ function playerAttributeUpdated( player, socket )
 	socket.broadcast.to(gameInstance.name).emit('player_attr_updated', gameInstance.players, player);
 }
 
-function attachIO(chatchannel, datachannel, gameInstance, IO)
+function attachIO(gameInstance, IO)
 {
 	var urlid = '/' + gameInstance.name;
 
-	console.log('attachingIO> joining ' + urlid + '/[' + chatchannel + ']');
+	console.log('attachingIO> joining ' + urlid + '/[on_data]');
 
 	// create sockets, pass back chat names
 	var chat = IO.of(urlid).on('connection', function(socket)
@@ -231,15 +231,14 @@ function attachIO(chatchannel, datachannel, gameInstance, IO)
 		});
 				
 		// join data channel
-		socket.on(datachannel, function( spyPos )
+		socket.on('on_data', function( spyPos )
 		{
-			socket.broadcast.to(gameInstance.name).emit(datachannel, spyPos);
+			socket.broadcast.to(gameInstance.name).emit('on_data', spyPos);
 		});
 
-		socket.on(chatchannel, function(data)
+		socket.on('on_chat', function(data)
 		{
-			console.log('server[' + chatchannel + ']> got chat msg: ' + data);
-			socket.broadcast.to(gameInstance.name).emit(chatchannel, data);
+			socket.broadcast.to(gameInstance.name).emit('on_chat', data);
 		});
 
 		socket.on('start_pre_game', function()

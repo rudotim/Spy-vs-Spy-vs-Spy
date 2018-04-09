@@ -13,9 +13,6 @@ var GameInstance = function()
 	this.name = '';
 	this.jsonMapData;
 	
-	this.chatchannel = '';
-	this.datachannel = '';
-	
 	this.options = {};
 	
 	this.once = false;
@@ -56,16 +53,6 @@ GameInstance.prototype.setMapData = function( jsonMapData )
 GameInstance.prototype.setOptions = function( newOptions )
 {
 	this.options = newOptions;
-}
-
-GameInstance.prototype.setChatChannel = function( channel )
-{
-	this.chatchannel = channel;
-}
-
-GameInstance.prototype.setDataChannel = function( channel )
-{
-	this.datachannel = channel;
 }
 
 //-----------------------------------------------------
