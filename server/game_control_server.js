@@ -265,6 +265,10 @@ function attachIO(chatchannel, datachannel, gameInstance, IO)
 			console.log('current players> %o', gameInstance.players );
 			
 			
+			chat.emit('start_game', gameInstance );
+			
+			// TODO:  Sort out this race condition start crap. 
+			// pre_game, start_game, player_entered... fix it
 			
 			var data;  
 			var p = gameInstance.players.length;
@@ -281,8 +285,6 @@ function attachIO(chatchannel, datachannel, gameInstance, IO)
 				// now let everyone know
 				chat.emit('player_entered_room', data);
 			}
-			
-			chat.emit('start_game', gameInstance );
 		});
 		
 	});
