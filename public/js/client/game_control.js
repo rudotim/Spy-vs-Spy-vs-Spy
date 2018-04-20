@@ -52,9 +52,27 @@ var GameControl = function( gameLogic )
 			console.log('CONNECTED TO SERVER');
 		});
 		
-		socket.on('player_attr_updated', function( serverPlayers, updatedPlayer )
+		// -------------------------------------------------------
+		// Game Config
+		// -------------------------------------------------------
+		
+		socket.on('on_player_joined', function(serverPlayers, newPlayer)
 		{
-			console.log('player_attr_updated ' + serverPlayers);
+			console.log('player_joined');
+			console.log('player ' + newPlayer.name + ' has joined the room');
+			_updateRoomList( serverPlayers );
+		});
+
+		socket.on('on_player_left', function(serverPlayers, playerThatLeft)
+		{
+			console.log('player_left');
+			console.log('player ' + playerThatLeft.name + ' has left the room');
+			_updateRoomList( serverPlayers );
+		});
+
+		socket.on('on_player_attr_updated', function( serverPlayers, updatedPlayer )
+		{
+			console.log('on_player_attr_updated ' + serverPlayers);
 			
 			// don't update unless it's our object
 			/*
@@ -80,26 +98,46 @@ var GameControl = function( gameLogic )
 			_updatePlayerAttr( serverPlayers );
 		});
 		
-		socket.on('player_left', function(serverPlayers, playerThatLeft)
-		{
-			console.log('player_left');
-			console.log('player ' + playerThatLeft.name + ' has left the room');
-			_updateRoomList( serverPlayers );
-		});
-
-		socket.on('player_joined', function(serverPlayers, newPlayer)
-		{
-			console.log('player_joined');
-			console.log('player ' + newPlayer.name + ' has joined the room');
-			_updateRoomList( serverPlayers );
-		});
-
 		socket.on('on_chosen_player', function( player_id, player_config )
 		{
 			console.log('someone has chosen a player> %o %o', player_id, player_config );
 			
 			_gameLogic.onChoosePlayer( player_id, player_config );
 		});
+		
+		socket.on( 'on_start_pre_game', function()
+		{
+			console.log('SERVER IS STARTING PRE GAME!');
+			_gameLogic.startPreGame();
+		});
+
+		socket.on( 'on_player_is_ready', function( player_id )
+		{
+			console.log('on_player_ready');
+			_gameLogic.onPlayerReady( player_id );
+		});
+		
+		socket.on( 'on_load_map', function( jsonMapData )
+		{
+			console.log('on_load_map');
+			_gameLogic.onLoadMapData( jsonMapData );
+		});
+		
+		socket.on( 'on_game_loading', function( game_loading_pct )
+		{
+			console.log('on_game_loading');
+			_gameLogic.onGameLoading( game_loading_pct );
+		});
+
+		socket.on( 'on_start_game', function( gameInstance )
+		{
+			console.log('SERVER IS STARTING OFFICIAL GAME!');
+			_gameLogic.onStartGame( gameInstance, _gameLogic.getPlayer() );
+		});
+				
+		// -------------------------------------------------------
+		// Game Play
+		// -------------------------------------------------------
 
 		socket.on( 'on_chat', function(msg)
 		{
@@ -112,35 +150,20 @@ var GameControl = function( gameLogic )
 			_gameLogic.updatePlayerPos( spyPos );			
 		});
 
-		socket.on( 'player_entered_room', function( room )
+		socket.on( 'on_player_entered_room', function( room )
 		{
 			console.log('player_entered_room');
 			_gameLogic.onPlayerEnteredRoom( room );
 		});
 		
-		socket.on( 'start_pre_game', function()
-		{
-			console.log('SERVER IS STARTING PRE GAME!');
-			_gameLogic.startPreGame();
-		});
+		// -------------------------------------------------------
 
-		socket.on( 'start_game', function( gameInstance )
-		{
-			console.log('SERVER IS STARTING OFFICIAL GAME!');
-			//_gameLogic.startGame( gameInstance, _gameLogic.getPlayer() );
-			_gameLogic.onPreGameComplete( gameInstance, _gameLogic.getPlayer() );
-		});
 		
 		// save our player in gameLogic
-		console.log('setting player> %o', player );
 		_gameLogic.setPlayer( player );
 		
-		//_player = player;
 		_gameInstance = gameInstance;
-		
-		console.log( gameInstance );
-		console.log( gameInstance.players );
-		
+				
 		socket.emit( 'player_joined', player );	
 		_updateRoomList( gameInstance.players );
 
@@ -154,27 +177,31 @@ var GameControl = function( gameLogic )
 			socket.emit('player_attr_updated', _gameLogic.getPlayer() );
 	};
 	
+	
+	// -------------------------------------------------------
+	// Game Config
+	// -------------------------------------------------------
+	
 	_setPlayerName = function( newName )
 	{
-		//_player.name = newName;
 		_gameLogic.getPlayer().name = newName;
 		
 		// fire player name update
 		_updatePlayer();
 	};
 
+	/**
+	 * Change my player name in the game room lobby
+	 */
 	ctrl.setPlayerName = function( playerName )
 	{
 		console.log('setting player name: ' + playerName );
 		_setPlayerName( playerName );
 	};
-	
-	ctrl.sendChat = function( msg )
-	{
-		//console.log('sending data {' + msg + '} on [' + _gameInstance.chatchannel + '] channel');
-		socket.emit('on_chat', msg);
-	};
-	
+		
+	/**
+	 * List any on-going games which I can join
+	 */
 	ctrl.listGames = function()
 	{
 		console.log('retrieving list of games from server');
@@ -182,6 +209,9 @@ var GameControl = function( gameLogic )
 		return "empty";
 	};
 	
+	/**
+	 * Join or create a room with name
+	 */
 	ctrl.joinRoom = function( roomName )
 	{
 		console.log('attempting to join game [' + roomName + ']');
@@ -199,8 +229,6 @@ var GameControl = function( gameLogic )
 		    contentType: "application/json",
 		    success: function ( data ) 
 		    {
-		    		console.log( data );
-		    		
 		    		if ( data != null )
 		    		{
 		    			// ok so now a game was created on the server for us
@@ -213,21 +241,30 @@ var GameControl = function( gameLogic )
 		    },
 		    error : function( err )
 		    {
-		    		console.error('ERROR! ' + err.responseText );
-		    		console.error(err);
+		    		console.error('ERROR> %o', err );
 		    }
 		});
 	};
 	
-		
+	/**
+	 * Player has left the game room lobby
+	 */
 	ctrl.leaveRoom = function( gameName )
 	{
 		console.log('leaving game room [' + gameName + ']');		
 	};
 
+	/**
+	 * Pop-up the options (player selection) modal window
+	 */
 	ctrl.showGameOptions = function()
 	{
 		_gameLogic.showGameOptions();
+	};
+	
+	ctrl.triggerPlayerIsReady = function( player )
+	{
+		socket.emit( 'player_is_ready', player );	
 	};
 
 	ctrl.triggerStartPreGame = function()
@@ -254,18 +291,8 @@ var GameControl = function( gameLogic )
 			data : JSON.stringify(clientData),
 			contentType : "application/json",
 			success : function(data) {
-				console.log(data);
 				
-				if ( data.success == true )
-				{
-					console.log('success choosing a player!');	
-					
-				}
-				else
-				{
-					console.log('error choosing a player!');
-				}
-
+				console.log(data);				
 				playerChosenCallback( modalPlayerConfig, data.success );
 			},
 			error : function(err) {
@@ -277,24 +304,31 @@ var GameControl = function( gameLogic )
 		});
 	};
 	
+
+	
+	// -------------------------------------------------------
+	// Game Play
+	// -------------------------------------------------------
+
+	ctrl.sendChat = function( msg )
+	{
+		socket.emit('on_chat', msg);
+	};
+	
 	ctrl.sendPosUpdate = function( spy )
 	{
-		// var pos = spy.getPos();
-		//console.log('sent game data[action(' + pos.action + '), x(' + pos.x + '), y(' + pos.y + ') ]');
-
 		if ( spy == undefined )
 			return;
 		
-		socket.emit(_gameInstance.datachannel, spy.getPos() );
+		socket.emit('on_data', spy.getPos() );
 	};
 
 	ctrl.sendStopUpdate = function( spy )
 	{
 		var pos = spy.getPos();
 		pos.extra = 'stop';
-		//console.log('sent game data[action(' + pos.action + '), x(' + pos.x + '), y(' + pos.y + '), extra(' + pos.extra + ') ]');
 
-		socket.emit( _gameInstance.datachannel, pos );
+		socket.emit( 'on_data', pos );
 	};
 		
 	return ctrl;

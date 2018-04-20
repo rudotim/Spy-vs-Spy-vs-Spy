@@ -2,10 +2,7 @@ var express = require('express');
 var router = express.Router();
 var fs = require('fs');
 
-//var Players = require('./players.js');
 var activeGamesClass = require('./activegames.js');
-
-//var activeGames = new activeGamesClass();
 var activeGames = new activeGamesClass();
 
 router.post('/room/join', function(req, res, next)
@@ -100,7 +97,6 @@ router.post('/player/choose', function(req, res, next) {
 		console.log('game name> %o', game.name);
 		
 		// send message to everybody that this player is now off the market
-		//IO.of( '/' + clientData.gameId ).emit('on_chosen_player', clientData.player.id, current_player.player_def );
 		IO.of( '/' + game.name ).emit('on_chosen_player', clientData.player.id, current_player.player_def );
 	}
 	else
@@ -134,9 +130,7 @@ function createRoom(gameName, player, IO)
 	
 	// create and add ourself
 	var newPlayer = gameInstance.createPlayer( player.name, isLeader );
-	
-	console.log( 'newPlayer> %o', newPlayer );
-	
+		
 	// return data to ourself
 	return {
 		"gameInstance"	: gameInstance,
@@ -147,8 +141,7 @@ function createRoom(gameName, player, IO)
 
 function playerHasLeft( player, socket )
 {
-	console.log('playerHasLeft');
-	console.log( player );
+	console.log('playerHasLeft> %o', player );
 
 	// find game associated with player
 	var gameInstance = activeGames.findGameByPlayerId( player.id );
@@ -156,31 +149,83 @@ function playerHasLeft( player, socket )
 	gameInstance.removePlayerById( player.id );
 	
 	console.log('server[player_left]> got data : ' + player.name);
-	socket.broadcast.to(gameInstance.name).emit('player_left', gameInstance.players, player);
+	socket.broadcast.to(gameInstance.name).emit('on_player_left', gameInstance.players, player);
 }
 
 function playerHasJoined( player, socket )
 {
-	console.log('playerHasJoined');
-	console.log( player );
+	console.log('playerHasJoined> %o', player );
+
 	// find game associated with player
 	var gameInstance = activeGames.findGameByPlayerId( player.id );
 	var serverPlayers = gameInstance.players;
 	
-	socket.broadcast.to(gameInstance.name).emit('player_joined', serverPlayers, player);
+	socket.broadcast.to(gameInstance.name).emit('on_player_joined', serverPlayers, player);
 }
 
 function playerAttributeUpdated( player, socket )
 {
-	console.log('playerAttributeUpdated');
-	console.log( player );
+	console.log('playerAttributeUpdated> %o', player );
+	
 	// find game associated with player
 	var gameInstance = activeGames.findGameByPlayerId( player.id );
 	
 	//gameInstance.players.removePlayerById( player.id );
 	
 	console.log('server[player_attr_updated]> got data : ' + player.name);
-	socket.broadcast.to(gameInstance.name).emit('player_attr_updated', gameInstance.players, player);
+	socket.broadcast.to(gameInstance.name).emit('on_player_attr_updated', gameInstance.players, player);
+}
+
+function loadMapData( gameInstance, levelName, chat )
+{
+	// load map data on server
+	var jsonMapData = JSON.parse(fs.readFileSync('public/data/level_' + levelName + '.json', 'utf8'));
+
+	gameInstance.setMapData( jsonMapData );
+	
+	chat.emit('on_load_map', jsonMapData);	
+
+	console.log('loaded data> %o', jsonMapData);
+}
+
+function setStartingLocation( gameInstance, player, chat )
+{
+	// find game associated with player
+	var gameInstance = activeGames.findGameByPlayerId( player.id );
+
+	var room = gameInstance.getStartingLocation( player.id );
+	
+	data = {
+		"room" : room,
+		"player" : player
+	};
+	
+	// now let everyone know
+	chat.emit('on_player_entered_room', data);	
+}
+
+function setStartingLocations( gameInstance, socket )
+{
+	var room;
+	var data;  
+	var p = gameInstance.players.length;
+	while ( p-- )
+	{
+		console.log('playerIter> %o', gameInstance.players[p] );
+		setStartingLocation( gameInstance, gameInstance.players[p], socket );
+		
+		/*
+		room = gameInstance.getStartingLocation( gameInstance.players[p].id );
+		
+		data = {
+			"room" : room,
+			"player" : gameInstance.players[p]
+		};
+		
+		// now let everyone know
+		chatSocket.emit('on_player_entered_room', data);
+		*/
+	}
 }
 
 function attachIO(gameInstance, IO)
@@ -204,31 +249,55 @@ function attachIO(gameInstance, IO)
 			// remove from server list
 			playerHasLeft( socket.player, socket );
 		});
-		 
-		socket.on('player_attr_updated', function( player )
-		{
-			playerAttributeUpdated( player, socket );
-			/*
-			console.log('server[player_attr_updated]> got player: ' + player.name );
-			var newPlayer = player;
-					
-			// TODO:  Move this player_id set logic to somewhere more appropriate
-			socket.player_id = newPlayer.player_id;
-			
-			chat.emit('player_attr_updated', serverPlayers, newPlayer);
-			*/
-		});
 
-		socket.on('player_left', function( player )
-		{
-			playerHasLeft( player, socket );
-		});
+		// -------------------------------------------------------
+		// Game Config
+		// -------------------------------------------------------
 		
 		socket.on('player_joined', function( player )
 		{
 			socket.player = player;
 			playerHasJoined( player, socket );
 		});
+		
+		socket.on('player_left', function( player )
+		{
+			playerHasLeft( player, socket );
+		});
+		
+		socket.on('player_attr_updated', function( player )
+		{
+			playerAttributeUpdated( player, socket );
+			
+			// TODO: this needs work
+		});
+
+		socket.on('player_is_ready', function( player )
+		{
+			var gameInstance = activeGames.findGameByPlayerId( player.id );
+
+			socket.broadcast.to(gameInstance.name).emit('on_player_is_ready', player);
+
+			// keep track of players loaded to provide feedback to waiting players as to who is the slow poke
+			if ( ++gameInstance.players_loaded >= gameInstance.players.length )
+			{
+				var levelName = "lobby";
+				loadMapData( gameInstance, levelName, chat );
+				
+				// this will call 'on_player_entered_room'
+				setStartingLocations( gameInstance, chat );
+				
+				// now start it!
+				chat.emit('on_start_game', gameInstance );
+			}			
+			else
+				console.log('nope, it\'s not');
+				
+		});
+
+		// -------------------------------------------------------
+		// Game Play
+		// -------------------------------------------------------
 				
 		// join data channel
 		socket.on('on_data', function( spyPos )
@@ -254,7 +323,7 @@ function attachIO(gameInstance, IO)
 			
 			console.log('loaded data> %o', jsonMapData);
 			
-			chat.emit('start_pre_game', null );
+			chat.emit('on_start_pre_game', null );
 		});
 		
 		socket.on('start_game', function( game_id )
@@ -263,8 +332,8 @@ function attachIO(gameInstance, IO)
 				
 			console.log('current players> %o', gameInstance.players );
 			
-			
-			chat.emit('start_game', gameInstance );
+			/*
+			chat.emit('on_start_game', gameInstance );
 			
 			// TODO:  Sort out this race condition start crap. 
 			// pre_game, start_game, player_entered... fix it
@@ -282,8 +351,9 @@ function attachIO(gameInstance, IO)
 				};
 				
 				// now let everyone know
-				chat.emit('player_entered_room', data);
+				chat.emit('on_player_entered_room', data);
 			}
+			*/
 		});
 		
 	});

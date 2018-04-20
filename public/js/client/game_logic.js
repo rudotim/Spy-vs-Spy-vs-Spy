@@ -415,30 +415,40 @@ var GameLogic = function()
 		_gameOptions.show();		
 	}
 			
-	ctrl.onPreGameComplete = function( gameInstance, player )
+	ctrl.playerIsReady = function()
 	{
-		console.log('onPreGameComplete> %o', player );
-		console.log('onPreGameComplete gameInstance> %o', gameInstance );
+		console.log( 'player is ready> %o', _player );
+
+		_gameControl.triggerPlayerIsReady( _player );
+	};
+
+	ctrl.onPlayerReady = function( player_id )
+	{
+		console.log('player> %o is ready', player_id);
+	}
+
+	ctrl.onGameLoading = function( game_loading_pct )
+	{
+		console.log('game loaded pct> %o', game_loading_pct);
+	}
+	
+	ctrl.onLoadMapData = function( jsonMapData )
+	{
+		console.log('onLoadMapData> %o', jsonMapData);
+		_gameInstance.jsonMapData = jsonMapData;
+	}
+
+	ctrl.onStartGame = function( gameInstance, player )
+	{
+		console.log('onStartGame> %o', player );
+		console.log('onStartGame gameInstance> %o', gameInstance );
 		
 		_gameOptions.hide();		
 
-		_gameInstance = gameInstance;
-
-		_startGame( gameInstance, null );
-	};	
-	
-	_startGame = function( gameInstance, player )
-	{
-		console.log( 'startGame...');
-
 		//_gameInstance = gameInstance;
-		
-		// so now we have all the players and their initial positions
-				
-		// begin timer
-		// zero scores
-		// play level music
-	};
+
+		//_startGame( gameInstance, null );
+	};	
 	
 	ctrl.invokeChoosePlayer = function( playerIndex, modalPlayerConfig, playerChosenCallback )
 	{

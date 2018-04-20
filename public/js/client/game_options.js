@@ -146,6 +146,11 @@ var GameOptions = function( gameLogic, phaserGame )
 		}
 	};
 	
+	_clickStart = function()
+	{
+		_gameLogic.playerIsReady();
+	};
+	
 	_startCountdown = function( startCount, x, y )
 	{
 	    var item = modal.getModalItem("modalOptions", 5);
@@ -153,8 +158,9 @@ var GameOptions = function( gameLogic, phaserGame )
 	    item.y = y;
 	    var index = Number(item.text);
 
-		gameControl.triggerStartGame();
-	    modal.hideModal("modalOptions");
+	    _clickStart();
+		//gameControl.triggerStartGame();
+	    //modal.hideModal("modalOptions");
 	    
 	    /*
 	    _countDown(_updateCountdown, startCount, x, y, function () {

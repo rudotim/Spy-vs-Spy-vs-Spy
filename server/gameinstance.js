@@ -8,6 +8,7 @@ var GameInstance = function()
 	this.game_id = guid();
 	
 	this.players = [];
+	this.players_loaded = 0;
 	this.nextPlayerId = 1;
 	
 	this.name = '';
