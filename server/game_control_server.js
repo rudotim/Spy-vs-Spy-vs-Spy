@@ -176,16 +176,10 @@ function playerAttributeUpdated( player, socket )
 	socket.broadcast.to(gameInstance.name).emit('on_player_attr_updated', gameInstance.players, player);
 }
 
-function loadMapData( gameInstance, levelName, chat )
+function loadMapData( levelName )
 {
 	// load map data on server
-	var jsonMapData = JSON.parse(fs.readFileSync('public/data/level_' + levelName + '.json', 'utf8'));
-
-	gameInstance.setMapData( jsonMapData );
-	
-	chat.emit('on_load_map', jsonMapData);	
-
-	console.log('loaded data> %o', jsonMapData);
+	return JSON.parse(fs.readFileSync('public/data/level_' + levelName + '.json', 'utf8'));
 }
 
 function setStartingLocation( gameInstance, player, chat )
@@ -195,13 +189,16 @@ function setStartingLocation( gameInstance, player, chat )
 
 	var room = gameInstance.getStartingLocation( player.id );
 	
-	data = {
-		"room" : room,
-		"player" : player
-	};
-	
-	// now let everyone know
-	chat.emit('on_player_entered_room', data);	
+	// starting location sends us to a room and the physical center
+	var teleports_to = {	
+	  	"room" : room.id,
+	  	"pos" : { 
+	  		"x" : 200, 
+	  		"y" : 200 
+	  	}
+	}
+		  	
+	chat.emit('on_player_entered_room', player, teleports_to);	
 }
 
 function setStartingLocations( gameInstance, socket )
@@ -282,23 +279,42 @@ function attachIO(gameInstance, IO)
 			if ( ++gameInstance.players_loaded >= gameInstance.players.length )
 			{
 				var levelName = "lobby";
-				loadMapData( gameInstance, levelName, chat );
 				
+				gameInstance.setMapData( loadMapData( levelName ) );
+
+				chat.emit('on_load_map', gameInstance);					
+			}			
+		});
+		
+		socket.on('player_has_loaded_map', function( player )
+		{
+			var gameInstance = activeGames.findGameByPlayerId( player.id );
+			
+			// keep track of players loaded to provide feedback to waiting players as to who is the slow poke
+			if ( ++gameInstance.players_loaded_map >= gameInstance.players.length )
+			{
 				// this will call 'on_player_entered_room'
 				setStartingLocations( gameInstance, chat );
 				
 				// now start it!
 				chat.emit('on_start_game', gameInstance );
-			}			
-			else
-				console.log('nope, it\'s not');
-				
+			}
 		});
 
 		// -------------------------------------------------------
 		// Game Play
 		// -------------------------------------------------------
-				
+			
+		socket.on('player_entered_room', function(playerId, teleports_to)
+		{
+			chat.emit('on_player_entered_room', playerId, teleports_to );
+		});		
+
+		socket.on('player_left_room', function(playerId, roomId)
+		{
+			chat.emit('on_player_left_room', playerId, roomId );
+		});
+		
 		// join data channel
 		socket.on('on_data', function( spyPos )
 		{
@@ -312,17 +328,7 @@ function attachIO(gameInstance, IO)
 
 		socket.on('start_pre_game', function()
 		{
-			console.log('server received request to start the pre-game');
-				
-			var levelName = "lobby";
-			
-			// load map data on server
-			var jsonMapData = JSON.parse(fs.readFileSync('public/data/level_' + levelName + '.json', 'utf8'));
-
-			gameInstance.setMapData( jsonMapData );
-			
-			console.log('loaded data> %o', jsonMapData);
-			
+			console.log('server received request to start the pre-game');				
 			chat.emit('on_start_pre_game', null );
 		});
 		
@@ -330,7 +336,7 @@ function attachIO(gameInstance, IO)
 		{
 			console.log('server received request to start the game');
 				
-			console.log('current players> %o', gameInstance.players );
+			//console.log('current players> %o', gameInstance.players );
 			
 			/*
 			chat.emit('on_start_game', gameInstance );

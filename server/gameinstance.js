@@ -9,6 +9,10 @@ var GameInstance = function()
 	
 	this.players = [];
 	this.players_loaded = 0;
+	this.players_loaded_map = 0;
+	
+	this.rooms = {};
+	
 	this.nextPlayerId = 1;
 	
 	this.name = '';

@@ -117,6 +117,10 @@ var GameLogic = function()
 	function _moveToRoom( roomId )
 	{
 		console.log('moving to room> %o', roomId);
+		
+		// find room with id and set _currentRoom to it 
+		_currentRoom = _gameInstance.rooms[ roomId ];
+		
 		roomScene.frameName = roomId;		
 	}
 		
@@ -263,7 +267,25 @@ var GameLogic = function()
 		if ( (door = _currentRoom.checkDoors( spy.box.getBounds() )) )
 		{
 			console.log('looks like we collided with a door> %o', door);
-			_moveToRoom( door.teleports_to );
+			
+			// doing well.  lots of things to test:
+			// we now load map data after all players have clicked 'start' on options.  
+			// Then we wait until all player's clients have finished loading map data before
+			// we place start locations and ultimately start the game.
+			
+			// We now also parse the entire map upon receiving the data.  The room
+			// info is stored in rooms{} property of gameInstance.  
+			
+			// we're currently attempting to get a player to change rooms via a door
+			// but the problem is the doors are not linked to one another.  Rather, 
+			// a door is currently linked with a room so there is no good x/y location
+			// to place the player at when they enter a new room.
+			
+			// we probably have to change the level_lobby.json to be able to link doors to each other.
+			
+			_gameControl.sendPlayerLeftRoom( _player, _currentRoom.id );
+			_gameControl.sendPlayerEnteredRoom( _player, door.teleports_to );
+			//_moveToRoom( door.teleports_to );
 			
 			// TODO: get position of opposing door and set spy coords
 			//_my_spy.x = door.bounds.x;
@@ -432,10 +454,21 @@ var GameLogic = function()
 		console.log('game loaded pct> %o', game_loading_pct);
 	}
 	
-	ctrl.onLoadMapData = function( jsonMapData )
+	ctrl.onLoadMapData = function( gameInstance )
 	{
-		console.log('onLoadMapData> %o', jsonMapData);
-		_gameInstance.jsonMapData = jsonMapData;
+		_gameInstance = gameInstance;
+		
+		var roomId;
+		// parse everything
+		var r = _gameInstance.jsonMapData.rooms.length;
+		while ( r-- )
+		{
+			roomId = _gameInstance.jsonMapData.rooms[r].id;
+			_gameInstance.rooms[roomId] = new Room(_gameInstance.jsonMapData.rooms[r]);
+		}			
+		
+		// let server know we've loaded everything
+		_gameControl.triggerPlayerLoadedMap( _player );
 	}
 
 	ctrl.onStartGame = function( gameInstance, player )
@@ -444,10 +477,6 @@ var GameLogic = function()
 		console.log('onStartGame gameInstance> %o', gameInstance );
 		
 		_gameOptions.hide();		
-
-		//_gameInstance = gameInstance;
-
-		//_startGame( gameInstance, null );
 	};	
 	
 	ctrl.invokeChoosePlayer = function( playerIndex, modalPlayerConfig, playerChosenCallback )
@@ -479,34 +508,32 @@ var GameLogic = function()
 		_all_spies[ spyPos.player_id ].setPos( spyPos );			
 	};
 	
-	ctrl.onPlayerEnteredRoom = function( data )
+	ctrl.onPlayerLeftRoom = function( data )
 	{
-		console.log('onPlayerEnteredRoom> %o', data);
-		/*
-		data = {
-				"room" : room,
-				"player" : player
-			};
-			*/
-		var player_id = data.player.id;
-		var room = data.room;
+		console.log('onPlayerLeftRoom> %o', data);
 		
-		if ( _my_spy != undefined && player_id == _my_spy._player_id )
+	}
+	
+	ctrl.onPlayerEnteredRoom = function( player, teleports_to )
+	{
+		console.log('onPlayerEnteredRoom> %o', teleports_to);
+		/*
+		  "teleports_to": {	
+		  	"room" : "room1"
+		  	"pos" : { 
+		  		"x" : 100, 
+		  		"y" : 235 
+		  	}
+		  }
+		*/
+		
+		if ( _my_spy != undefined && player.id == _my_spy._player_id )
 		{
-			//console.log('roomData> %o', _gameInstance.jsonMapData );
+			// change scene to correct room
+			_moveToRoom( teleports_to.room );
 			
-			var r = _gameInstance.jsonMapData.rooms.length;
-			while ( r-- )
-			{
-				if ( _gameInstance.jsonMapData.rooms[r].id == room.id )
-				{
-					_currentRoom = new Room(_gameInstance.jsonMapData.rooms[r]);
-					
-					break;
-				}
-			}			
-			
-			_moveToRoom( room.id );
+			// move spy to correct position
+			_my_spy.setPos( teleports_to.pos );
 		}
 	};
 	

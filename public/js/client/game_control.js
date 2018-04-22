@@ -117,10 +117,10 @@ var GameControl = function( gameLogic )
 			_gameLogic.onPlayerReady( player_id );
 		});
 		
-		socket.on( 'on_load_map', function( jsonMapData )
+		socket.on( 'on_load_map', function( gameInstance )
 		{
 			console.log('on_load_map');
-			_gameLogic.onLoadMapData( jsonMapData );
+			_gameLogic.onLoadMapData( gameInstance );
 		});
 		
 		socket.on( 'on_game_loading', function( game_loading_pct )
@@ -150,10 +150,10 @@ var GameControl = function( gameLogic )
 			_gameLogic.updatePlayerPos( spyPos );			
 		});
 
-		socket.on( 'on_player_entered_room', function( room )
+		socket.on( 'on_player_entered_room', function( player, room )
 		{
 			console.log('player_entered_room');
-			_gameLogic.onPlayerEnteredRoom( room );
+			_gameLogic.onPlayerEnteredRoom( player, room );
 		});
 		
 		// -------------------------------------------------------
@@ -267,6 +267,11 @@ var GameControl = function( gameLogic )
 		socket.emit( 'player_is_ready', player );	
 	};
 
+	ctrl.triggerPlayerLoadedMap = function( player )
+	{
+		socket.emit( 'player_has_loaded_map', player );	
+	};
+
 	ctrl.triggerStartPreGame = function()
 	{
 		socket.emit( 'start_pre_game', null );	
@@ -310,6 +315,16 @@ var GameControl = function( gameLogic )
 	// Game Play
 	// -------------------------------------------------------
 
+	ctrl.sendPlayerEnteredRoom = function( player, teleports_to )
+	{
+		socket.emit('player_entered_room', player, teleports_to );
+	};
+	
+	ctrl.sendPlayerLeftRoom = function( player, roomId )
+	{
+		socket.emit('player_left_room', player, roomId );
+	};
+	
 	ctrl.sendChat = function( msg )
 	{
 		socket.emit('on_chat', msg);

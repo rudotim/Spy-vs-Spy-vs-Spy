@@ -20,7 +20,13 @@
 		    "width" : 60,
 		    "height" : 20
 		  },
-		  "teleports_to": "room1"
+		  "teleports_to": {	
+		  	"room" : "room1",
+		  	"pos" : { 
+		  		"x" : 100, 
+		  		"y" : 235 
+		  	}
+		  }
       	}	
       ]
     },
@@ -41,7 +47,13 @@
 		    "width" : 60,
 		    "height" : 20
           },
-          "teleports_to": "room0"
+		  "teleports_to": {	
+		  	"room" : "room1",
+		  	"pos" : { 
+		  		"x" : 100, 
+		  		"y" : 235 
+		  	}
+		  }
         }
       ]
     }
