@@ -395,9 +395,10 @@ var GameLogic = function()
 	
 	
 	// -------------------------------------------------------
-	// -- Public Utilities
+	// Game Play Config
 	// -------------------------------------------------------
 		
+	
 	ctrl.setPlayer = function( player )
 	{
 		_player = player;
@@ -436,7 +437,30 @@ var GameLogic = function()
 		// draw gray rectangle on top of viewport
 		_gameOptions.show();		
 	}
-			
+		
+	ctrl.invokeChoosePlayer = function( playerIndex, modalPlayerConfig, playerChosenCallback )
+	{
+		_gameControl.choosePlayer( _player, modalPlayerConfig, playerChosenCallback );
+	};
+
+	ctrl.onChoosePlayer = function( player_id, player_config )
+	{
+		console.log('onChoosePlayer');
+	
+		var spy = createSpy( player_id, 250, 200, player_config );
+		
+		// when it's us
+		if ( player_id == _player.id )
+		{
+			_my_spy = spy;
+		}
+		else
+		{
+			// when it's someone else
+			_all_spies[ player_id ] = spy;
+		}		
+	}
+	
 	ctrl.playerIsReady = function()
 	{
 		console.log( 'player is ready> %o', _player );
@@ -478,30 +502,12 @@ var GameLogic = function()
 		
 		_gameOptions.hide();		
 	};	
-	
-	ctrl.invokeChoosePlayer = function( playerIndex, modalPlayerConfig, playerChosenCallback )
-	{
-		_gameControl.choosePlayer( _player, modalPlayerConfig, playerChosenCallback );
-	};
 
-	ctrl.onChoosePlayer = function( player_id, player_config )
-	{
-		console.log('onChoosePlayer');
 	
-		var spy = createSpy( player_id, 250, 200, player_config );
-		
-		// when it's us
-		if ( player_id == _player.id )
-		{
-			_my_spy = spy;
-		}
-		else
-		{
-			// when it's someone else
-			_all_spies[ player_id ] = spy;
-		}		
-	}
-	
+	// -------------------------------------------------------
+	// Game Play
+	// -------------------------------------------------------
+
 	
 	ctrl.updatePlayerPos = function( spyPos )
 	{
