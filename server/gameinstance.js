@@ -38,15 +38,20 @@ GameInstance.prototype.setName = function( name )
 GameInstance.prototype.getStartingLocation = function( player_id )
 {
 	console.log('getting starting location for player id> %o', player_id);
-	console.log('returning room> %o', this.jsonMapData.rooms[0] );
+	
+	var room;
 	
 	if ( this.once )
-		return this.jsonMapData.rooms[0];
+		room = this.jsonMapData.rooms[0];
 	else
 	{
 		this.once = true;
-		return this.jsonMapData.rooms[1];
+		room = this.jsonMapData.rooms[1];
 	}
+	
+	console.log('returning room> %o', room );
+
+	return room;
 }
 
 GameInstance.prototype.setMapData = function( jsonMapData )

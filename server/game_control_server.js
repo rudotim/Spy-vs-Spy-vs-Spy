@@ -187,6 +187,7 @@ function setStartingLocation( gameInstance, player, chat )
 	// find game associated with player
 	var gameInstance = activeGames.findGameByPlayerId( player.id );
 
+	console.log( 'setting stating location for player ', player.id );
 	var room = gameInstance.getStartingLocation( player.id );
 	
 	// starting location sends us to a room and the physical center
@@ -289,6 +290,7 @@ function attachIO(gameInstance, IO)
 			// keep track of players loaded to provide feedback to waiting players as to who is the slow poke
 			if ( gameInstance.verifyMapsLoaded(player) === true )
 			{
+				console.log('setting starting locations...');
 				// this will call 'on_player_entered_room'
 				setStartingLocations( gameInstance, chat );
 				

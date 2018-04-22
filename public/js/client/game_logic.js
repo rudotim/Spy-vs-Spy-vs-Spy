@@ -284,7 +284,7 @@ var GameLogic = function()
 			_gameControl.sendPlayerLeftRoom( _player, _currentRoom.id );
 			_gameControl.sendPlayerEnteredRoom( _player, door.teleports_to );
 			
-			_moveToRoom( door.teleports_to.room );
+			//_moveToRoom( door.teleports_to.room );
 			
 			// move spy to correct position
 			_my_spy.setPos( door.teleports_to.pos );
@@ -417,9 +417,13 @@ var GameLogic = function()
 		// inflate game_div
 		$('#game_div').toggleClass('fullscreen');
 		
+		var gameWidth = window.innerWidth; // * window.devicePixelRatio;
+		var gameHeight = window.innerHeight; // * window.devicePixelRatio;
+		
+		
+		
 		phaserGame = new Phaser.Game(
-				window.innerWidth * window.devicePixelRatio, 
-				window.innerHeight * window.devicePixelRatio, 
+				gameWidth, gameHeight, 
 				Phaser.AUTO, 'game_div',
 		{
 			preload : preload,
@@ -516,18 +520,20 @@ var GameLogic = function()
 	
 	ctrl.onPlayerLeftRoom = function( player, roomId )
 	{
-		console.log('onPlayerLeftRoom> %o', player.id);	
+		//console.log('onPlayerLeftRoom> %o', player.id);	
+		console.log('onPlayerLeftRoom> player ', player.id, ' left room ', roomId );
 				
 		// if it's someone else, set their room so we'll know to stop drawing them
 		if ( player.id != _my_spy._player_id )
 		{
+			console.log('we will stop drawing player ', player.id);
 			_all_spies[ player.id ].setRoom( roomId );
 		}		
 	}
 
 	ctrl.onPlayerEnteredRoom = function( player, teleports_to )
 	{
-		console.log('onPlayerEnteredRoom> %o', teleports_to);
+		console.log('onPlayerEnteredRoom> player ', player.id, ' entered room ', teleports_to.room );
 		/*
 		  "teleports_to": {	
 		  	"room" : "room1"
@@ -541,11 +547,12 @@ var GameLogic = function()
 		// if it's us
 		if ( player.id == _my_spy._player_id )
 		{
-			if ( _currentRoom === undefined || _currentRoom.id == teleports_to.room )
+			//if ( _currentRoom === undefined /*|| _currentRoom.id == teleports_to.room */ )
 			{
 				_currentRoom = _gameInstance.rooms[ teleports_to.room ];
 				
 				_my_spy.setRoom( teleports_to.room );
+				_moveToRoom( teleports_to.room );
 				
 				console.log('setting room for us(', player.id, ')> %o', teleports_to.room );
 			}
