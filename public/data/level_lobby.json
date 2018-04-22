@@ -23,7 +23,7 @@
 		  "teleports_to": {	
 		  	"room" : "room1",
 		  	"pos" : { 
-		  		"x" : 100, 
+		  		"x" : 490, 
 		  		"y" : 235 
 		  	}
 		  }
@@ -48,9 +48,9 @@
 		    "height" : 20
           },
 		  "teleports_to": {	
-		  	"room" : "room1",
+		  	"room" : "room0",
 		  	"pos" : { 
-		  		"x" : 100, 
+		  		"x" : 76, 
 		  		"y" : 235 
 		  	}
 		  }
