@@ -30,13 +30,7 @@ var GameControl = function( gameLogic )
 	
 	_updatePlayerAttr = function( serverPlayers )
 	{
-		/*
-		console.log('updating player attr');
-		for ( var p=0; p<serverPlayers.length; p++)
-		{
-			
-		}
-		*/
+		// TODO: Implement this?  Really it's just for name changes...
 	};
 	
 	_joinRoom = function( gameInstance, player )
@@ -53,7 +47,7 @@ var GameControl = function( gameLogic )
 		});
 		
 		// -------------------------------------------------------
-		// Game Config
+		// Lobby Config
 		// -------------------------------------------------------
 		
 		socket.on('on_player_joined', function(serverPlayers, newPlayer)
@@ -98,6 +92,10 @@ var GameControl = function( gameLogic )
 			_updatePlayerAttr( serverPlayers );
 		});
 		
+		// -------------------------------------------------------
+		// Game Play Config
+		// -------------------------------------------------------
+
 		socket.on('on_chosen_player', function( player_id, player_config )
 		{
 			console.log('someone has chosen a player> %o %o', player_id, player_config );
@@ -134,7 +132,7 @@ var GameControl = function( gameLogic )
 			console.log('SERVER IS STARTING OFFICIAL GAME!');
 			_gameLogic.onStartGame( gameInstance, _gameLogic.getPlayer() );
 		});
-				
+			
 		// -------------------------------------------------------
 		// Game Play
 		// -------------------------------------------------------
@@ -157,7 +155,6 @@ var GameControl = function( gameLogic )
 		});
 		
 		// -------------------------------------------------------
-
 		
 		// save our player in gameLogic
 		_gameLogic.setPlayer( player );
@@ -178,9 +175,12 @@ var GameControl = function( gameLogic )
 	};
 	
 	
+	
 	// -------------------------------------------------------
-	// Game Config
+	// Lobby Config
 	// -------------------------------------------------------
+	
+	
 	
 	_setPlayerName = function( newName )
 	{
@@ -254,6 +254,12 @@ var GameControl = function( gameLogic )
 		console.log('leaving game room [' + gameName + ']');		
 	};
 
+	
+	// -------------------------------------------------------
+	// Game Play Setup
+	// -------------------------------------------------------
+
+	
 	/**
 	 * Pop-up the options (player selection) modal window
 	 */
@@ -315,6 +321,8 @@ var GameControl = function( gameLogic )
 	// Game Play
 	// -------------------------------------------------------
 
+	
+	
 	ctrl.sendPlayerEnteredRoom = function( player, teleports_to )
 	{
 		socket.emit('player_entered_room', player, teleports_to );

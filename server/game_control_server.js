@@ -210,18 +210,6 @@ function setStartingLocations( gameInstance, socket )
 	{
 		console.log('playerIter> %o', gameInstance.players[p] );
 		setStartingLocation( gameInstance, gameInstance.players[p], socket );
-		
-		/*
-		room = gameInstance.getStartingLocation( gameInstance.players[p].id );
-		
-		data = {
-			"room" : room,
-			"player" : gameInstance.players[p]
-		};
-		
-		// now let everyone know
-		chatSocket.emit('on_player_entered_room', data);
-		*/
 	}
 }
 
@@ -248,7 +236,7 @@ function attachIO(gameInstance, IO)
 		});
 
 		// -------------------------------------------------------
-		// Game Config
+		// Lobby Config
 		// -------------------------------------------------------
 		
 		socket.on('player_joined', function( player )
@@ -266,7 +254,7 @@ function attachIO(gameInstance, IO)
 		{
 			playerAttributeUpdated( player, socket );
 			
-			// TODO: this needs work
+			// TODO: Implement this?  It's just for lobby name changes
 		});
 
 		socket.on('player_is_ready', function( player )
@@ -275,6 +263,8 @@ function attachIO(gameInstance, IO)
 
 			socket.broadcast.to(gameInstance.name).emit('on_player_is_ready', player);
 
+			// TODO: add something to remember who clicked start
+			
 			// keep track of players loaded to provide feedback to waiting players as to who is the slow poke
 			if ( ++gameInstance.players_loaded >= gameInstance.players.length )
 			{
@@ -290,6 +280,8 @@ function attachIO(gameInstance, IO)
 		{
 			var gameInstance = activeGames.findGameByPlayerId( player.id );
 			
+			// TODO: add something to remember who clicked start
+
 			// keep track of players loaded to provide feedback to waiting players as to who is the slow poke
 			if ( ++gameInstance.players_loaded_map >= gameInstance.players.length )
 			{
@@ -302,19 +294,24 @@ function attachIO(gameInstance, IO)
 		});
 
 		// -------------------------------------------------------
-		// Game Play
+		// Game Play Config
 		// -------------------------------------------------------
 			
-		socket.on('player_entered_room', function(playerId, teleports_to)
+		socket.on('start_pre_game', function()
 		{
-			chat.emit('on_player_entered_room', playerId, teleports_to );
-		});		
-
-		socket.on('player_left_room', function(playerId, roomId)
-		{
-			chat.emit('on_player_left_room', playerId, roomId );
+			console.log('server received request to start the pre-game');				
+			chat.emit('on_start_pre_game', null );
 		});
 		
+		socket.on('start_game', function( game_id )
+		{
+			console.log('server received request to start the game');
+		});
+		
+		// -------------------------------------------------------
+		// Game Play
+		// -------------------------------------------------------
+
 		// join data channel
 		socket.on('on_data', function( spyPos )
 		{
@@ -325,43 +322,17 @@ function attachIO(gameInstance, IO)
 		{
 			socket.broadcast.to(gameInstance.name).emit('on_chat', data);
 		});
+		
+		socket.on('player_entered_room', function(playerId, teleports_to)
+		{
+			chat.emit('on_player_entered_room', playerId, teleports_to );
+		});		
 
-		socket.on('start_pre_game', function()
+		socket.on('player_left_room', function(playerId, roomId)
 		{
-			console.log('server received request to start the pre-game');				
-			chat.emit('on_start_pre_game', null );
+			chat.emit('on_player_left_room', playerId, roomId );
 		});
-		
-		socket.on('start_game', function( game_id )
-		{
-			console.log('server received request to start the game');
-				
-			//console.log('current players> %o', gameInstance.players );
-			
-			/*
-			chat.emit('on_start_game', gameInstance );
-			
-			// TODO:  Sort out this race condition start crap. 
-			// pre_game, start_game, player_entered... fix it
-			
-			var data;  
-			var p = gameInstance.players.length;
-			while ( p-- )
-			{
-				console.log('playerIter> %o', gameInstance.players[p] );
-				room = gameInstance.getStartingLocation( gameInstance.players[p].id );
-				
-				data = {
-					"room" : room,
-					"player" : gameInstance.players[p]
-				};
-				
-				// now let everyone know
-				chat.emit('on_player_entered_room', data);
-			}
-			*/
-		});
-		
+						
 	});
 }
 

@@ -510,8 +510,7 @@ var GameLogic = function()
 	
 	ctrl.onPlayerLeftRoom = function( data )
 	{
-		console.log('onPlayerLeftRoom> %o', data);
-		
+		console.log('onPlayerLeftRoom> %o', data);		
 	}
 	
 	ctrl.onPlayerEnteredRoom = function( player, teleports_to )
