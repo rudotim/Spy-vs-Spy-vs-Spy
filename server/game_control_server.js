@@ -209,9 +209,41 @@ function setStartingLocations( gameInstance, socket )
 	while ( p-- )
 	{
 		console.log('playerIter> %o', gameInstance.players[p] );
-		setStartingLocation( gameInstance, gameInstance.players[p], socket );
+		setStartingLocation( gameInstance, gameInstance.players[p], socket );		
 	}
 }
+
+/*
+function getStartingLocations( gameInstance )
+{
+	var rooms = [];
+	var room;
+	//var data;  
+	var teleports_to;
+	var p = gameInstance.players.length;
+	while ( p-- )
+	{
+		console.log('playerIter> %o', gameInstance.players[p] );
+		
+		room = gameInstance.getStartingLocation( gameInstance.players[p].id );
+		
+		// starting location sends us to a room and the physical center
+		teleports_to = {	
+			"player" : gameInstance.players[p],
+		  	"room" : room.id,
+		  	"pos" : { 
+		  		"x" : 200, 
+		  		"y" : 200 
+		  	}
+		}
+		
+		rooms.push( teleports_to );
+		
+	}
+	
+	return rooms;
+}
+*/
 
 function attachIO(gameInstance, IO)
 {
@@ -257,6 +289,12 @@ function attachIO(gameInstance, IO)
 			// TODO: Implement this?  It's just for lobby name changes
 		});
 
+		
+		// -------------------------------------------------------
+		// Game Play Config
+		// -------------------------------------------------------
+			
+		
 		socket.on('player_is_ready', function( player )
 		{
 			var gameInstance = activeGames.findGameByPlayerId( player.id );
@@ -272,6 +310,18 @@ function attachIO(gameInstance, IO)
 				
 				gameInstance.setMapData( loadMapData( levelName ) );
 
+				/*
+				teleports_to = {	
+					"player" : player,
+				  	"room" : room.id,
+				  	"pos" : { 
+				  		"x" : 200, 
+				  		"y" : 200 
+				  	}
+				}				 
+				 */
+				//chat.emit('on_inital_player_rooms', getStartingLocations( gameInstance ));									
+				
 				chat.emit('on_load_map', gameInstance);					
 			}			
 		});
@@ -283,7 +333,8 @@ function attachIO(gameInstance, IO)
 			// TODO: add something to remember who clicked start
 
 			// keep track of players loaded to provide feedback to waiting players as to who is the slow poke
-			if ( ++gameInstance.players_loaded_map >= gameInstance.players.length )
+			//if ( ++gameInstance.players_loaded_map >= gameInstance.players.length )
+			if ( gameInstance.verifyMapsLoaded(player) === true )
 			{
 				// this will call 'on_player_entered_room'
 				setStartingLocations( gameInstance, chat );
@@ -293,10 +344,6 @@ function attachIO(gameInstance, IO)
 			}
 		});
 
-		// -------------------------------------------------------
-		// Game Play Config
-		// -------------------------------------------------------
-			
 		socket.on('start_pre_game', function()
 		{
 			console.log('server received request to start the pre-game');				
@@ -323,14 +370,14 @@ function attachIO(gameInstance, IO)
 			socket.broadcast.to(gameInstance.name).emit('on_chat', data);
 		});
 		
-		socket.on('player_entered_room', function(playerId, teleports_to)
+		socket.on('player_entered_room', function(player, teleports_to)
 		{
-			chat.emit('on_player_entered_room', playerId, teleports_to );
+			chat.emit('on_player_entered_room', player, teleports_to );
 		});		
 
-		socket.on('player_left_room', function(playerId, roomId)
+		socket.on('player_left_room', function(player, roomId)
 		{
-			chat.emit('on_player_left_room', playerId, roomId );
+			chat.emit('on_player_left_room', player, roomId );
 		});
 						
 	});

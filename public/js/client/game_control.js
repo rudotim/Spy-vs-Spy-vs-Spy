@@ -121,6 +121,12 @@ var GameControl = function( gameLogic )
 			_gameLogic.onLoadMapData( gameInstance );
 		});
 		
+		socket.on( 'on_inital_player_rooms', function( startingRooms )
+		{
+			console.log('on_inital_player_rooms');
+			_gameLogic.onInitialPlayerLocations( startingRooms );
+		});
+		
 		socket.on( 'on_game_loading', function( game_loading_pct )
 		{
 			console.log('on_game_loading');
@@ -150,10 +156,16 @@ var GameControl = function( gameLogic )
 
 		socket.on( 'on_player_entered_room', function( player, room )
 		{
-			console.log('player_entered_room');
+			//console.log('on_player_entered_room');
 			_gameLogic.onPlayerEnteredRoom( player, room );
 		});
-		
+
+		socket.on( 'on_player_left_room', function( player, room )
+		{
+			//console.log('on_player_left_room');
+			_gameLogic.onPlayerLeftRoom( player, room );
+		});
+
 		// -------------------------------------------------------
 		
 		// save our player in gameLogic

@@ -31,10 +31,6 @@ var green_spy_def = {
 
 var Spy = (function() 
 {
-	//var speed, action;
-	//var box;
-	//var _roomId;
-	//var _player_id;
 	
 	var Spy = function(phaserGame, id, x, y, spy_def, gameControl) 
 	{
@@ -42,8 +38,6 @@ var Spy = (function()
 		this.action = null;
 		this._player_id = id;
 		this._room_id = null;
-		//this.x = x;
-		//this.y = y;
 
 		Phaser.Particle.call(this, phaserGame, x, y, 'spies', spy_def.stand);
 		
@@ -55,11 +49,13 @@ var Spy = (function()
 
 		this.box = drawCollisionBox( phaserGame, x, y );
 
+		this.phaserGame = phaserGame;
+		
 		phaserGame.add.existing(this);
 				
 		console.log('spy()');
 	};
-	
+
 	function drawCollisionBox( phaserGame, x, y )
 	{
 		var bmd = phaserGame.add.bitmapData(spy_width, 8);
@@ -83,6 +79,11 @@ var Spy = (function()
 	// Override Phaser's Sprite object so we can add our own logic on top
 	Spy.prototype = Object.create(Phaser.Particle.prototype);
 	Spy.prototype.constructor = Spy;
+		
+	Spy.prototype.setVisibility = function( visible )
+	{
+		this.visible = visible;
+	};
 	
 	Spy.prototype.getPos = function()
 	{

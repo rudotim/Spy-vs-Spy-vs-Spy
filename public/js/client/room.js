@@ -4,6 +4,7 @@ var Room = function( roomJson )
 	this.roomJson = roomJson;
 	this.doors = [];
 	this.actors = [];
+	this.id = undefined;
 	
 	this.parseJson( roomJson );
 }
@@ -14,16 +15,19 @@ Room.prototype.parseJson = function( roomJson )
 {
 	var doorJson = roomJson.doors;
 	
+	// set id of room
+	this.id = roomJson.id;
+	
 	var rect;
 	var tpto;
 	var d = doorJson.length;
 	while ( d-- )
 	{
-		console.log('door> %o', doorJson[d]);
+		//console.log('door> %o', doorJson[d]);
 		
 		tpto = doorJson[d].teleports_to;
 		
-		console.log('tpto> %o', tpto );		
+		//console.log('tpto> %o', tpto );		
 		
 		rect = new Phaser.Rectangle( doorJson[d].bounds.x, doorJson[d].bounds.y, doorJson[d].bounds.width, doorJson[d].bounds.height );	
 		

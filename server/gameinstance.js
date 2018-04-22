@@ -9,7 +9,7 @@ var GameInstance = function()
 	
 	this.players = [];
 	this.players_loaded = 0;
-	this.players_loaded_map = 0;
+	this.players_loaded_map = {};
 	
 	this.rooms = {};
 	
@@ -79,6 +79,17 @@ GameInstance.prototype.createPlayer = function( player_name, isLeader )
 
 	return player;
 };
+
+GameInstance.prototype.verifyMapsLoaded = function( player )
+{
+	this.players_loaded_map[player.id] = player.id;
+	
+	var keys = Object.keys( this.players_loaded_map  );
+	
+	console.log('maps loaded? have ', keys.length, ' keys and ', this.players.length, ' players');
+	
+	return ( keys.length == this.players.length );
+}
 
 GameInstance.prototype.getPlayerById = function( id )
 {
