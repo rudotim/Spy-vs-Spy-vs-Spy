@@ -212,11 +212,7 @@ var GameLogic = function()
 	    if ( _currentRoom !== undefined )
 	    {
 		    Object.keys(_all_spies).forEach(function(key) 
-		    	{
-		    		// skip us
-		    		//if ( key == _my_spy._player_id )
-		    		//	continue;
-		    		
+		    	{		    		
 		    		if ( _all_spies[key]._room_id == _currentRoom.id )
 		    		{
 		    			_all_spies[key].setVisibility( true );
@@ -225,7 +221,6 @@ var GameLogic = function()
 		    		{
 		    			_all_spies[key].setVisibility( false );
 		    		}
-		        //console.log(key, _all_spies[key]);
 		    });
 	    }
 	    // if there was movement
@@ -285,22 +280,7 @@ var GameLogic = function()
 		if ( (door = _currentRoom.checkDoors( spy.box.getBounds() )) )
 		{
 			console.log('looks like we collided with a door> %o', door);
-			
-			// doing well.  lots of things to test:
-			// we now load map data after all players have clicked 'start' on options.  
-			// Then we wait until all player's clients have finished loading map data before
-			// we place start locations and ultimately start the game.
-			
-			// We now also parse the entire map upon receiving the data.  The room
-			// info is stored in rooms{} property of gameInstance.  
-			
-			// we're currently attempting to get a player to change rooms via a door
-			// but the problem is the doors are not linked to one another.  Rather, 
-			// a door is currently linked with a room so there is no good x/y location
-			// to place the player at when they enter a new room.
-			
-			// we probably have to change the level_lobby.json to be able to link doors to each other.
-			
+						
 			_gameControl.sendPlayerLeftRoom( _player, _currentRoom.id );
 			_gameControl.sendPlayerEnteredRoom( _player, door.teleports_to );
 			
@@ -537,55 +517,14 @@ var GameLogic = function()
 	ctrl.onPlayerLeftRoom = function( player, roomId )
 	{
 		console.log('onPlayerLeftRoom> %o', player.id);	
-		
-		// is it our room?  if so, do not draw the player anymore
-		/*
-		if ( _currentRoom.id == roomId )
+				
+		// if it's someone else, set their room so we'll know to stop drawing them
+		if ( player.id != _my_spy._player_id )
 		{
-			// ensure we stop drawing that spy			
-			_all_spies[ player.id ].setVisibility( false );
-		}
-		*/
-		
-		// if it's us
-		if ( player.id == _my_spy._player_id )
-		{
-			/*
-			if ( _currentRoom === undefined || _currentRoom.id == roomId )
-			{
-				_currentRoom = _gameInstance.rooms[ roomId ];				
-			}
-			*/
-		}
-		else
-		{
-			// it's someone else who entered
 			_all_spies[ player.id ].setRoom( roomId );
 		}		
 	}
 
-	ctrl.onInitialPlayerLocations = function( startingRooms )
-	{
-		console.log('onInitialPlayerLocations> %o', startingRooms);
-		
-		/*
-		teleports_to = {	
-			"player" : player,
-		  	"room" : room.id,
-		  	"pos" : { 
-		  		"x" : 200, 
-		  		"y" : 200 
-		  	}
-		}				 
-		 */
-
-		// go through all players
-		
-		// when we find us, set the _currentRoom
-		
-		
-	}
-	
 	ctrl.onPlayerEnteredRoom = function( player, teleports_to )
 	{
 		console.log('onPlayerEnteredRoom> %o', teleports_to);
@@ -611,48 +550,12 @@ var GameLogic = function()
 				console.log('setting room for us(', player.id, ')> %o', teleports_to.room );
 			}
 		}
-		else
+		else  // someone else
 		{
 			_all_spies[ player.id ].setRoom( teleports_to.room );
 			console.log('setting room for other player(', player.id, ')> %o', teleports_to.room );
 		}
-		/*
-		else
-		{
-			// if it's our room
-			if ( _currentRoom.id == teleports_to.room )
-			{
-				console.log('showing the spy> ' + player.id);
-
-				// it's someone else who entered
-				//_all_spies[ player.id ].setVisibility( true );
-			}
-		}
-		*/
-		
-		
-/*		
-		if ( _currentRoom === undefined || _currentRoom.id == teleports_to.room )
-		{
-			_currentRoom = _gameInstance.rooms[ teleports_to.room ];
-			
-			console.log('all_spies> %o', _all_spies );
-			
-			// ensure we start drawing that spy			
-			_all_spies[ player.id ].visible( true );
-		}
-*/		
-		
-		if ( _my_spy != undefined && player.id == _my_spy._player_id )
-		{
-			// change scene to correct room
-			//_moveToRoom( teleports_to.room );
-			
-			// move spy to correct position
-			//_my_spy.setPos( teleports_to.pos );
-		}
-	};
-	
+	};	
 
 	return ctrl;
 };

@@ -121,12 +121,6 @@ var GameControl = function( gameLogic )
 			_gameLogic.onLoadMapData( gameInstance );
 		});
 		
-		socket.on( 'on_inital_player_rooms', function( startingRooms )
-		{
-			console.log('on_inital_player_rooms');
-			_gameLogic.onInitialPlayerLocations( startingRooms );
-		});
-		
 		socket.on( 'on_game_loading', function( game_loading_pct )
 		{
 			console.log('on_game_loading');

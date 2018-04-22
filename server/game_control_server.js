@@ -213,38 +213,6 @@ function setStartingLocations( gameInstance, socket )
 	}
 }
 
-/*
-function getStartingLocations( gameInstance )
-{
-	var rooms = [];
-	var room;
-	//var data;  
-	var teleports_to;
-	var p = gameInstance.players.length;
-	while ( p-- )
-	{
-		console.log('playerIter> %o', gameInstance.players[p] );
-		
-		room = gameInstance.getStartingLocation( gameInstance.players[p].id );
-		
-		// starting location sends us to a room and the physical center
-		teleports_to = {	
-			"player" : gameInstance.players[p],
-		  	"room" : room.id,
-		  	"pos" : { 
-		  		"x" : 200, 
-		  		"y" : 200 
-		  	}
-		}
-		
-		rooms.push( teleports_to );
-		
-	}
-	
-	return rooms;
-}
-*/
-
 function attachIO(gameInstance, IO)
 {
 	var urlid = '/' + gameInstance.name;
@@ -310,18 +278,6 @@ function attachIO(gameInstance, IO)
 				
 				gameInstance.setMapData( loadMapData( levelName ) );
 
-				/*
-				teleports_to = {	
-					"player" : player,
-				  	"room" : room.id,
-				  	"pos" : { 
-				  		"x" : 200, 
-				  		"y" : 200 
-				  	}
-				}				 
-				 */
-				//chat.emit('on_inital_player_rooms', getStartingLocations( gameInstance ));									
-				
 				chat.emit('on_load_map', gameInstance);					
 			}			
 		});
@@ -330,10 +286,7 @@ function attachIO(gameInstance, IO)
 		{
 			var gameInstance = activeGames.findGameByPlayerId( player.id );
 			
-			// TODO: add something to remember who clicked start
-
 			// keep track of players loaded to provide feedback to waiting players as to who is the slow poke
-			//if ( ++gameInstance.players_loaded_map >= gameInstance.players.length )
 			if ( gameInstance.verifyMapsLoaded(player) === true )
 			{
 				// this will call 'on_player_entered_room'
