@@ -1,6 +1,3 @@
-/**
- * New node file
- */
 
 
 var GameOptions = function( gameLogic, phaserGame )
@@ -11,121 +8,42 @@ var GameOptions = function( gameLogic, phaserGame )
 	var _phaser = phaserGame;
 	
 	var modal;
+	
+	var tween = null;
+	var popup;
 		
 	_initModal = function()
 	{
 		console.log('initting modal...');
 		console.log(_phaser);
-		
-		modal = new gameModal( _phaser );
-		
-	    modal.createModal({
-	        type: "modalOptions",
-	        includeBackground: true,
-	        modalCloseOnInput: false,
-	        itemsArr: [
-			{
-			    type: "image",
-			    content: "modalBG",
-			    offsetY: -20,
-			    contentScale: 1
-			},
-			{
-	            type: "text",
-	            content: "Pick Yo Damn Options!",
-	            fontFamily: "Luckiest Guy",
-	            fontSize: 22,
-	            color: "0x1e1e1e",
-	            offsetY: -120	            
-	        }, 	        
-            {
-                type: "image",
-                content: "startButton",
-                offsetX: -5,
-                offsetY: 100,
-                contentScale: 0.6,
-                callback: function () 
-                {
-                	// start countdown
-                	_startCountdown(5, -82, 102);
-                }
-            },
-			{
-	            type: "text",
-	            content: "Start",
-	            fontFamily: "Luckiest Guy",
-	            fontSize: 22,
-	            color: "0x1e1e1e",
-	            offsetX: -5,
-	            offsetY: 102
-	        }, 
-	        
-			{
-			    type: "image",
-			    content: "spyWhite",
-			    offsetX: -150,
-			    offsetY: -20,
-			    contentScale: 3,
-                callback: function()
-                {
-                		console.log( this );
-                		_gameLogic.invokeChoosePlayer( 0, this.key, _playerChosen );
-                }			    
-			},
+				
+	    //  You can drag the pop-up window around
+	    popup = _phaser.add.sprite(_phaser.world.centerX, _phaser.world.centerY, 'choosePlayerBG');
+	    popup.alpha = 1;
+	    popup.anchor.set(0.5);
+	    popup.inputEnabled = true;
+	    popup.input.enableDrag();
 
-			{
-			    type: "image",
-			    content: "spyRed",
-			    offsetX: -50,
-			    offsetY: -20,
-			    contentScale: 3,
-                callback: function()
-                {
-                		_gameLogic.invokeChoosePlayer( 1, this.key, _playerChosen );
-                }			    
-			},
-			
-			{
-			    type: "image",
-			    content: "spyGreen",
-			    offsetX: 50,
-			    offsetY: -20,
-			    contentScale: 3,
-                callback: function()
-                {
-                		_gameLogic.invokeChoosePlayer( 2, this.key, _playerChosen );
-                }			    
-			},
-			
-			{
-			    type: "image",
-			    content: "spyCyan",
-			    offsetX: 150,
-			    offsetY: -20,
-			    contentScale: 3,
-                callback: function()
-                {
-                		_gameLogic.invokeChoosePlayer( 3, this.key, _playerChosen );
-                }			    
-			},
+	    //  Position the close button to the top-right of the popup sprite (minus 8px for spacing)
+	    var pw = (popup.width / 2) - 45;
+	    var ph = (popup.height / 2) - 8;
 
-	        {
-                type : "text",
-                content: "X",
-                fontSize: 52,
-                color: "0x000000",
-                offsetY: -130,
-                offsetX: 240,
-                callback: function()
-                {
-                		modal.hideModal("modalOptions");
-                }
-            }	        
-	        ]
-	    });	
+	    //  And click the close button to close it down again
+	    var closeButton = _phaser.make.sprite(pw, -ph, 'closeButton');
+	    closeButton.inputEnabled = true;
+	    closeButton.input.priorityID = 1;
+	    closeButton.input.useHandCursor = true;
+	    closeButton.events.onInputDown.add(_hideWindow, this);
+
+	    //  Add the "close button" to the popup window image
+	    popup.addChild(closeButton);
+
+	    //  Hide it awaiting a click
+	    popup.scale.set(0.1);
+	    popup.visible = false;
 	};
 	
-	_playerChosen = function( modalPlayerConfig, success )
+	_playerChosen = function( playerIndex, modalPlayerConfig, success )
 	{
 		console.log('_playerChosen : success?> ' + success );
 		console.log('_playerChosen : modalPlayerConfig?> ' + modalPlayerConfig );
@@ -133,16 +51,32 @@ var GameOptions = function( gameLogic, phaserGame )
 		// TODO:  show visual about player X having reserved a player config
 		if ( success == true )
 		{
-			
+			console.log('doing modal thing');
 			
 			// access object via key and draw box around it
 			// value, type, index, id
-			//var mItem = modal.getModalItem( "modalOptions", 3 );
+			var mItem = modal.getModalItem( "modalOptions", playerIndex );
+			mItem.scale.setTo( 2.5 );
+			/*
+			mItem = modal.getModalItem( "modalOptions", 7 );
+			//mItem.tint = 0x00ff00;
+			mItem.scale.setTo(0.5,0.5);
 			
+			mItem = modal.getModalItem( "modalOptions", 8 );
+			//mItem.tint = 0x0000ff;
+			mItem.scale.setTo(0.5,0.5);
+			
+			mItem = modal.getModalItem( "modalOptions", 9 );
+			//mItem.tint = 0x0000ff;
+			mItem.scale.setTo(0.5,0.5);
+			*/
+
 			//mItem.graphicOpacity = 0.3;
-			//mItem.tint = 0xFF4444;
+			//mItem.contentScale = 1;
 			
+			//console.log('mItem> %o', mItem);
 			//modal.updateModalValue( "spyWhite", "modalOptions", 3, null );
+			//modal.updateModalValue( modalPlayerConfig, "modalOptions", 3, null );
 		}
 	};
 	
@@ -153,10 +87,10 @@ var GameOptions = function( gameLogic, phaserGame )
 	
 	_startCountdown = function( startCount, x, y )
 	{
-	    var item = modal.getModalItem("modalOptions", 5);
-	    item.x = x;
-	    item.y = y;
-	    var index = Number(item.text);
+	   //var item = modal.getModalItem("modalOptions", 5);
+	    //item.x = x;
+	    //item.y = y;
+	    //var index = Number(item.text);
 
 	    _clickStart();
 		//gameControl.triggerStartGame();
@@ -181,6 +115,7 @@ var GameOptions = function( gameLogic, phaserGame )
 	};
 
 	_updateCountdown = function( startCount, x, y ) {
+		/*
 	    var item = modal.getModalItem("modalOptions", 5);
 	    
 	    if ( item.text == "Start" )
@@ -194,14 +129,36 @@ var GameOptions = function( gameLogic, phaserGame )
 	    item.update();
 	    item.x = x;
 	    item.y = y;
-	    //item.x = _phaser.width / 2 - (item.width / 2);
-	    //item.y = _phaser.height / 2 - (item.height / 2);
+	    */
 	};
 	
 	_drawWindow = function()
 	{	
-	    modal.showModal("modalOptions");
+	    popup.visible = true;
+
+	    //modal.showModal("modalOptions");
+	    if ((tween !== null && tween.isRunning) || popup.scale.x === 1)
+	    {
+	        return;
+	    }
+	    
+	    //  Create a tween that will pop-open the window, but only if it's not already tweening or open
+	    tween = _phaser.add.tween(popup.scale).to( { x: 1, y: 1 }, 1000, Phaser.Easing.Elastic.Out, true);
 	};
+	
+	_hideWindow = function()
+	{
+	    if (tween && tween.isRunning || popup.scale.x === 0.1)
+	    {
+	        return;
+	    }
+
+	    //  Create a tween that will close the window, but only if it's not already tweening or closed
+	    tween = _phaser.add.tween(popup.scale).to( { x: 0.1, y: 0.1 }, 500, Phaser.Easing.Elastic.In, true);
+	    
+	    popup.visible = false;
+
+	}
 	
 	optionwindow.show = function()
 	{
@@ -214,7 +171,9 @@ var GameOptions = function( gameLogic, phaserGame )
 	{
 		console.log('hiding modal');
 		
-		modal.hideModal("modalOptions");
+		_hideWindow();
+		
+		//modal.hideModal("modalOptions");
 	};
 	
 	_initModal();
