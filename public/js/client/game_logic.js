@@ -154,8 +154,10 @@ var GameLogic = function()
 		_roomData = _loadLevel('data/level_lobby.json', phaserGame);
 
 		phaserGame.load.image('startButton', 'img/buttonStart.png');
+		phaserGame.load.image('closeButton', 'img/closeButton.png');
 		
 		phaserGame.load.image("modalBG","img/modalBG.png");
+		phaserGame.load.image("choosePlayerBG","img/choose_player_bg.png");
 
 		// spies
 		phaserGame.load.image('spyWhite', 'img/spy0.png');
@@ -442,7 +444,7 @@ var GameLogic = function()
 		
 	ctrl.invokeChoosePlayer = function( playerIndex, modalPlayerConfig, playerChosenCallback )
 	{
-		_gameControl.choosePlayer( _player, modalPlayerConfig, playerChosenCallback );
+		_gameControl.choosePlayer( _player, playerIndex, modalPlayerConfig, playerChosenCallback );
 	};
 
 	ctrl.onChoosePlayer = function( player_id, player_config )
@@ -463,6 +465,11 @@ var GameLogic = function()
 			// when it's someone else
 			_all_spies[ player_id ] = spy;
 		}		
+		
+		// TODO:  Call gameOptions with index of chosen player
+		// going to need to pass index back to onChoosePlayer
+		// also the name of the chosen player
+		
 	}
 	
 	ctrl.playerIsReady = function()
