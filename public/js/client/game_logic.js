@@ -155,6 +155,7 @@ var GameLogic = function()
 
 		phaserGame.load.image('startButton', 'img/buttonStart.png');
 		phaserGame.load.image('closeButton', 'img/closeButton.png');
+		phaserGame.load.image("colorWheel","img/colorWheel.png");
 		
 		phaserGame.load.image("modalBG","img/modalBG.png");
 		phaserGame.load.image("choosePlayerBG","img/choose_player_bg.png");
