@@ -46,7 +46,7 @@ router.post('/player/choose', function(req, res, next) {
 	/**
 		var clientData = {
 				player : player,
-				modalPlayerConfig : modalPlayerConfig,
+				playerConfig : playerConfig,
 				gameId : _gameInstance.game_id
 		};
 	 */
@@ -63,7 +63,7 @@ router.post('/player/choose', function(req, res, next) {
 	// find the other players in the game
 	var players = activeGames.findPlayersByGameId( clientData.gameId );
 	var current_player;
-	
+		
 	console.log('verifying that player X\'s config doesn\'t match anyone elses');
 	var p = players.length;
 	while ( p-- )
@@ -74,8 +74,13 @@ router.post('/player/choose', function(req, res, next) {
 			current_player = players[p];
 			continue;
 		}
-		
-		// TODO: compare player configs for conflicting properties
+
+		// compare colors so we don't have 2 players with the same color
+		if ( players[p].player_def.color == clientData.playerConfig.color )
+		{
+			success = false;
+			break;
+		}
 	}
 	
 	if ( success == true )
@@ -83,12 +88,7 @@ router.post('/player/choose', function(req, res, next) {
 		console.log('success - reserving player config');
 				
 		// set server player property
-		if ( once == true )
-			current_player.player_def = default_spy_def;
-		else
-			current_player.player_def = green_spy_def;
-		
-		once = false;
+		current_player.player_def = clientData.playerConfig;
 		
 		var IO = req.app.get('io');
 		

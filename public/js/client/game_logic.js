@@ -443,9 +443,9 @@ var GameLogic = function()
 		_gameOptions.show();		
 	}
 		
-	ctrl.invokeChoosePlayer = function( playerIndex, modalPlayerConfig, playerChosenCallback )
+	ctrl.invokeChoosePlayer = function( playerIndex, playerConfig, playerChosenCallback )
 	{
-		_gameControl.choosePlayer( _player, playerIndex, modalPlayerConfig, playerChosenCallback );
+		_gameControl.choosePlayer( _player, playerIndex, playerConfig, playerChosenCallback );
 	};
 
 	ctrl.onChoosePlayer = function( player_id, player_config )

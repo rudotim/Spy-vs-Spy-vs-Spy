@@ -294,11 +294,11 @@ var GameControl = function( gameLogic )
 		socket.emit( 'start_game', _gameInstance.game_id );	
 	};
 	
-	ctrl.choosePlayer = function( player, modalPlayerConfig, playerChosenCallback )
+	ctrl.choosePlayer = function( player, playerIndex, playerConfig, playerChosenCallback )
 	{
 		var clientData = {
 				player : player,
-				modalPlayerConfig : modalPlayerConfig,
+				playerConfig : playerConfig,
 				gameId : _gameInstance.game_id
 		};
 
@@ -310,7 +310,7 @@ var GameControl = function( gameLogic )
 			success : function(data) {
 				
 				console.log(data);				
-				playerChosenCallback( modalPlayerConfig, data.success );
+				playerChosenCallback( playerIndex, playerConfig, data.success );
 			},
 			error : function(err) {
 				console.error('ERROR! ' + err.responseText);
