@@ -29,21 +29,63 @@ var green_spy_def = {
 		run_left : 'gspy_lrun'
 };
 
+
+function createSpriteWithColor( phaserGame, playerId, playerConfig, modelAtlasName ) 
+{		
+	var newAtlasName = playerId + "_";
+	
+	// get all frame data coordinates
+	var frameData = phaserGame.cache.getFrameData(modelAtlasName);
+    	
+	// create red player bitmap data, resize it from the 'spies' atlas
+    var redbmd = phaserGame.make.bitmapData();
+    redbmd.load(modelAtlasName);
+
+    // color it to reflect our new player's choice
+	redbmd.replaceRGB(255, 255, 255, 255, playerConfig.color.r, playerConfig.color.g, playerConfig.color.b, 255);
+    
+    // create a new texture atlas using our new player's color
+    var atlasRedFrames = [];
+    	
+    var currFrame;
+    for ( var key in frameData._frames )
+    {
+    		currFrame = frameData._frames[key];
+		atlasRedFrames.push( 
+				{
+					"filename" :  currFrame.name,
+					"frame" : 
+					{
+						x: currFrame.x, y: currFrame.y, w: currFrame.width, h: currFrame.height
+					}
+				});
+    }
+    	
+    var atlasRed = { frames: atlasRedFrames };
+	
+    phaserGame.cache.addTextureAtlas(newAtlasName, '', redbmd.canvas, atlasRed, Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);	
+}
+
 var Spy = (function() 
 {
+	// spy_def now contains playerOptions which currently only consists of a color property.
+	// Use that to dynamically create bitmap sprites for the white spy and replace the
+	// white color with the passed in value.
 	
-	var Spy = function(phaserGame, id, x, y, spy_def, gameControl) 
+	var Spy = function(phaserGame, playerId, x, y, playerConfig, gameControl) 
 	{
 		this.speed = 4;
 		this.action = null;
-		this._player_id = id;
+		this._player_id = playerId;
 		this._room_id = null;
 
-		Phaser.Particle.call(this, phaserGame, x, y, 'spies', spy_def.stand);
+		createSpriteWithColor( phaserGame, playerId, playerConfig, 'spies' );
+		
+		Phaser.Particle.call(this, phaserGame, x, y, playerId + '_', playerConfig.stand);
 		
 		// Associate specific image frames with animation sequences
-		this.animations.add('run_right', [spy_def.stand_right, spy_def.run_right], 8, true, false);
-		this.animations.add('run_left', [spy_def.stand_left, spy_def.run_left], 8, true, false);
+		this.animations.add('run_right', [playerConfig.stand_right, playerConfig.run_right], 8, true, false);
+		this.animations.add('run_left', [playerConfig.stand_left, playerConfig.run_left], 8, true, false);
 
 		this.gameControl = gameControl;
 

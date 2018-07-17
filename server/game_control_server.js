@@ -75,6 +75,10 @@ router.post('/player/choose', function(req, res, next) {
 			continue;
 		}
 
+		// if they haven't chosen a color yet...
+		if ( players[p].player_def == undefined )
+			continue;
+		
 		// compare colors so we don't have 2 players with the same color
 		if ( players[p].player_def.color == clientData.playerConfig.color )
 		{

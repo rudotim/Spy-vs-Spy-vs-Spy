@@ -188,9 +188,9 @@ var GameLogic = function()
 		_gameOptions.show( );		
 	}
 	
-	function createSpy( id, posX, posY, spy_def )
+	function createSpy( id, posX, posY, playerConfig )
 	{
-		return new Spy(phaserGame, id, posX, posY, spy_def, _gameControl);				
+		return new Spy(phaserGame, id, posX, posY, playerConfig, _gameControl);				
 	}
 
 	
