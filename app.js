@@ -5,8 +5,6 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 
-var game_control = require('./server/game_control_server');
-
 var app = express();
 
 // uncomment after placing your favicon in /public
@@ -15,12 +13,13 @@ app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
-
-//app.use('/', routes);
+app.set('router', express.Router() );
 app.use(express.static(path.join(__dirname, '/public')));
-app.use('/', game_control);
 
+//console.log('app..getio> %o', app.get('io'));
 
+//var game_control = require('./server/server_receiver')(app.get('io'), express.Router() );
+//app.use('/', game_control);
 
 
 module.exports = app;

@@ -22,23 +22,23 @@ router.post('/room/join', function(req, res, next)
 		res.status(500).send({ error: 'You are already in a room, dummy!' });	
 });
 
-var default_spy_def = {
-		stand : 'wspy_stand',
-		stand_right : 'wspy_rstand',
-		run_right : 'wspy_rrun',
-		stand_left : 'wspy_lstand',
-		run_left : 'wspy_lrun'
-};
+//var default_spy_def = {
+//		stand : 'wspy_stand',
+//		stand_right : 'wspy_rstand',
+//		run_right : 'wspy_rrun',
+//		stand_left : 'wspy_lstand',
+//		run_left : 'wspy_lrun'
+//};
 
-var green_spy_def = {
-		stand : 'gspy_stand',
-		stand_right : 'gspy_rstand',
-		run_right : 'gspy_rrun',
-		stand_left : 'gspy_lstand',
-		run_left : 'gspy_lrun'
-};
+//var green_spy_def = {
+//		stand : 'gspy_stand',
+//		stand_right : 'gspy_rstand',
+//		run_right : 'gspy_rrun',
+//		stand_left : 'gspy_lstand',
+//		run_left : 'gspy_lrun'
+//};
 
-var once = true;
+//var once = true;
 
 router.post('/player/choose', function(req, res, next) {
 	var clientData = req.body;

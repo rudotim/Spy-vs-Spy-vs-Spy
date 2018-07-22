@@ -4,6 +4,7 @@
  * Module dependencies.
  */
 
+
 var app = require('../app');
 var debug = require('debug')('caivscai:server');
 
@@ -22,6 +23,9 @@ var server = require('http').Server(app);
 var io = require('socket.io')(server);
 app.set('io', io);
 
+var game_control = require('../server/server_receiver')( io, app.get('router') );
+app.use('/', game_control);
+
 /**
  * Listen on provided port, on all network interfaces.
  */
@@ -29,6 +33,7 @@ app.set('io', io);
 server.listen(port);
 server.on('error', onError);
 server.on('listening', onListening);
+
 
 /*
 io.on('connection', function (socket) {
