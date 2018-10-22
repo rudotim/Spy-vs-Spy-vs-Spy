@@ -1,18 +1,19 @@
 
-//var Room = require('room.js');
 
 var GameLogic = function()
 {
 	var _gameOptions;
 
-	var ctrl =
-	{};
+	var ctrl = {};
 		
 	// holds local copy of game data
 	var _gameInstance = {};
 	
 	var _gameControl = {};
 	
+	// Game Play
+	// ------------------------------------------
+
 	// holds all Spies in game
 	var _all_spies = {			
 	};
@@ -36,10 +37,18 @@ var GameLogic = function()
 	var _roomData;
 		
 	var roomScene;
+	
+	// Phaser
+	// ------------------------------------------	
 	var phaserGame;
+	
+	// User Input
+	// ------------------------------------------
 	var buttonDown = false;
 	var joystick;
 
+	// Game UI
+	// ------------------------------------------
 	var BORDER_TOP = 157;
 	var BORDER_BOTTOM = 275;
 	var BORDER_LEFT = 18;
@@ -415,15 +424,13 @@ var GameLogic = function()
 		_gameControl = gameControl;
 	}
 	
-	ctrl.startPreGame = function()
+	ctrl.onStartPreGame = function()
 	{
 		// inflate game_div
 		$('#game_div').toggleClass('fullscreen');
 		
 		var gameWidth = window.innerWidth; // * window.devicePixelRatio;
 		var gameHeight = window.innerHeight; // * window.devicePixelRatio;
-		
-		
 		
 		phaserGame = new Phaser.Game(
 				gameWidth, gameHeight, 
@@ -452,25 +459,24 @@ var GameLogic = function()
 	{
 		console.log('onChoosePlayer');
 	
-		var spy = createSpy( player_id, 250, 200, player_config );
-		
 		//spy.setVisibility( false );
 		
 		// when it's us
 		if ( player_id == _player.id )
 		{
-			_my_spy = spy;
+			if ( _my_spy != undefined )
+				_my_spy.destroySprite();
+			
+			_my_spy = createSpy( player_id, 250, 200, player_config );
 		}
 		else
+		// when it's someone else
 		{
-			// when it's someone else
-			_all_spies[ player_id ] = spy;
-		}		
-		
-		// TODO:  Call gameOptions with index of chosen player
-		// going to need to pass index back to onChoosePlayer
-		// also the name of the chosen player
-		
+			if ( _all_spies[ player_id ] != undefined )
+				_all_spies[ player_id ].destroySprite();
+
+			_all_spies[ player_id ] = createSpy( player_id, 200, 125, player_config );
+		}	
 	}
 	
 	ctrl.playerIsReady = function()

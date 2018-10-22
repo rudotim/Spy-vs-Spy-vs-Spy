@@ -5,14 +5,21 @@
 
 var GameControl = function( gameLogic )
 {
-	var ctrl = {};
+	var clientRequest = {};
 	
-	var socket; 
+	// communication socket to server
+	var _socket; 
+	
+	// local copy of game data
 	var _gameInstance = null;
 		
+	// encapsulated methods to perform common game logic
 	var _gameLogic = gameLogic;
 
-	_updateRoomList = function( serverPlayers )
+	/**
+	 * Update UI list of room members
+	 */
+	_updateRoomListUI = function( serverPlayers )
 	{
 		$('#player_list ul').empty();
 		
@@ -28,20 +35,21 @@ var GameControl = function( gameLogic )
 		}
 	};
 	
-	_updatePlayerAttr = function( serverPlayers )
+	_updatePlayerOnServerAttr = function( serverPlayers )
 	{
 		// TODO: Implement this?  Really it's just for name changes...
 	};
 	
-	_joinRoom = function( gameInstance, player )
+	_onJoinRoomSuccess = function( gameInstance, player )
 	{
 		var urlid = '/' + gameInstance.name;
 
 		console.log('client joining ' + urlid + '/[' + gameInstance.datachannel + ']');
 				
-		socket = io( urlid );
+		// initialize socket to server and establish communication callback channels
+		_socket = io( urlid );
 		
-		socket.on('connection', function(msg)
+		_socket.on('connection', function(msg)
 		{
 			console.log('CONNECTED TO SERVER');
 		});
@@ -49,85 +57,72 @@ var GameControl = function( gameLogic )
 		// -------------------------------------------------------
 		// Lobby Config
 		// -------------------------------------------------------
+
+		// -- Lobby callbacks from server -----------------------------------------------------
 		
-		socket.on('on_player_joined', function(serverPlayers, newPlayer)
+		_socket.on('on_player_joined', function(serverPlayers, newPlayer)
 		{
-			console.log('player_joined');
-			console.log('player ' + newPlayer.name + ' has joined the room');
-			_updateRoomList( serverPlayers );
+			console.log('player joined room> ', newPlayer.name );
+			_updateRoomListUI( serverPlayers );
 		});
 
-		socket.on('on_player_left', function(serverPlayers, playerThatLeft)
+		_socket.on('on_player_left', function(serverPlayers, playerThatLeft)
 		{
-			console.log('player_left');
-			console.log('player ' + playerThatLeft.name + ' has left the room');
-			_updateRoomList( serverPlayers );
+			console.log('player left room> ', playerThatLeft.name );
+			_updateRoomListUI( serverPlayers );
 		});
 
-		socket.on('on_player_attr_updated', function( serverPlayers, updatedPlayer )
+		_socket.on('on_player_attr_updated', function( serverPlayers, updatedPlayer )
 		{
 			console.log('on_player_attr_updated ' + serverPlayers);
-			
-			// don't update unless it's our object
-			/*
-			if ( player.stub == true 
-				|| player.player_id == updatedPlayer.player_id )
-			{
-				player = updatedPlayer;
-				console.log('hey, it\'s our player[' + player.name + ' / ' + player.player_id + '] and are we leader? ' + player.isLeader );
-			}
-			*/
-			
+						
 			var p = _gameLogic.getPlayer();
 			if ( p.player_id == updatedPlayer.player_id )
 				_gameLogic.setPlayer( p );
 			
-			//if ( _player.player_id == updatedPlayer.player_id )
-			//	_player = updatedPlayer;
-			
 			// redraw room members
-			_updateRoomList( serverPlayers );
+			_updateRoomListUI( serverPlayers );
 			
 			// update any player data
-			_updatePlayerAttr( serverPlayers );
+			_updatePlayerOnServerAttr( serverPlayers );
 		});
 		
 		// -------------------------------------------------------
 		// Game Play Config
 		// -------------------------------------------------------
 
-		socket.on('on_chosen_player', function( player_id, player_config )
+		_socket.on('on_chosen_player', function( player_id, player_config )
 		{
 			console.log('someone has chosen a player> %o %o', player_id, player_config );
 			
 			_gameLogic.onChoosePlayer( player_id, player_config );
 		});
 		
-		socket.on( 'on_start_pre_game', function()
+		_socket.on( 'on_start_pre_game', function()
 		{
 			console.log('SERVER IS STARTING PRE GAME!');
-			_gameLogic.startPreGame();
+			_gameLogic.onStartPreGame();
 		});
 
-		socket.on( 'on_player_is_ready', function( player_id )
+		_socket.on( 'on_player_is_ready', function( player_id )
 		{
 			console.log('on_player_ready');
 			_gameLogic.onPlayerReady( player_id );
 		});
 		
-		socket.on( 'on_load_map', function( gameInstance )
+		_socket.on( 'on_load_map', function( gameInstance )
 		{
 			console.log('on_load_map');
 			_gameLogic.onLoadMapData( gameInstance );
 		});
 		
-		socket.on( 'on_game_loading', function( game_loading_pct )
+		_socket.on( 'on_game_loading', function( game_loading_pct )
 		{
 			console.log('on_game_loading');
 			_gameLogic.onGameLoading( game_loading_pct );
 		});
 
-		socket.on( 'on_start_game', function( gameInstance )
+		_socket.on( 'on_start_game', function( gameInstance )
 		{
 			console.log('SERVER IS STARTING OFFICIAL GAME!');
 			_gameLogic.onStartGame( gameInstance, _gameLogic.getPlayer() );
@@ -137,26 +132,24 @@ var GameControl = function( gameLogic )
 		// Game Play
 		// -------------------------------------------------------
 
-		socket.on( 'on_chat', function(msg)
+		_socket.on( 'on_chat', function(msg)
 		{
 			console.log('got chat data[' + msg + ']');
 		});
 				
-		socket.on( 'on_data', function( spyPos )
+		_socket.on( 'on_data', function( spyPos )
 		{
 			// update spy with data
 			_gameLogic.updatePlayerPos( spyPos );			
 		});
 
-		socket.on( 'on_player_entered_room', function( player, room )
+		_socket.on( 'on_player_entered_room', function( player, room )
 		{
-			//console.log('on_player_entered_room');
 			_gameLogic.onPlayerEnteredRoom( player, room );
 		});
 
-		socket.on( 'on_player_left_room', function( player, room )
+		_socket.on( 'on_player_left_room', function( player, room )
 		{
-			//console.log('on_player_left_room');
 			_gameLogic.onPlayerLeftRoom( player, room );
 		});
 
@@ -167,17 +160,20 @@ var GameControl = function( gameLogic )
 		
 		_gameInstance = gameInstance;
 				
-		socket.emit( 'player_joined', player );	
-		_updateRoomList( gameInstance.players );
+		// tell server we have joined the room
+		_socket.emit( 'player_joined', player );
+		
+		// redraw UI with our name in the list
+		_updateRoomListUI( gameInstance.players );
 
 		console.log('ok, you\'ve joined room [' + gameInstance.game_id + ']');
 	};
 
-	_updatePlayer = function()
+	_updatePlayerOnServer = function()
 	{
 		// don't send anything unless we've connected
 		if ( _gameInstance != null )
-			socket.emit('player_attr_updated', _gameLogic.getPlayer() );
+			_socket.emit('player_attr_updated', _gameLogic.getPlayer() );
 	};
 	
 	
@@ -185,30 +181,26 @@ var GameControl = function( gameLogic )
 	// -------------------------------------------------------
 	// Lobby Config
 	// -------------------------------------------------------
-	
-	
-	
-	_setPlayerName = function( newName )
+
+	var _setPlayerName = function( newPlayerName )
 	{
-		_gameLogic.getPlayer().name = newName;
+		console.log('setting player name: ' + newPlayerName );
+		
+		_gameLogic.getPlayer().name = newPlayerName;
 		
 		// fire player name update
-		_updatePlayer();
+		_updatePlayerOnServer();
 	};
-
+	
 	/**
 	 * Change my player name in the game room lobby
 	 */
-	ctrl.setPlayerName = function( playerName )
-	{
-		console.log('setting player name: ' + playerName );
-		_setPlayerName( playerName );
-	};
+	clientRequest.setPlayerName = _setPlayerName;
 		
 	/**
 	 * List any on-going games which I can join
 	 */
-	ctrl.listGames = function()
+	clientRequest.listGames = function()
 	{
 		console.log('retrieving list of games from server');
 		
@@ -218,7 +210,7 @@ var GameControl = function( gameLogic )
 	/**
 	 * Join or create a room with name
 	 */
-	ctrl.joinRoom = function( roomName )
+	clientRequest.joinRoom = function( roomName )
 	{
 		console.log('attempting to join game [' + roomName + ']');
 
@@ -238,7 +230,7 @@ var GameControl = function( gameLogic )
 		    		if ( data != null )
 		    		{
 		    			// ok so now a game was created on the server for us
-		    			_joinRoom( data.gameInstance, data.player );
+		    			_onJoinRoomSuccess( data.gameInstance, data.player );
 		    		}
 		    		else
 		    		{
@@ -255,7 +247,7 @@ var GameControl = function( gameLogic )
 	/**
 	 * Player has left the game room lobby
 	 */
-	ctrl.leaveRoom = function( gameName )
+	clientRequest.leaveRoom = function( gameName )
 	{
 		console.log('leaving game room [' + gameName + ']');		
 	};
@@ -269,32 +261,32 @@ var GameControl = function( gameLogic )
 	/**
 	 * Pop-up the options (player selection) modal window
 	 */
-	ctrl.showGameOptions = function()
+	clientRequest.showGameOptions = function()
 	{
 		_gameLogic.showGameOptions();
 	};
 	
-	ctrl.triggerPlayerIsReady = function( player )
+	clientRequest.triggerPlayerIsReady = function( player )
 	{
-		socket.emit( 'player_is_ready', player );	
+		_socket.emit( 'player_is_ready', player );	
 	};
 
-	ctrl.triggerPlayerLoadedMap = function( player )
+	clientRequest.triggerPlayerLoadedMap = function( player )
 	{
-		socket.emit( 'player_has_loaded_map', player );	
+		_socket.emit( 'player_has_loaded_map', player );	
 	};
 
-	ctrl.triggerStartPreGame = function()
+	clientRequest.triggerStartPreGame = function()
 	{
-		socket.emit( 'start_pre_game', null );	
+		_socket.emit( 'start_pre_game', null );	
 	};
 
-	ctrl.triggerStartGame = function()
+	clientRequest.triggerStartGame = function()
 	{
-		socket.emit( 'start_game', _gameInstance.game_id );	
+		_socket.emit( 'start_game', _gameInstance.game_id );	
 	};
 	
-	ctrl.choosePlayer = function( player, playerIndex, playerConfig, playerChosenCallback )
+	clientRequest.choosePlayer = function( player, playerIndex, playerConfig, playerChosenCallback )
 	{
 		var clientData = {
 				player : player,
@@ -329,38 +321,38 @@ var GameControl = function( gameLogic )
 
 	
 	
-	ctrl.sendPlayerEnteredRoom = function( player, teleports_to )
+	clientRequest.sendPlayerEnteredRoom = function( player, teleports_to )
 	{
-		socket.emit('player_entered_room', player, teleports_to );
+		_socket.emit('player_entered_room', player, teleports_to );
 	};
 	
-	ctrl.sendPlayerLeftRoom = function( player, roomId )
+	clientRequest.sendPlayerLeftRoom = function( player, roomId )
 	{
-		socket.emit('player_left_room', player, roomId );
+		_socket.emit('player_left_room', player, roomId );
 	};
 	
-	ctrl.sendChat = function( msg )
+	clientRequest.sendChat = function( msg )
 	{
-		socket.emit('on_chat', msg);
+		_socket.emit('on_chat', msg);
 	};
 	
-	ctrl.sendPosUpdate = function( spy )
+	clientRequest.sendPosUpdate = function( spy )
 	{
 		if ( spy == undefined )
 			return;
 		
-		socket.emit('on_data', spy.getPos() );
+		_socket.emit('on_data', spy.getPos() );
 	};
 
-	ctrl.sendStopUpdate = function( spy )
+	clientRequest.sendStopUpdate = function( spy )
 	{
 		var pos = spy.getPos();
 		pos.extra = 'stop';
 
-		socket.emit( 'on_data', pos );
+		_socket.emit( 'on_data', pos );
 	};
 		
-	return ctrl;
+	return clientRequest;
 };
 
 var gameLogic = new GameLogic();

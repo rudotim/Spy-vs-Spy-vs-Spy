@@ -13,23 +13,6 @@ var box_height = 8;
 /** end debug stuff **/
 
 
-var white_spy_def = {
-		stand : 'wspy_stand',
-		stand_right : 'wspy_rstand',
-		run_right : 'wspy_rrun',
-		stand_left : 'wspy_lstand',
-		run_left : 'wspy_lrun'
-};
-
-var green_spy_def = {
-		stand : 'gspy_stand',
-		stand_right : 'gspy_rstand',
-		run_right : 'gspy_rrun',
-		stand_left : 'gspy_lstand',
-		run_left : 'gspy_lrun'
-};
-
-
 function createSpriteWithColor( phaserGame, playerId, playerConfig, modelAtlasName ) 
 {		
 	var newAtlasName = playerId + "_";
@@ -98,6 +81,13 @@ var Spy = (function()
 		console.log('spy()');
 	};
 
+	function updatePlayerConfig( newPlayerConfig )
+	{
+		createSpriteWithColor( phaserGame, playerId, playerConfig, 'spies' );
+
+	}
+	
+	
 	function drawCollisionBox( phaserGame, x, y )
 	{
 		var bmd = phaserGame.add.bitmapData(spy_width, 8);
@@ -122,6 +112,14 @@ var Spy = (function()
 	Spy.prototype = Object.create(Phaser.Particle.prototype);
 	Spy.prototype.constructor = Spy;
 		
+	Spy.prototype.destroySprite = function()
+	{
+		console.log('destroying...');
+		
+		this.box.destroy();
+		this.destroy();
+	}
+	
 	Spy.prototype.setVisibility = function( visible )
 	{
 		this.visible = visible;
