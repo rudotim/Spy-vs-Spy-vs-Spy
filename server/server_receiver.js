@@ -13,6 +13,11 @@ module.exports = function (io, router)
 	
 	var serverLogic = require('./server_logic.js')( io );
 
+	/**
+	 * Called when a player has joined a room.  It doesn't matter if that player is the
+	 * first person to join or the last.  If they are the first, a new game will be created
+	 * with that person as the leader.
+	 */
 	router.post('/room/join', function(req, res, next)
 	{
 		var gameName = req.body.gameName;
@@ -30,6 +35,9 @@ module.exports = function (io, router)
 		}
 	});
 	
+	/**
+	 * Called when a player has selected a player configuration during the pre-game mode.
+	 */
 	router.post('/player/choose', function(req, res, next) {
 		var clientData = req.body;
 	
@@ -97,7 +105,7 @@ module.exports = function (io, router)
 			
 			socket.on('player_has_loaded_map', function( player )
 			{
-				serverLogic.playerHasLoadedMap( player, socket );
+				serverLogic.playerHasFinishedLoadingResources( player, socket );
 			});
 	
 			socket.on('start_pre_game', function()
@@ -145,36 +153,3 @@ module.exports = function (io, router)
 
 
 
-
-
-///* GET users listing. */
-//router.get('/list_games', function(req, res, next)
-//{
-//	res.json(getStubGameList());
-//});
-//
-//function getStubGameList()
-//{
-//	var gameList =
-//
-//	[
-//	{
-//		name : 'Tim\'s Game',
-//		max_players : 5,
-//		max_duration : 1,
-//		map : 'lobby'
-//	},
-//	{
-//		name : 'Satan\'s Broom Closet',
-//		max_players : 3,
-//		max_duration : 2,
-//		map : 'closet'
-//	} ];
-//
-//	return gameList;
-//}
-//
-//
-//
-//
-//module.exports = router;

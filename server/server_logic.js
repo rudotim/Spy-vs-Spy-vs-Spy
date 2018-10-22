@@ -11,14 +11,22 @@ module.exports = function (io)
 	{
 	};
 
+	/**
+	 * 
+	 */
 	ServerLogic.joinRoom = function( gameName, player, configureSocketSubscriptions )
 	{
+		// TODO: verify if this 'isLeader' crap is a bad way to know whether or not to create a room
 		if ( typeof player.isLeader == 'undefined' )
 			return _createRoom(gameName, player, configureSocketSubscriptions );
 		
 		throw 500;
 	}
 
+	/**
+	 * Determine if there are conflicts between the configuration one player 
+	 * has selected vs another player's.
+	 */
 	function _playersAreTooSimilar( playerConfigJsonA, playerConfigJsonB )
 	{
 		return false;
@@ -63,6 +71,10 @@ module.exports = function (io)
 	}
 
 	
+	/**
+	 * Create a new room with name and set player as the leader.  Also configure
+	 * first time socket subscriptions.
+	 */
 	function _createRoom( gameName, player, configureSocketSubscriptions )
 	{	
 		// check if it already exists
@@ -120,7 +132,7 @@ module.exports = function (io)
 		// find game associated with player
 		var gameInstance = activeGames.findGameByPlayerId( player.id );
 		
-		//gameInstance.players.removePlayerById( player.id );
+		// TODO: change player attribute
 		
 		console.log('server[player_attr_updated]> got data : ' + player.name);
 		socket.broadcast.to(gameInstance.name).emit('on_player_attr_updated', gameInstance.players, player);
@@ -137,16 +149,18 @@ module.exports = function (io)
 		// keep track of players loaded to provide feedback to waiting players as to who is the slow poke
 		if ( ++gameInstance.players_loaded >= gameInstance.players.length )
 		{
+			// once everyone is ready, begin loading the map data for this game			
 			var levelName = "lobby";
 			
+			// load it on the server and then tell each client to load it for themselves.
+			// everyone will need to keep track of the rooms and players
 			gameInstance.setMapData( _loadMapData( levelName ) );
 	
-			//chat.emit('on_load_map', gameInstance);					
 			io.of( '/' + gameInstance.name ).emit('on_load_map', gameInstance );
 		}			
 	}
 	
-	ServerLogic.playerHasLoadedMap = function( player, socket )
+	ServerLogic.playerHasFinishedLoadingResources = function( player, socket )
 	{
 		var gameInstance = activeGames.findGameByPlayerId( player.id );
 		
@@ -154,11 +168,11 @@ module.exports = function (io)
 		if ( gameInstance.verifyMapsLoaded(player) === true )
 		{
 			console.log('setting starting locations...');
+			
 			// this will call 'on_player_entered_room'
 			_setStartingLocations( gameInstance );
 			
 			// now start it!
-			//chat.emit('on_start_game', gameInstance );
 			io.of( '/' + gameInstance.name ).emit('on_start_game', gameInstance );
 		}
 	}
@@ -166,12 +180,9 @@ module.exports = function (io)
 	
 	function _setStartingLocations( gameInstance )
 	{
-		var room;
-		var data;  
 		var p = gameInstance.players.length;
 		while ( p-- )
 		{
-			console.log('playerIter> %o', gameInstance.players[p] );
 			_setStartingLocationForPlayer( gameInstance, gameInstance.players[p] );		
 		}
 	}
@@ -181,11 +192,12 @@ module.exports = function (io)
 		// find game associated with player
 		var gameInstance = activeGames.findGameByPlayerId( player.id );
 	
-		console.log( 'setting stating location for player ', player.id );
+		console.log( 'setting stating location for player ', player.id, ' ', player.name );
 		var room = gameInstance.getStartingLocation( player.id );
 		
-		// starting location sends us to a room and the physical center
-		var teleports_to = {	
+		// starting location sends us to a room and the physical center		
+		var teleports_to = 
+		{	
 		  	"room" : room.id,
 		  	"pos" : { 
 		  		"x" : 200, 
@@ -193,16 +205,16 @@ module.exports = function (io)
 		  	}
 		}
 			  	
-		//chat.emit('on_player_entered_room', player, teleports_to);	
 		io.of( '/' + gameInstance.name ).emit('on_player_entered_room', player, teleports_to);	
 	}
-	
+
+	/**
+	 * Load map data on server to be in sync with the clients which are also loading the map data.
+	 */
 	function _loadMapData( levelName )
 	{
-		// load map data on server
 		return JSON.parse(fs.readFileSync('public/data/level_' + levelName + '.json', 'utf8'));
 	}
-	
 	
 	return ServerLogic;
 }
