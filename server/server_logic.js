@@ -1,13 +1,13 @@
 //var express = require('express');
 //var router = express.Router();
-var fs = require('fs');
+const fs = require('fs');
 
-var activeGamesClass = require('./objects/activegames.js');
-var activeGames = new activeGamesClass();
+const activeGamesClass = require('./objects/activegames.js');
+let activeGames = new activeGamesClass();
 
-module.exports = function (io) 
+module.exports = function (io)
 {
-	var ServerLogic = function() 
+	const ServerLogic = function()
 	{
 	};
 
@@ -17,50 +17,42 @@ module.exports = function (io)
 	ServerLogic.joinRoom = function( gameName, player, configureSocketSubscriptions )
 	{
 		// TODO: verify if this 'isLeader' crap is a bad way to know whether or not to create a room
-		if ( typeof player.isLeader == 'undefined' )
+		if ( typeof player.isLeader === 'undefined' )
 			return _createRoom(gameName, player, configureSocketSubscriptions );
 		
 		throw 500;
-	}
+	};
 
-	/**
-	 * Determine if there are conflicts between the configuration one player 
-	 * has selected vs another player's.
-	 */
-	function _playersAreTooSimilar( playerConfigJsonA, playerConfigJsonB )
-	{
-		return false;
-	}
 	
 	ServerLogic.choosePlayer = function( gameId, playerId, playerConfigJson )
 	{
-		var current_player;
+		const current_player = activeGames.findPlayerByGameId( gameId, playerId );
 
-		// find the other players in the game
-		var players = activeGames.findPlayersByGameId( gameId );
-		var p = players.length;
-		while ( p-- )
-		{
-			// skip checking the player in question
-			if ( players[p].id == playerId )
-			{
-				current_player = players[p];
-				continue;
-			}
-
-			// if they haven't chosen a color yet...
-			if ( players[p].player_def == undefined )
-				continue;
-			
-			// compare colors so we don't have 2 players with the same color
-			if ( _playersAreTooSimilar( players[p].player_def, playerConfigJson ))
-				return false;
-		}
+		// // find the other players in the game
+        // let players = activeGames.findPlayersByGameId( gameId );
+        // let p = players.length;
+		// while ( p-- )
+		// {
+		// 	// skip checking the player in question
+		// 	if ( players[p].id === playerId )
+		// 	{
+		// 		current_player = players[p];
+		// 		continue;
+		// 	}
+        //
+		// 	// if they haven't chosen a color yet...
+		// 	if ( players[p].player_def === undefined )
+		// 		continue;
+		//
+		// 	// compare colors so we don't have 2 players with the same color
+		// 	if ( _playersAreTooSimilar( players[p].player_def, playerConfigJson ))
+		// 		return false;
+		// }
 		
 		// set server player property
 		current_player.player_def = playerConfigJson;
 		
-		var game = activeGames.findGameById( gameId );
+		let game = activeGames.findGameById( gameId );
 		
 		console.log('game name> %o', game.name);
 		
@@ -78,8 +70,8 @@ module.exports = function (io)
 	function _createRoom( gameName, player, configureSocketSubscriptions )
 	{	
 		// check if it already exists
-		var gameInstance = activeGames.findGameByName( gameName );
-		var isLeader = (gameInstance == null);
+		let gameInstance = activeGames.findGameByName( gameName );
+        const isLeader = (gameInstance == null);
 		
 		// if it doesn't, create it
 		if ( gameInstance == null )
@@ -92,7 +84,7 @@ module.exports = function (io)
 		}
 		
 		// create and add ourself
-		var newPlayer = gameInstance.createPlayer( player.name, isLeader );
+        const newPlayer = gameInstance.createPlayer( player.name, isLeader );
 			
 		// return data to ourself
 		return {
