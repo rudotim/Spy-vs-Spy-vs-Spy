@@ -12,7 +12,10 @@ module.exports = function (io)
 	};
 
 	/**
-	 * 
+	 * Join a room.  This will create the room and add you to it if it did not exist.
+	 * If the room did not exist, you will be marked as the leader of the room.
+	 * That means you can perform admin actions like starting the game,
+	 * removing users and changing admin properties.
 	 */
 	ServerLogic.joinRoom = function( gameName, player, configureSocketSubscriptions )
 	{

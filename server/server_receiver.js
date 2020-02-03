@@ -33,6 +33,7 @@ module.exports = function (io, router)
 	
 	/**
 	 * Called when a player has selected a player configuration during the pre-game mode.
+	 * Right now, a player configuration consists of just a name.
 	 */
 	router.post('/player/choose', function(req, res, next) {
 		var clientData = req.body;
