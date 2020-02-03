@@ -1,9 +1,5 @@
 var express = require('express');
 var router = express.Router();
-//var fs = require('fs');
-
-//var serverLogicClass = require('./server_logic.js');
-//var serverLogic = new serverLogicClass();
 
 module.exports = function (io, router) 
 {
