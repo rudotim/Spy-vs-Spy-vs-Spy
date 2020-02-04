@@ -3,7 +3,7 @@
  */
 var Player = require('./player.js');
 
-var GameInstance = function()
+var Game = function()
 {
 	this.game_id = guid();
 	
@@ -23,19 +23,19 @@ var GameInstance = function()
 	this.once = false;
 };
 
-GameInstance.prototype.constructor = GameInstance;
+Game.prototype.constructor = Game;
 
-GameInstance.prototype.setGameId = function( game_id )
+Game.prototype.setGameId = function(game_id )
 {
 	this.game_id = game_id;
 };
 
-GameInstance.prototype.setName = function( name )
+Game.prototype.setName = function(name )
 {
 	this.name = name;
 };
 
-GameInstance.prototype.getStartingLocation = function( player_id )
+Game.prototype.getStartingLocation = function(player_id )
 {
 	console.log('getting starting location for player id> %o', player_id);
 	
@@ -54,13 +54,13 @@ GameInstance.prototype.getStartingLocation = function( player_id )
 	return room;
 }
 
-GameInstance.prototype.setMapData = function( jsonMapData )
+Game.prototype.setMapData = function(jsonMapData )
 {
 	console.log('map data has been set');
 	this.jsonMapData = jsonMapData;
 }
 
-GameInstance.prototype.setOptions = function( newOptions )
+Game.prototype.setOptions = function(newOptions )
 {
 	this.options = newOptions;
 }
@@ -69,7 +69,7 @@ GameInstance.prototype.setOptions = function( newOptions )
 // Players
 //-----------------------------------------------------
 
-GameInstance.prototype.createPlayer = function( player_name, isLeader )
+Game.prototype.createPlayer = function(player_name, isLeader )
 {
 	var player = new Player();
 	
@@ -85,7 +85,7 @@ GameInstance.prototype.createPlayer = function( player_name, isLeader )
 	return player;
 };
 
-GameInstance.prototype.verifyMapsLoaded = function( player )
+Game.prototype.verifyMapsLoaded = function(player )
 {
 	this.players_loaded_map[player.id] = player.id;
 	
@@ -96,7 +96,7 @@ GameInstance.prototype.verifyMapsLoaded = function( player )
 	return ( keys.length == this.players.length );
 }
 
-GameInstance.prototype.getPlayerById = function( id )
+Game.prototype.getPlayerById = function(id )
 {
 	var p = this.players.length;
 	while ( p-- )
@@ -108,7 +108,7 @@ GameInstance.prototype.getPlayerById = function( id )
 	return -1;
 };
 
-GameInstance.prototype.getAllPlayerNames = function()
+Game.prototype.getAllPlayerNames = function()
 {
 	var names = [];
 	
@@ -119,7 +119,7 @@ GameInstance.prototype.getAllPlayerNames = function()
 	return names;
 };
 
-GameInstance.prototype.removePlayerById = function( id )
+Game.prototype.removePlayerById = function(id )
 {
 	
 	/*
@@ -151,8 +151,8 @@ function guid() {
 
 if ( ! (typeof module === 'undefined') )
 {
-	console.log('GameInstance exported');
-	module.exports = GameInstance;
+	console.log('Game exported');
+	module.exports = Game;
 }
 else
 	console.log('Not Exported');

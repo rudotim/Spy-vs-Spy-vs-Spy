@@ -2,8 +2,8 @@
 //var router = express.Router();
 const fs = require('fs');
 
-const activeGamesClass = require('./objects/activegames.js');
-let activeGames = new activeGamesClass();
+const GameManager = require('./objects/game_manager.js');
+let gameManager = new GameManager();
 
 module.exports = function (io)
 {
@@ -29,7 +29,7 @@ module.exports = function (io)
 	
 	ServerLogic.choosePlayer = function( gameId, playerId, playerConfigJson )
 	{
-		const current_player = activeGames.findPlayerByGameId( gameId, playerId );
+		const current_player = gameManager.findPlayerByGameId( gameId, playerId );
 
 		// // find the other players in the game
         // let players = activeGames.findPlayersByGameId( gameId );
@@ -55,7 +55,7 @@ module.exports = function (io)
 		// set server player property
 		current_player.player_def = playerConfigJson;
 		
-		let game = activeGames.findGameById( gameId );
+		let game = gameManager.findGameById( gameId );
 		
 		console.log('game name> %o', game.name);
 		
@@ -73,25 +73,25 @@ module.exports = function (io)
 	function _createRoom( gameName, player, configureSocketSubscriptions )
 	{	
 		// check if it already exists
-		let gameInstance = activeGames.findGameByName( gameName );
-        const isLeader = (gameInstance == null);
+		let game = gameManager.findGameByName( gameName );
+        const isLeader = (game == null);
 		
 		// if it doesn't, create it
-		if ( gameInstance == null )
+		if ( game == null )
 		{
 			// add game to list of known active games
-			gameInstance = activeGames.createGame( gameName );
+			game = gameManager.createGame( gameName );
 					
 			// set up socket listeners for client actions
-			configureSocketSubscriptions( gameInstance );
+			configureSocketSubscriptions( game );
 		}
 		
 		// create and add ourself
-        const newPlayer = gameInstance.createPlayer( player.name, isLeader );
+        const newPlayer = game.createPlayer( player.name, isLeader );
 			
 		// return data to ourself
 		return {
-			"gameInstance"	: gameInstance,
+			"game"	: game,
 			"player" 		: newPlayer
 		};
 	}
@@ -102,10 +102,10 @@ module.exports = function (io)
 		console.log('playerHasJoined> %o', player );
 	
 		// find game associated with player
-		var gameInstance = activeGames.findGameByPlayerId( player.id );
-		var serverPlayers = gameInstance.players;
+		let game = gameManager.findGameByPlayerId( player.id );
+		var serverPlayers = game.players;
 		
-		socket.broadcast.to(gameInstance.name).emit('on_player_joined', serverPlayers, player);
+		socket.broadcast.to(game.name).emit('on_player_joined', serverPlayers, player);
 	}
 	
 	ServerLogic.playerHasLeft = function( player, socket )
@@ -113,11 +113,11 @@ module.exports = function (io)
 		console.log('playerHasLeft> %o', player );
 	
 		// find game associated with player
-		var gameInstance = activeGames.findGameByPlayerId( player.id );
+		let game = gameManager.findGameByPlayerId( player.id );
 		
-		gameInstance.removePlayerById( player.id );
+		game.removePlayerById( player.id );
 		
-		socket.broadcast.to(gameInstance.name).emit('on_player_left', gameInstance.players, player);
+		socket.broadcast.to(game.name).emit('on_player_left', game.players, player);
 	}
 	
 	ServerLogic.playerAttributeUpdated = function( player, socket )
@@ -125,70 +125,70 @@ module.exports = function (io)
 		console.log('playerAttributeUpdated> %o', player );
 		
 		// find game associated with player
-		var gameInstance = activeGames.findGameByPlayerId( player.id );
+		let game = gameManager.findGameByPlayerId( player.id );
 		
 		// TODO: change player attribute
 		
 		console.log('server[player_attr_updated]> got data : ' + player.name);
-		socket.broadcast.to(gameInstance.name).emit('on_player_attr_updated', gameInstance.players, player);
+		socket.broadcast.to(game.name).emit('on_player_attr_updated', game.players, player);
 	}
 	
 	ServerLogic.playerIsReady = function( player, socket )
 	{
-		var gameInstance = activeGames.findGameByPlayerId( player.id );
+		let game = gameManager.findGameByPlayerId( player.id );
 	
-		socket.broadcast.to(gameInstance.name).emit('on_player_is_ready', player);
+		socket.broadcast.to(game.name).emit('on_player_is_ready', player);
 	
 		// TODO: add something to remember who clicked start
 		
 		// keep track of players loaded to provide feedback to waiting players as to who is the slow poke
-		if ( ++gameInstance.players_loaded >= gameInstance.players.length )
+		if ( ++game.players_loaded >= game.players.length )
 		{
 			// once everyone is ready, begin loading the map data for this game			
 			var levelName = "lobby";
 			
 			// load it on the server and then tell each client to load it for themselves.
 			// everyone will need to keep track of the rooms and players
-			gameInstance.setMapData( _loadMapData( levelName ) );
+			game.setMapData( _loadMapData( levelName ) );
 	
-			io.of( '/' + gameInstance.name ).emit('on_load_map', gameInstance );
+			io.of( '/' + game.name ).emit('on_load_map', game );
 		}			
 	}
 	
 	ServerLogic.playerHasFinishedLoadingResources = function( player, socket )
 	{
-		var gameInstance = activeGames.findGameByPlayerId( player.id );
+		let game = gameManager.findGameByPlayerId( player.id );
 		
 		// keep track of players loaded to provide feedback to waiting players as to who is the slow poke
-		if ( gameInstance.verifyMapsLoaded(player) === true )
+		if ( game.verifyMapsLoaded(player) === true )
 		{
 			console.log('setting starting locations...');
 			
 			// this will call 'on_player_entered_room'
-			_setStartingLocations( gameInstance );
+			_setStartingLocations( game );
 			
 			// now start it!
-			io.of( '/' + gameInstance.name ).emit('on_start_game', gameInstance );
+			io.of( '/' + game.name ).emit('on_start_game', game );
 		}
 	}
 	
 	
-	function _setStartingLocations( gameInstance )
+	function _setStartingLocations( game )
 	{
-		var p = gameInstance.players.length;
+		var p = game.players.length;
 		while ( p-- )
 		{
-			_setStartingLocationForPlayer( gameInstance, gameInstance.players[p] );		
+			_setStartingLocationForPlayer( game, game.players[p] );		
 		}
 	}
 	
-	function _setStartingLocationForPlayer( gameInstance, player )
+	function _setStartingLocationForPlayer( game, player )
 	{
 		// find game associated with player
-		var gameInstance = activeGames.findGameByPlayerId( player.id );
+		let game = gameManager.findGameByPlayerId( player.id );
 	
 		console.log( 'setting stating location for player ', player.id, ' ', player.name );
-		var room = gameInstance.getStartingLocation( player.id );
+		var room = game.getStartingLocation( player.id );
 		
 		// starting location sends us to a room and the physical center		
 		var teleports_to = 
@@ -200,7 +200,7 @@ module.exports = function (io)
 		  	}
 		}
 			  	
-		io.of( '/' + gameInstance.name ).emit('on_player_entered_room', player, teleports_to);	
+		io.of( '/' + game.name ).emit('on_player_entered_room', player, teleports_to);	
 	}
 
 	/**

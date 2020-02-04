@@ -1,15 +1,15 @@
 
-var GameInstance = require('./gameinstance.js');
+let Game = require('./game.js');
 
-	var ActiveGames = function()
+	let GameManager = function()
 	{
 		this.keys = [];
 		this.available_games = {};
 	};
 
-	ActiveGames.prototype.constructor = ActiveGames;
+	GameManager.prototype.constructor = GameManager;
 
-	ActiveGames.prototype.addNewGame = function( newGame )
+	GameManager.prototype.addNewGame = function(newGame )
 	{
 		// store keys in array
 		this.keys.push( newGame.game_id );
@@ -18,9 +18,9 @@ var GameInstance = require('./gameinstance.js');
 		this.available_games[ newGame.game_id ] = newGame;
 	};
 		
-	ActiveGames.prototype.createGame = function( gameName )
+	GameManager.prototype.createGame = function(gameName )
 	{
-		var game = new GameInstance();
+        let game = new Game();
 		
 		game.setName( gameName );
 		
@@ -29,27 +29,27 @@ var GameInstance = require('./gameinstance.js');
 		return game;
 	};
 	
-	ActiveGames.prototype.findGameById = function( game_id )
+	GameManager.prototype.findGameById = function(game_id )
 	{
 		return this.available_games[ game_id ];
 	};
 	
-	ActiveGames.prototype.findGameByName = function( gameName )
+	GameManager.prototype.findGameByName = function(gameName )
 	{
-		for ( var k = 0; k < this.keys.length; k++ )
+		for ( let k = 0; k < this.keys.length; k++ )
 		{
-			if ( this.available_games[ this.keys[k] ].name == gameName )
+			if ( this.available_games[ this.keys[k] ].name === gameName )
 				return this.available_games[ this.keys[k] ];
 		}
 		
 		return null;
 	};
 
-	ActiveGames.prototype.findPlayerByGameId = function( game_id, player_id )
+	GameManager.prototype.findPlayerByGameId = function(game_id, player_id )
 	{
-		var game = this.findGameById( game_id );
+        let game = this.findGameById( game_id );
 
-		var pId = game.players.player_data[player_id];
+        let pId = game.players.player_data[player_id];
 				
 		return pId;
 		
@@ -66,15 +66,15 @@ var GameInstance = require('./gameinstance.js');
 		//return this.available_games[ game_id ];
 	};
 	
-	ActiveGames.prototype.findPlayersByGameId = function( game_id )
+	GameManager.prototype.findPlayersByGameId = function(game_id )
 	{
-		var game = this.findGameById( game_id );
+        let game = this.findGameById( game_id );
 		
 		return game.players;
 	};
 	
 	/*
-	ActiveGames.prototype.findAllPlayersExceptThisOneByGameId = function( game_id, player_id )
+	Game_manager.prototype.findAllPlayersExceptThisOneByGameId = function( game_id, player_id )
 	{
 		var game = findGameById( game_id );
 		
@@ -82,11 +82,11 @@ var GameInstance = require('./gameinstance.js');
 	};
 	*/	
 
-	ActiveGames.prototype.findGameByPlayerId = function( player_id )
+	GameManager.prototype.findGameByPlayerId = function(player_id )
 	{
-		var game, p;
+        let game, p;
 		
-		for ( var k = 0; k < this.keys.length; k++ )
+		for ( let k = 0; k < this.keys.length; k++ )
 		{
 			game = this.available_games[ this.keys[k] ];
 
@@ -108,11 +108,11 @@ var GameInstance = require('./gameinstance.js');
 		return null;
 	};
 	
-	ActiveGames.prototype.getAllGames = function()
+	GameManager.prototype.getAllGames = function()
 	{
-		var names = [];
+		let names = [];
 		
-		for ( var k = 0; k < this.keys.length; k++ )
+		for ( let k = 0; k < this.keys.length; k++ )
 			names.push( this.available_games[ this.keys[k] ].game_id );
 		
 		return names;
@@ -120,11 +120,11 @@ var GameInstance = require('./gameinstance.js');
 	
 	if ( ! (typeof module === 'undefined') )
 	{
-		console.log('ActiveGames exported');
-		module.exports = ActiveGames;
+		console.log('Game_manager exported');
+		module.exports = GameManager;
 	}
 
-//	return ActiveGames;
+//	return Game_manager;
 //}());
 
-//module.exports = ActiveGames;
+//module.exports = Game_manager;

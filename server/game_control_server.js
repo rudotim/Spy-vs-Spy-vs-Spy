@@ -2,7 +2,7 @@ var express = require('express');
 var router = express.Router();
 var fs = require('fs');
 
-var activeGamesClass = require('./objects/activegames.js');
+var activeGamesClass = require('./objects/game_manager.js');
 var activeGames = new activeGamesClass();
 
 router.post('/room/join', function(req, res, next)
