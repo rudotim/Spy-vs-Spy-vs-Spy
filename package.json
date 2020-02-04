@@ -14,7 +14,8 @@
     "morgan": "~1.6.1",
     "phaser": "^2.4.7",
     "serve-favicon": "~2.3.0",
-    "socket.io": "^1.4.5"
+    "socket.io": "^1.4.5",
+    "uuid": "^3.4.0"
   },
   "devDependencies": {
     "jasmine-core": "^2.5.2",

@@ -72,10 +72,14 @@ var GameControl = function( gameLogic )
 			_updateRoomListUI( serverPlayers );
 		});
 
+		/**
+		 * The backend told us someone updated some player property
+		 */
 		_socket.on('on_player_attr_updated', function( serverPlayers, updatedPlayer )
 		{
 			console.log('on_player_attr_updated ' + serverPlayers);
 						
+			// find the player
 			var p = _gameLogic.getPlayer();
 			if ( p.player_id == updatedPlayer.player_id )
 				_gameLogic.setPlayer( p );
@@ -169,6 +173,9 @@ var GameControl = function( gameLogic )
 		console.log('ok, you\'ve joined room [' + gameInstance.game_id + ']');
 	};
 
+	/**
+	 * Tell backend that one of our properties has updated.
+	 */
 	_updatePlayerOnServer = function()
 	{
 		// don't send anything unless we've connected
@@ -181,8 +188,11 @@ var GameControl = function( gameLogic )
 	// -------------------------------------------------------
 	// Lobby Config
 	// -------------------------------------------------------
-
-	var _setPlayerName = function( newPlayerName )
+	
+	/**
+	 * Change my player name in the game room lobby
+	 */
+	clientRequest.setPlayerName = function( newPlayerName )
 	{
 		console.log('setting player name: ' + newPlayerName );
 		
@@ -191,11 +201,6 @@ var GameControl = function( gameLogic )
 		// fire player name update
 		_updatePlayerOnServer();
 	};
-	
-	/**
-	 * Change my player name in the game room lobby
-	 */
-	clientRequest.setPlayerName = _setPlayerName;
 		
 	/**
 	 * List any on-going games which I can join

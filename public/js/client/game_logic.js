@@ -25,7 +25,7 @@ var GameLogic = function()
 	// current room:   _currentRoom
 	
 	// holds our local player 
-	var _player = {};
+	var _player;
 	
 	// our local Spy object
 	var _my_spy;
@@ -407,16 +407,15 @@ var GameLogic = function()
 	// -------------------------------------------------------
 	// Game Play Config
 	// -------------------------------------------------------
-		
-	
-	ctrl.setPlayer = function( player )
-	{
-		_player = player;
-	}
 	
 	ctrl.getPlayer = function()
 	{
 		return _player;
+	}
+
+	ctrl.setPlayerName = function( newName )
+	{
+		_player.name = newName;
 	}
 	
 	ctrl.setGameControl = function(gameControl)
