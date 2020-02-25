@@ -2,32 +2,42 @@
 
 <head>
 
-<meta name="viewport" content="user-scalable=no,  initial-scale=1,  maximum-scale=1,  width=device-width" />
+	<meta name="viewport" content="user-scalable=no,  initial-scale=1,  maximum-scale=1,  width=device-width" />
 
-<script src="/js/jquery-2.2.3.min.js"></script>
-<script src="/js/bootstrap.min.js"></script>
+	<script src="/js/jquery-2.2.3.min.js"></script>
+	<script src="/js/bootstrap.min.js"></script>
 
-<script src="/js/socket.io-1.4.5.js"></script>
-<script src="/js/phaser.2.7.0_ce.min.js"></script>
+	<script src="/js/socket.io-1.4.5.js"></script>
+	<script src="/js/phaser.2.7.0_ce.min.js"></script>
 
-<script src="/js/client/modal.js"></script>
-<!--  
-<script src="/js/phaser.min.js"></script>
-<script src="/js/server/players.js"></script>
-<script src="/js/server/game.js"></script>
- -->
+	<script src="/js/client/modal.js"></script>
+	<!--
+	<script src="/js/phaser.min.js"></script>
+	<script src="/js/server/players.js"></script>
+	<script src="/js/server/game.js"></script>
+	 -->
 
-<script src="/js/client/lobby/player.js"></script>
+	<script src="/js/client/objects/player.js"></script>
 
-<script src="/js/client/game_logic.js"></script>
-<script src="/js/client/game_options.js"></script>
-<script src="/js/client/game_control.js"></script>
-<script src="/js/client/spy.js"></script>
-<script src="/js/client/room.js"></script>
-<script src="/js/client/virtualjoystick.js"></script>
+	<script src="/js/client/game_logic.js"></script>
+	<script src="/js/client/front_end.js"></script>
+	<script src="/js/client/toServerHttp.js"></script>
+	<script src="/js/client/toServerSocket.js"></script>
+	<script src="/js/client/fromServerSocket.js"></script>
+	<script src="/js/client/gameController.js"></script>
 
-<link rel="stylesheet" href="/css/bootstrap.min.css">
-<link rel="stylesheet" href="/css/svs.css">
+	<!--
+	<script src="/js/client/game_logic.js"></script>
+	<script src="/js/client/game_options.js"></script>
+	<script src="/js/client/game_control.js"></script>
+	-->
+	<script src="/js/client/objects/spy.js"></script>
+	<script src="/js/client/objects/room.js"></script>
+
+	<script src="/js/client/virtualjoystick.js"></script>
+
+	<link rel="stylesheet" href="/css/bootstrap.min.css">
+	<link rel="stylesheet" href="/css/svs.css">
 </head>
 
 <body>
@@ -35,7 +45,7 @@
 	<div id="container">
 		<div id="game_info">
 			<input type="text" class="form-control" id="player_name" placeholder="Your Name" value="testname"
-				onblur="gameControl.setPlayerName(this.value);">
+				onblur="gameControl.createPlayer(this.value);">
 			<button class="form-control"
 				onClick="gameControl.joinRoom( 'sweetbonesgame' );">Create
 				Server Room</button>
