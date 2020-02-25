@@ -1,28 +1,28 @@
 var express = require('express');
 var router = express.Router();
 
-module.exports = function (io, router) 
+module.exports = function (io, router, gameManager)
 {
-	var ServerReceiver = function() 
+	const ServerReceiver = function()
 	{
 	};
 	
-	var serverLogic = require('./server_logic.js')( io );
+	const serverLogic = require('./server_logic.js')( io, gameManager );
+
+	// set up socket calls for lobby logic.  (join room, leave room, etc...)
+	const serverSocket = configureLobbySockets();
 
 	/**
-	 * Called when a player has joined a room.  It doesn't matter if that player is the
-	 * first person to join or the last.  If they are the first, a new game will be created
-	 * with that person as the leader.
+	 * Called when someone requests to join the server.
 	 */
-	router.post('/room/join', function(req, res, next)
+	router.post('/player/create', function(req, res, next)
 	{
-		var gameName = req.body.gameName;
-		var player   = req.body.player;
-		
+		const playerName = req.body.playerName;
+
 		try
 		{
 			// name of game, player to add and IO socket channel
-			res.json( serverLogic.joinRoom( gameName, player, configureSocketSubscriptions ) );
+			res.json( serverLogic.createPlayer( playerName ) );
 		}
 		catch (err)
 		{
@@ -30,40 +30,68 @@ module.exports = function (io, router)
 			res.status( err ).send({ error: 'You are already in a room, dummy' });
 		}
 	});
+
+	// /**
+	//  * Called when a player has joined a room.  It doesn't matter if that player is the
+	//  * first person to join or the last.  If they are the first, a new game will be created
+	//  * with that person as the leader.
+	//  */
+	// router.post('/room/join', function(req, res, next)
+	// {
+	// 	const gameName = req.body.gameName;
+     //    const playerName = req.body.playerName;
+	//
+	// 	try
+	// 	{
+	// 		// name of game, player to add and IO socket channel
+	// 		res.json( serverLogic.joinRoom( gameName, playerName, configureSocketSubscriptions ) );
+	// 	}
+	// 	catch (err)
+	// 	{
+	// 		console.log('err> %o', err);
+	// 		res.status( err ).send({ error: 'You are already in a room, dummy' });
+	// 	}
+	// });
 	
 	/**
 	 * Called when a player has selected a player configuration during the pre-game mode.
 	 * Right now, a player configuration consists of just a name.
 	 */
 	router.post('/player/choose', function(req, res, next) {
-		var clientData = req.body;
+		const clientData = req.body;
 	
 		console.log('calling choose_player> %o', clientData);
 	
-		var success = serverLogic.choosePlayer( 
+		const success = serverLogic.choosePlayer(
 				req.body.gameId, 
 				req.body.player.id, 
 				req.body.playerConfig );
 	
 		res.json( { 'success' : success } );
 	});
-	
-	
-	var configureSocketSubscriptions = function( gameInstance )
+
+
+	function configureLobbySockets()
 	{
-		var urlid = '/' + gameInstance.name;
+ 		const urlid = '/';
 	
-		console.log('attachingIO> joining ' + urlid + '/[on_data]');
+		console.log('attachingIO> joining %o', urlid);
 	
 		// create sockets, pass back chat names
-		var chat = io.of(urlid).on('connection', function(socket)
+        const chat = io.of(urlid).on('connection', function(socket)
 		{
-			console.log('server> CONNECTED TO SERVER');
+			console.log('server_receiver> SOCKET CONNECTED TO CLIENT');
 	
 			// join chat room
-			socket.join(gameInstance.name);
-	
-			socket.on('disconnect', function () 
+			//socket.join(gameInstance.name);
+			//socket.join("/");
+
+			socket.on('test', function ()
+			{
+				console.log("got test");
+			});
+
+			socket.on('disconnect', function ()
 			{
 				console.log('disconnected player_id=' + socket.player);
 				
@@ -74,11 +102,44 @@ module.exports = function (io, router)
 			// -------------------------------------------------------
 			// Lobby Config
 			// -------------------------------------------------------
-			
-			socket.on('player_joined', function( player )
+
+			/**
+			 * Called when a client requests to create or join a room.
+			 */
+			socket.on('join_room', function( data )
 			{
-				socket.player = player;
-				serverLogic.playerHasJoined( player, socket );
+				console.log("player[%o] is joining room[%o]", data.playerId, data.roomName);
+
+				//socket.join( (data.roomName[0] !== '/' ? '/' : '') + data.roomName );
+				socket.join( data.roomName );
+
+				// returns a game but we dont' do anything with it?
+				serverLogic.joinRoom( data.playerId, data.roomName, socket );
+			});
+
+			socket.on('leave_room', function( data )
+			{
+				console.log("player[%o] is leaving room [%o]", data.playerId, data.roomName);
+
+				//socket.leave( (data.roomName[0] !== '/' ? '/' : '') + data.roomName );
+				socket.leave( data.roomName );
+
+				// returns a game but we dont' do anything with it?
+				serverLogic.leaveRoom( data.playerId, data.roomName, socket );
+			});
+
+
+			/**
+			 * Received when a player successfully joins a room.
+			 * data.playerId
+			 * data.roomName
+			 */
+			socket.on('player_joined', function( data )
+			{
+				console.log('server got: player_joined');
+
+				//socket.player = player;
+				serverLogic.playerHasJoined( data.playerId, data.roomName, socket );
 			});
 			
 			socket.on('player_left', function( player )
@@ -120,32 +181,39 @@ module.exports = function (io, router)
 			// Game Play
 			// -------------------------------------------------------
 	
-			// join data channel
-			socket.on('on_data', function( spyPos )
-			{
-				socket.broadcast.to(gameInstance.name).emit('on_data', spyPos);
-			});
-	
+			// // join data channel
+			// socket.on('on_data', function( spyPos )
+			// {
+			// 	socket.broadcast.to(gameInstance.name).emit('on_data', spyPos);
+			// });
+			//
 			socket.on('on_chat', function(data)
 			{
-				socket.broadcast.to(gameInstance.name).emit('on_chat', data);
+				console.log("got yo chat! %o", data);
+				//io.of(data.roomName).emit("on_chat", data.msg );
+				io.sockets.in(data.roomName).emit("on_chat", data.msg );
+
+				//chat.emit("on_chat", data);
+				//socket.broadcast.to(gameInstance.name).emit('on_chat', data);
 			});
-			
-			socket.on('player_entered_room', function(player, teleports_to)
-			{
-				chat.emit('on_player_entered_room', player, teleports_to );
-			});		
-	
-			socket.on('player_left_room', function(player, roomId)
-			{
-				chat.emit('on_player_left_room', player, roomId );
-			});
+			//
+			// socket.on('player_entered_room', function(player, teleports_to)
+			// {
+			// 	chat.emit('on_player_entered_room', player, teleports_to );
+			// });
+			//
+			// socket.on('player_left_room', function(player, roomId)
+			// {
+			// 	chat.emit('on_player_left_room', player, roomId );
+			// });
 							
 		});
+
+        return chat;
 	}
 
 	return router;
-}
+};
 
 
 

@@ -1,13 +1,15 @@
 
 
-let Player = function( name, isLeader )
+const utils = require('../utils');
+//const uuidv1 = require('uuid/v1');
+
+let Player = function( name )
 {
 	this.name = name;
-	this.id = -1;
+	this.id = utils.guid();
+
 	this.pos = { x : 0, y : 0 };
 	this.room = -1;
-	this.isLeader = isLeader;
-	
 	this.player_def = {};
 };
 

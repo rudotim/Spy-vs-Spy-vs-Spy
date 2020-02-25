@@ -1,16 +1,23 @@
 /**
  * New node file
  */
+const utils = require('../utils');
+
 var Player = require('./player.js');
+const uuidv1 = require('uuid/v1');
+
 
 var Game = function()
 {
-	this.game_id = guid();
-	
+	// unique identifier
+	this.id = utils.guid();
+
+	// all players in the game
 	this.players = [];
 	this.players_loaded = 0;
 	this.players_loaded_map = {};
-	
+
+
 	this.rooms = {};
 	
 	this.nextPlayerId = 1;
@@ -19,6 +26,8 @@ var Game = function()
 	this.jsonMapData;
 	
 	this.options = {};
+
+	this.leaderName;
 	
 	this.once = false;
 };
@@ -27,12 +36,17 @@ Game.prototype.constructor = Game;
 
 Game.prototype.setGameId = function(game_id )
 {
-	this.game_id = game_id;
+	this.id = game_id;
 };
 
 Game.prototype.setName = function(name )
 {
 	this.name = name;
+};
+
+Game.prototype.setLeader = function( playerName )
+{
+	this.leaderName = playerName;
 };
 
 Game.prototype.getStartingLocation = function(player_id )
@@ -134,21 +148,21 @@ Game.prototype.removePlayerById = function(id )
 		}
 	}
 	*/
-} 
+};
 
 //-----------------------------------------------------
 // Utils
 //-----------------------------------------------------
 
-function guid() {
-	  function s4() {
-	    return Math.floor((1 + Math.random()) * 0x10000)
-	      .toString(16)
-	      .substring(1);
-	  }
-	  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
-	}
-
+// function guid() {
+// 	  function s4() {
+// 	    return Math.floor((1 + Math.random()) * 0x10000)
+// 	      .toString(16)
+// 	      .substring(1);
+// 	  }
+// 	  return s4() + s4() + '-' + s4() + '-' + s4() + '-' + s4() + '-' + s4() + s4() + s4();
+// 	}
+//
 if ( ! (typeof module === 'undefined') )
 {
 	console.log('Game exported');

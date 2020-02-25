@@ -1,51 +1,99 @@
 
-let Game = require('./game.js');
+const Game = require('./game.js');
+const Player = require('./player.js');
 
-	let GameManager = function()
-	{
-		this.keys = [];
-		this.available_games = {};
-	};
+module.exports = function ()
+{
+	const gameIds = [];
+	const allGames = {};
 
-	GameManager.prototype.constructor = GameManager;
+	const playerIds = [];
+	const allPlayers = {};
 
-	GameManager.prototype.addNewGame = function(newGame )
+	const roomIds = [];
+	const allRooms = {};
+
+    let GameManager = function()
+    {
+    	alert('game manager constructor?');
+    };
+
+	//GameManager.prototype.constructor = GameManager;
+
+	GameManager.findRoomByName = function( roomName )
 	{
-		// store keys in array
-		this.keys.push( newGame.game_id );
-		
-		// store objects associated by key
-		this.available_games[ newGame.game_id ] = newGame;
-	};
-		
-	GameManager.prototype.createGame = function(gameName )
-	{
-        let game = new Game();
-		
-		game.setName( gameName );
-		
-		this.addNewGame( game );
-		
-		return game;
-	};
-	
-	GameManager.prototype.findGameById = function(game_id )
-	{
-		return this.available_games[ game_id ];
-	};
-	
-	GameManager.prototype.findGameByName = function(gameName )
-	{
-		for ( let k = 0; k < this.keys.length; k++ )
+		for ( let k = 0; k < roomIds.length; k++ )
 		{
-			if ( this.available_games[ this.keys[k] ].name === gameName )
-				return this.available_games[ this.keys[k] ];
+			if ( allRooms[ roomIds[k] ].name === roomName )
+				return allRooms[ roomIds[k] ];
 		}
-		
+
 		return null;
 	};
 
-	GameManager.prototype.findPlayerByGameId = function(game_id, player_id )
+	GameManager.createPlayer = function( newPlayerName )
+	{
+		const player = new Player( newPlayerName );
+
+		return _addNewPlayer( player );
+	};
+
+	GameManager.createGame = function( gameName, playerId )
+	{
+		let game = new Game();
+
+		game.setName( gameName );
+		game.setLeader( playerId );
+
+		return _addNewGame( game );
+	};
+
+	GameManager.findGameByName = function( gameName )
+	{
+		for ( let k = 0; k < gameIds.length; k++ )
+		{
+			if ( allGames[ gameIds[k] ].name === gameName )
+				return allGames[ gameIds[k] ];
+		}
+
+		return null;
+	};
+
+	const _addNewPlayer = function( newPlayer )
+	{
+		playerIds.push( newPlayer.id );
+		allPlayers[ newPlayer.id ] = newPlayer;
+
+		return newPlayer;
+	};
+
+	const _addNewGame = function( newGame )
+	{
+		gameIds.push( newGame.id );
+		allGames[ newGame.id ] = newGame;
+
+		// store keys in array
+		//this.keys.push( newGame.game_id );
+		
+		// store objects associated by key
+		//allGames[ newGame.game_id ] = newGame;
+
+		return newGame;
+	};
+
+	GameManager.findPlayerById = function( playerId )
+	{
+		return allPlayers[ playerId ];
+	};
+	
+	GameManager.findGameById = function( game_id )
+	{
+		return allGames[ game_id ];
+	};
+	
+
+
+	GameManager.findPlayerByGameId = function(game_id, player_id )
 	{
         let game = this.findGameById( game_id );
 
@@ -63,10 +111,10 @@ let Game = require('./game.js');
 			}
 		}
 		*/
-		//return this.available_games[ game_id ];
+		//return this.allGames[ game_id ];
 	};
 	
-	GameManager.prototype.findPlayersByGameId = function(game_id )
+	GameManager.findPlayersByGameId = function(game_id )
 	{
         let game = this.findGameById( game_id );
 		
@@ -82,13 +130,13 @@ let Game = require('./game.js');
 	};
 	*/	
 
-	GameManager.prototype.findGameByPlayerId = function(player_id )
+	GameManager.findGameByPlayerId = function(player_id )
 	{
         let game, p;
 		
 		for ( let k = 0; k < this.keys.length; k++ )
 		{
-			game = this.available_games[ this.keys[k] ];
+			game = this.allGames[ this.keys[k] ];
 
 			console.log('checking game \'' + this.keys[k] + '\' for players...');
 
@@ -108,23 +156,21 @@ let Game = require('./game.js');
 		return null;
 	};
 	
-	GameManager.prototype.getAllGames = function()
+	GameManager.getAllGames = function()
 	{
 		let names = [];
 		
 		for ( let k = 0; k < this.keys.length; k++ )
-			names.push( this.available_games[ this.keys[k] ].game_id );
+			names.push( this.allGames[ this.keys[k] ].game_id );
 		
 		return names;
 	};
 	
-	if ( ! (typeof module === 'undefined') )
-	{
-		console.log('Game_manager exported');
-		module.exports = GameManager;
-	}
+	// if ( ! (typeof module === 'undefined') )
+	// {
+	// 	console.log('Game_manager exported');
+	// 	module.exports = GameManager;
+	// }
 
-//	return Game_manager;
-//}());
-
-//module.exports = Game_manager;
+	return GameManager;
+}();

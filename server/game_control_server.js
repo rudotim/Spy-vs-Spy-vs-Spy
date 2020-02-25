@@ -2,8 +2,10 @@ var express = require('express');
 var router = express.Router();
 var fs = require('fs');
 
-var activeGamesClass = require('./objects/game_manager.js');
-var activeGames = new activeGamesClass();
+let gameManager = require('game_manager');
+
+//var activeGamesClass = require('./objects/game_manager.js');
+//var activeGames = new activeGamesClass();
 
 router.post('/room/join', function(req, res, next)
 {
@@ -11,16 +13,36 @@ router.post('/room/join', function(req, res, next)
 
 	var gameName = clientData.gameName;
 	var player = clientData.player;
-	
-	if ( typeof player.isLeader == 'undefined' )
+
+	if ( typeof player.isLeader === 'undefined' )
 	{
 		var newGameData = createRoom(gameName, player, req.app.get('io'));
 		// attach chat channel to client gameInstance object
 		res.json(newGameData);
 	}
-	else 
-		res.status(500).send({ error: 'You are already in a room, dummy!' });	
+	else
+		res.status(500).send({ error: 'You are already in a room, dummy!' });
 });
+
+router.post('/player/create', function(req, res, next)
+{
+	const clientData = req.body;
+
+	const playerName = clientData.playerName;
+
+	// TODO: allow duplicate names?
+
+	// Create and return new player object based off name.
+	// New player will be added to the game manager but not
+	// yet to any specific game instance.
+	res.json( createPlayer( playerName ) );
+});
+
+function createPlayer( playerName )
+{
+	// create and add ourself
+	return gameManager.addNewPlayer( playerName );
+}
 
 //var default_spy_def = {
 //		stand : 'wspy_stand',
@@ -37,8 +59,6 @@ router.post('/room/join', function(req, res, next)
 //		stand_left : 'gspy_lstand',
 //		run_left : 'gspy_lrun'
 //};
-
-//var once = true;
 
 router.post('/player/choose', function(req, res, next) {
 	var clientData = req.body;
