@@ -1,15 +1,15 @@
 
 
-var GameLogic = function()
+var GameLogic = function( gameControl )
 {
-	var _gameOptions;
+	let _gameOptions;
 
 	var ctrl = {};
 		
 	// holds local copy of game data
 	var _gameInstance = {};
 	
-	var _gameControl = {};
+	const _gameControl = gameControl;
 	
 	// Game Play
 	// ------------------------------------------
@@ -418,10 +418,10 @@ var GameLogic = function()
 		_player.name = newName;
 	}
 	
-	ctrl.setGameControl = function(gameControl)
-	{
-		_gameControl = gameControl;
-	}
+	// ctrl.setGameControl = function(gameControl)
+	// {
+	// 	_gameControl = gameControl;
+	// }
 	
 	ctrl.onStartPreGame = function()
 	{

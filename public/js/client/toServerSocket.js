@@ -9,9 +9,6 @@ const toServerSocket = function( socket )
 
 	let clientRequest = {};
 
-	// communication socket to server
-	const _socket = socket;
-
 	/**
 	 * Join or create a room with name
 	 */
@@ -24,8 +21,6 @@ const toServerSocket = function( socket )
 			roomName : roomName
 		};
 
-		//io.to('/').emit('join_room', data);
-		//_socket.emit('join_room', data );
 		socketRoom.emit( 'join_room', data );
 	};
 
@@ -39,6 +34,17 @@ const toServerSocket = function( socket )
 		};
 
 		socketRoom.emit( 'leave_room', data );
+	};
+
+	clientRequest.listPlayersInRoom = function( roomName, socketRoom )
+	{
+		console.log('Listing players in room %o', roomName );
+
+		const data = {
+			roomName : roomName
+		};
+
+		socketRoom.emit( 'list_players', data );
 	};
 
 	// const _onJoinRoomSuccess = function( gameInstance, player )

@@ -3,9 +3,11 @@
 
 
 
-const GameController = function( frontEnd, gameLogic )
+const GameController = function( frontEnd )
 {
-	let clientRequest = {};
+	const clientRequest = {};
+	const LOBBY = "/";
+	const _toServerHttp = toServerHttp();
 
 	// your player object
 	let _player;
@@ -13,38 +15,49 @@ const GameController = function( frontEnd, gameLogic )
 	// communication socket to server
 	let _socket;
 
-	const LOBBY = "/";
+	// the name of the chat room that you're currently in
 	let currentRoomName;
 
-	// local copy of game data
-	let _gameInstance = null;
-		
-	// encapsulated methods to perform common game logic
-	//var _gameLogic = gameLogic;
-
-	//const _socket = io( LOBBY );
-
-	const _toServerHttp = toServerHttp();
-
+	// the encapsulation of logic calls to receive data from the server
 	let _toClient;
 
+	// the encapsulation of logic calls to send data to the server
 	let _toServer;
 
+	// the core game logic
+	let _gameLogic;
+
+	// ---------------
+	// local copy of game data
+	let _gameInstance = null;
+
+	init();
+
+	function init()
+	{
+		console.log("initialization");
+
+		// gameControl
+		_gameLogic = GameLogic( clientRequest );
+	}
+
+
+	/**
+	 * Create a new player on the server with the supplied name
+	 * @param newPlayerName name of the new player
+	 */
 	clientRequest.createPlayer = function( newPlayerName )
 	{
 		_toServerHttp.createPlayer( newPlayerName )
 			.then(data =>
 			{
 				console.log("Created player [" + newPlayerName + "] with id: %o", data.playerId);
+
+				// upon sucessful creation of a new player, save a reference
+				// to the player id and dump the player into the default room (lobby)
 				_player = data.playerId;
 
-				_joinRoom( LOBBY );
-
-				// const socket = io( LOBBY );
-				//
-				// _toClient = fromServerSocket( data.socket, gameLogic, frontEnd );
-				//
-				// _toServer = toServerSocket( data.socket );
+				this.joinRoom( LOBBY );
 			})
 			.catch(error => {
 				console.log("Bzzp - error adding player: " + error);
@@ -52,116 +65,48 @@ const GameController = function( frontEnd, gameLogic )
 	};
 
 	/**
-	 * Join or create a room with name
+	 * Join a new chat room.  Joining a new room automatically causes the user to leave their old room.
+	 * @param newRoomName
+	 * @returns {*}
 	 */
 	clientRequest.joinRoom = function( newRoomName )
-	{
-		// precede with slash
-		//const newRoomUrl = "/" + newRoomName;
-
-		//let socketRoom = io("/" + newRoomName);
-
-		console.log('attempting to join room [' + newRoomName + ']');
-
-		// change rooms from old to new
-		//_socket = changeRooms( currentRoomName, newRoomName );
-
-		//_toServer.joinRoom( _player, newRoomName, _socket );
-
-		_joinRoom( newRoomName );
-	};
-
-	// const changeRooms = function ( oldRoomName, newRoomName )
-	// {
-	// 	// leave existing room if it was a valid room
-	// 	if ( currentRoomName !== undefined )
-	// 	{
-	// 		console.log("leaving old room %o", oldRoomName );
-	//
-	// 		//_toServer.leaveRoom(oldRoomName);
-	//
-	// 		// tell server to change our socket to the new toom
-	//
-	// 	}
-	// 	else
-	// 		console.log("no need to leave old room");
-	//
-	// 	// join new
-	// 	return _joinRoom( newRoomName );
-	// };
-
-	const _joinRoom = function( roomName )
 	{
 		// add '/' if it was missing
 		if ( currentRoomName === undefined )
 		{
 			console.log('Joining room: lobby');
-			//_socket = io((roomName[0] !== '/' ? '/' : '') + roomName);
-			_socket = io(roomName);
+			_socket = io(newRoomName);
 
-			_toClient = fromServerSocket(_socket, gameLogic, frontEnd);
+			_toClient = fromServerSocket(_socket, _gameLogic, frontEnd);
 
 			_toServer = toServerSocket(_socket);
 
-			_toServer.joinRoom( _player, roomName, _socket );
+			_toServer.joinRoom( _player, newRoomName, _socket );
 		}
 		else
 		{
-			console.log('Player %o joining room: ', _player, roomName);
+			console.log('Player %o joining room: ', _player, newRoomName);
 
 			// leave old room
 			_toServer.leaveRoom( _player, currentRoomName, _socket );
 
 			// join new room
-			_toServer.joinRoom( _player, roomName, _socket );
+			_toServer.joinRoom( _player, newRoomName, _socket );
 		}
 
-		currentRoomName = roomName;
+		currentRoomName = newRoomName;
 
 		return _socket;
 	};
 
-	const joinCB = function()
-	{
-		console.log("JOINED");
-	};
 
-	// let _toClient;// = fromServerSocket( socket, gameLogic, frontEnd );
-	// let _toServer;
 
-	// let _initSocket = function( urlid )
-	// {
-	// 	return io( urlid );
-	// };
 
-	//var urlid = '/' + gameInstance.name;
-	//_initSocket("");
 
-	let _onJoinRoomSuccess = function( gameInstance, player )
-	{
-		const urlid = '/' + gameInstance.name;
 
-		console.log('client joining ' + urlid + '/[' + gameInstance.datachannel + ']');
 
-		let socket = _initSocket( urlid );
 
-		_toClient = fromServerSocket( socket, gameLogic, frontEnd );
 
-		_toServer = toServerSocket( socket );
-
-		// save our player in gameLogic
-		//gameLogic.setPlayer( player );
-		
-		//_gameInstance = gameInstance;
-				
-		// tell server we have joined the room
-		toServerSocket.sendPlayerJoined( player );
-
-		// redraw UI with our name in the list
-		frontEnd.updateRoomListUI( gameInstance.players );
-
-		console.log('ok, you\'ve joined room [' + gameInstance.game_id + ']');
-	};
 
 	/**
 	 * Tell backend that one of our properties has updated.
@@ -210,13 +155,7 @@ const GameController = function( frontEnd, gameLogic )
 
 
 	
-	/**
-	 * Player has left the game room lobby
-	 */
-	clientRequest.leaveRoom = function( gameName )
-	{
-		console.log('leaving game room [' + gameName + ']');		
-	};
+
 
 	
 	// -------------------------------------------------------
@@ -331,9 +270,9 @@ const GameController = function( frontEnd, gameLogic )
 
 let frontEnd = toFrontEnd();
 
-let gameLogic = GameLogic();
+//let gameLogic = GameLogic();
 
-const gameControl = GameController( frontEnd, gameLogic );
+const gameControl = GameController( frontEnd );
 // let fromServerSocket = fromServerSocket( socket, gameLogic, frontEnd );
 
 //var gameLogic = new GameLogic();

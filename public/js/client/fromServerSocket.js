@@ -44,6 +44,15 @@ const fromServerSocket = function(socket, gameLogic, frontEnd )
         //frontEnd.updateRoomListUI( serverPlayers );
     });
 
+	socket.on('on_list_players', function( data )
+	{
+		console.log('listing players> ', data );
+
+		frontEnd.updateRoomListUI( data.players );
+	});
+
+
+
     /**
      * The backend told us someone updated some player property
      */

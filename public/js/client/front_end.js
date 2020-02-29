@@ -5,14 +5,14 @@
 
 const toFrontEnd = function()
 {
-	var frontEnd = {};
+	const frontEnd = {};
 
 	/**
 	 * Update UI list of room members
 	 */
-	toFrontEnd.updateRoomListUI = function( serverPlayers )
+	frontEnd.updateRoomListUI = function( serverPlayers )
 	{
-		$('#player_list ul').empty();
+		$("#player_list ul").empty();
 		
 		console.log( serverPlayers );
 		
