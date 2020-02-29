@@ -97,6 +97,20 @@ module.exports = function (io, gameManager)
 	};
 
 
+	ServerLogic.listPlayers = function( roomName, socket )
+	{
+		const player = gameManager.findPlayerById( playerId );
+		
+		let data =
+		{
+			"players" : playerId,
+		};
+
+		// join it
+		socket.to(roomName).emit( "on_list_players", data);
+	};
+
+
 	/**
 	 * Create a new room with name and set player as the leader.  Also configure
 	 * first time socket subscriptions.

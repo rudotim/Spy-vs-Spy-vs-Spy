@@ -1,6 +1,7 @@
 
 const Game = require('./game.js');
 const Player = require('./player.js');
+const ChatRoom = require('./chatroom.js');
 
 module.exports = function ()
 {
@@ -13,12 +14,25 @@ module.exports = function ()
 	const roomIds = [];
 	const allRooms = {};
 
-    let GameManager = function()
+    const GameManager = function()
     {
-    	alert('game manager constructor?');
+    	console.log('game manager constructor');
+
+    	// Create the default lobby chat room
+	    createChatRoom( "/" );
     };
 
-	//GameManager.prototype.constructor = GameManager;
+	GameManager.prototype.constructor = GameManager;
+
+	GameManager.getOrCreateRoomByName = function( roomName )
+	{
+		let room = this.findRoomByName( roomName );
+
+		if ( room === undefined )
+			room = createChatRoom( roomName );
+
+		return room;
+	};
 
 	GameManager.findRoomByName = function( roomName )
 	{
@@ -28,15 +42,37 @@ module.exports = function ()
 				return allRooms[ roomIds[k] ];
 		}
 
-		return null;
+		return undefined;
 	};
 
 	GameManager.createPlayer = function( newPlayerName )
 	{
 		const player = new Player( newPlayerName );
 
-		return _addNewPlayer( player );
+		// add player to default room
+		const lobby = this.getOrCreateRoomByName( "/" );
+
+		addPlayerToRoom( player, lobby );
+
+		return _storePlayer( player );
 	};
+
+	// We are here.  Juggling rooms and players.  We're trying to ultimately get a list of players to the HTML.
+
+	function addPlayerToRoom( player, room )
+	{
+		room.players.push( player );
+	}
+
+	function removePlayerFromRoom( player, room )
+	{
+		// TODO: disassociate player with this room
+	}
+
+	GameManager.findPlayersInRoom = function( roomName )
+	{
+	};
+
 
 	GameManager.createGame = function( gameName, playerId )
 	{
@@ -45,7 +81,7 @@ module.exports = function ()
 		game.setName( gameName );
 		game.setLeader( playerId );
 
-		return _addNewGame( game );
+		return _storeGame( game );
 	};
 
 	GameManager.findGameByName = function( gameName )
@@ -59,7 +95,21 @@ module.exports = function ()
 		return null;
 	};
 
-	const _addNewPlayer = function( newPlayer )
+	function createChatRoom( roomName )
+	{
+		return _storeRoom( new ChatRoom( roomName ) );
+	}
+
+	function _storeRoom( chatroom )
+	{
+		console.log("Chat room %o created", chatroom.name);
+		roomIds.push( chatroom.id );
+		allRooms[ chatroom.id ] = chatroom;
+
+		return chatroom;
+	}
+
+	const _storePlayer = function( newPlayer )
 	{
 		playerIds.push( newPlayer.id );
 		allPlayers[ newPlayer.id ] = newPlayer;
@@ -67,7 +117,7 @@ module.exports = function ()
 		return newPlayer;
 	};
 
-	const _addNewGame = function( newGame )
+	const _storeGame = function( newGame )
 	{
 		gameIds.push( newGame.id );
 		allGames[ newGame.id ] = newGame;

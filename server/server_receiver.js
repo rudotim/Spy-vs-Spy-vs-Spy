@@ -129,6 +129,15 @@ module.exports = function (io, router, gameManager)
 			});
 
 
+			socket.on('list_players', function( data )
+			{
+				console.log("Request to list players in room[%o]", data.playerId, data.roomName);
+
+				// returns a game but we dont' do anything with it?
+				serverLogic.listPlayers( data.roomName, socket );
+			});
+
+
 			/**
 			 * Received when a player successfully joins a room.
 			 * data.playerId
