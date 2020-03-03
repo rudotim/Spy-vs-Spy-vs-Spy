@@ -26,7 +26,6 @@ const toFrontEnd = function()
 						));
 		}
 	};
-	
+
 	return frontEnd;
 };
-
