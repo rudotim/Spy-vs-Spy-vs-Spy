@@ -195,9 +195,10 @@ module.exports = function (io, router, gameManager)
 				chat.emit('on_start_pre_game', null );
 			});
 
-			socket.on('start_game', function( game_id )
+			socket.on('start_game', function( data )
 			{
 				console.log('server received request to start the game');
+				serverLogic.startGame( data.roomName );
 			});
 			
 			// -------------------------------------------------------

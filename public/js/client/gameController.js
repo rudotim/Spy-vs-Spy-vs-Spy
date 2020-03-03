@@ -178,19 +178,6 @@ const GameController = function( frontEnd )
 		_toServer.sendChat( currentRoomName, message, _socket );
 	};
 
-
-	/**
-	 * Called when the leader of a chat room has initiated the start of the game
-	 */
-	clientRequest.onStartGame = function()
-	{
-		// initiate the logic container for our game specific stuff
-		_gameLogic = new GameLogic( clientRequest, _player );
-
-		// start listening for game specific events
-		_fromGameServerSocket = new fromServerSocket(_socket, _gameLogic, frontEnd);
-	};
-
 	/**
 	 * List any on-going chat rooms which you can join
 	 */
@@ -204,6 +191,30 @@ const GameController = function( frontEnd )
 	// -------------------------------------------------------
 	// Game Play Setup
 	// -------------------------------------------------------
+
+	/**
+	 * Called when you wish to start the game.
+	 * todo: this should only work if you're the leader.
+	 */
+	clientRequest.triggerStartGame = function()
+	{
+		_toServer.startGame( currentRoomName, _socket );
+	};
+
+	/**
+	 * Called when the leader of a chat room has initiated the start of the game
+	 */
+	clientRequest.onStartGame = function()
+	{
+		// initiate the logic container for our game specific stuff
+		_gameLogic = new GameLogic( clientRequest, _player );
+
+		// start listening for game specific events
+		_fromGameServerSocket = new fromServerSocket(_socket, _gameLogic, frontEnd);
+
+		_gameLogic.onStartGame();
+	};
+
 
 	
 	/**
@@ -230,10 +241,6 @@ const GameController = function( frontEnd )
 	// 	_socket.emit( 'start_pre_game', null );
 	// };
 
-	clientRequest.triggerStartGame = function()
-	{
-		_socket.emit( 'start_game' );
-	};
 	
 	clientRequest.choosePlayer = function( player, playerIndex, playerConfig, playerChosenCallback )
 	{

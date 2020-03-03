@@ -84,6 +84,9 @@ module.exports = function (io, gameManager)
 	};
 
 
+	// todo: possibly change listPlayers to 'get room status'
+	// This might include the player list and the current state of the game.
+
 	/**
 	 * Return list of all players in the room with name roomName
 	 * @param roomName name of chat room
@@ -119,6 +122,15 @@ module.exports = function (io, gameManager)
 	{
 		// Send to everone else
 		sendToEveryoneElseInRoom(socket, "on_chat", roomName, message );
+	};
+
+
+	ServerLogic.startGame = function( roomName, socket )
+	{
+		// todo: mark this game as having been started
+
+		// Send to everone else
+		sendToEveryoneInRoom( "on_start_game", roomName );
 	};
 
 	/**

@@ -66,6 +66,17 @@ const toServerSocket = function( socket )
 		socketRoom.emit('on_chat', data);
 	};
 
+
+	clientRequest.startGame = function( roomName, socketRoom )
+	{
+		const data =
+			{
+				"roomName" : roomName,
+			};
+
+		socketRoom.emit('start_game', data);
+	};
+
 	// clientRequest.sendPlayerJoined = function( player )
 	// {
 	// 	socket.emit('player_joined', player );
@@ -163,7 +174,7 @@ const toServerSocket = function( socket )
 	
 	clientRequest.choosePlayer = function( player, playerIndex, playerConfig, playerChosenCallback )
 	{
-		var clientData = {
+		const clientData = {
 				player : player,
 				playerConfig : playerConfig,
 				gameId : _gameInstance.game_id
