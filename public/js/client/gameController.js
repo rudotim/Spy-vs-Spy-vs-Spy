@@ -21,11 +21,15 @@ const GameController = function( frontEnd )
 	// the encapsulation of logic calls to receive data from the server
 	let _toClient;
 
+	let _fromGameServerSocket;
+
 	// the encapsulation of logic calls to send data to the server
 	let _toServer;
 
 	// the core game logic
 	let _gameLogic;
+
+	let _chatroom;
 
 	// ---------------
 	// local copy of game data
@@ -77,9 +81,9 @@ const GameController = function( frontEnd )
 			console.log('Joining room: lobby');
 			_socket = io(newRoomName);
 
-			_toClient = fromServerSocket(_socket, _gameLogic, frontEnd);
+			_toClient = fromServerSocket( _socket, clientRequest );
 
-			_toServer = toServerSocket(_socket);
+			_toServer = toServerSocket( _socket );
 
 			_toServer.joinRoom( _player, newRoomName, _socket );
 		}
@@ -94,15 +98,75 @@ const GameController = function( frontEnd )
 			_toServer.joinRoom( _player, newRoomName, _socket );
 		}
 
+		// todo: create game instance so that we can locally add players and stuff
+		_chatroom = {
+			name : newRoomName,
+			players : [ _player ]
+		};
+
+		// list players to find out who is here
+		_toServer.listPlayersInRoom( newRoomName, _socket );
+
+		// todo: check if game is in progress
+
 		currentRoomName = newRoomName;
 
 		return _socket;
 	};
 
 
+	/**
+	 * Called whenever we get notified that a new player has joined this chat room
+	 * @param playerId
+	 * @param playerName
+	 * @param chatRoomName
+	 */
+	clientRequest.onPlayerJoinedRoom = function( playerId, playerName, chatRoomName )
+	{
+		// todo: wrap in logic to control creation and structure
+		_chatroom.players.push(
+			{
+				name : playerName,
+				id : playerId
+			}
+		);
+
+		frontEnd.updateRoomListUI( _chatroom.players );
+	};
+
+	clientRequest.onPlayerLeftRoom = function( playerId, playerName, chatRoomName )
+	{
+		// todo: wrap in logic to control creation and structure
+		_chatroom.players = _chatroom.players.filter(
+			function(value, index, arr)
+			{
+				return value.id !== playerId;
+			});
+
+		frontEnd.updateRoomListUI( _chatroom.players );
+	};
+
+	/**
+	 * Called when the leader of a chat room has initiated the start of the game
+	 */
+	clientRequest.onStartGame = function()
+	{
+		// initiate the logic container for our game specific stuff
+		_gameLogic = new GameLogic( clientRequest, _player );
+
+		// start listening for game specific events
+		_fromGameServerSocket = new fromServerSocket(_socket, _gameLogic, frontEnd);
+	};
 
 
+	clientRequest.onListPlayers = function( players )
+	{
+		console.log("onListPlayers> %o", players );
 
+		_chatroom.players = players;
+
+		frontEnd.updateRoomListUI( players );
+	};
 
 
 
@@ -116,7 +180,7 @@ const GameController = function( frontEnd )
 		// don't send anything unless we've connected
 		if ( _gameInstance != null )
 		{
-            toServerSocket._updatePlayerOnServer( _gameLogic.getPlayer() );
+            //toServerSocket._updatePlayerOnServer( _gameLogic.getPlayer() );
             //_socket.emit('player_attr_updated', _gameLogic.getPlayer());
         }
 	};
@@ -181,19 +245,20 @@ const GameController = function( frontEnd )
 		_socket.emit( 'player_has_loaded_map', player );	
 	};
 
-	clientRequest.triggerStartPreGame = function()
-	{
-		_socket.emit( 'start_pre_game', null );	
-	};
+
+	// clientRequest.triggerStartPreGame = function()
+	// {
+	// 	_socket.emit( 'start_pre_game', null );
+	// };
 
 	clientRequest.triggerStartGame = function()
 	{
-		_socket.emit( 'start_game', _gameInstance.game_id );	
+		_socket.emit( 'start_game' );
 	};
 	
 	clientRequest.choosePlayer = function( player, playerIndex, playerConfig, playerChosenCallback )
 	{
-		var clientData = {
+		const clientData = {
 				player : player,
 				playerConfig : playerConfig,
 				gameId : _gameInstance.game_id
@@ -259,7 +324,7 @@ const GameController = function( frontEnd )
 
 	clientRequest.sendStopUpdate = function( spy )
 	{
-		var pos = spy.getPos();
+		const pos = spy.getPos();
 		pos.extra = 'stop';
 
 		_socket.emit( 'on_data', pos );

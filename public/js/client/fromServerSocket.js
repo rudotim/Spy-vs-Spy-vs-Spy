@@ -3,7 +3,7 @@
 
 
 
-const fromServerSocket = function(socket, gameLogic, frontEnd )
+const fromServerSocket = function( socket, gameController )
 {
 	console.log("On-call events registered for socket");
     //console.log('client joining ' + urlid + '/[' + gameInstance.datachannel + ']');
@@ -34,43 +34,52 @@ const fromServerSocket = function(socket, gameLogic, frontEnd )
 		// 		"gameName" : gameName
 		// 	};
 
-        console.log('player joined room> %o', data );
-        //frontEnd.updateRoomListUI( serverPlayers );
+        console.log('on player joined room> %o', data );
+
+        gameController.onPlayerJoinedRoom( data.playerId, data.playerName, data.roomName );
     });
 
     socket.on('on_player_left', function( data )
     {
         console.log('player left room> ', data );
-        //frontEnd.updateRoomListUI( serverPlayers );
+
+	    gameController.onPlayerLeftRoom( data.playerId, data.playerName, data.roomName );
     });
 
+	/**
+	 * Received when a request is made to list the players in the room
+	 */
 	socket.on('on_list_players', function( data )
 	{
-		console.log('listing players> ', data );
+		console.log('listing players> %o', data );
 
-		frontEnd.updateRoomListUI( data.players );
+		gameController.onListPlayers( data.players );
 	});
 
+	socket.on( 'on_start_game', function()
+	{
+		console.log('SERVER IS STARTING GAME!');
+		gameController.onStartGame();
+	});
 
-
-    /**
-     * The backend told us someone updated some player property
-     */
-    socket.on('on_player_attr_updated', function( serverPlayers, updatedPlayer )
-    {
-        console.log('on_player_attr_updated ' + serverPlayers);
-
-        // find the player
-        let p = gameLogic.getPlayer();
-        if ( p.player_id === updatedPlayer.player_id )
-            gameLogic.setPlayer( p );
-
-        // redraw room members
-        frontEnd.updateRoomListUI( serverPlayers );
-
-        // update any player data
-        //_updatePlayerOnServerAttr( serverPlayers );
-    });
+    // /**
+    //  * The backend told us someone updated some player property
+    //  */
+    // socket.on('on_player_attr_updated', function( serverPlayers, updatedPlayer )
+    // {
+    //     console.log('on_player_attr_updated ' + serverPlayers);
+    //
+    //     // find the player
+    //     let p = gameLogic.getPlayer();
+    //     if ( p.player_id === updatedPlayer.player_id )
+    //         gameLogic.setPlayer( p );
+    //
+    //     // redraw room members
+    //     frontEnd.updateRoomListUI( serverPlayers );
+    //
+    //     // update any player data
+    //     //_updatePlayerOnServerAttr( serverPlayers );
+    // });
 
     // -------------------------------------------------------
     // Game Play Config
@@ -80,38 +89,32 @@ const fromServerSocket = function(socket, gameLogic, frontEnd )
     {
         console.log('someone has chosen a player> %o %o', player_id, player_config );
 
-        gameLogic.onChoosePlayer( player_id, player_config );
-    });
-
-    socket.on( 'on_start_pre_game', function()
-    {
-        console.log('SERVER IS STARTING PRE GAME!');
-        gameLogic.onStartPreGame();
+        //gameLogic.onChoosePlayer( player_id, player_config );
     });
 
     socket.on( 'on_player_is_ready', function( player_id )
     {
         console.log('on_player_ready');
-        gameLogic.onPlayerReady( player_id );
+        //gameLogic.onPlayerReady( player_id );
     });
 
     socket.on( 'on_load_map', function( gameInstance )
     {
         console.log('on_load_map');
-        gameLogic.onLoadMapData( gameInstance );
+        //gameLogic.onLoadMapData( gameInstance );
     });
 
     socket.on( 'on_game_loading', function( game_loading_pct )
     {
         console.log('on_game_loading');
-        gameLogic.onGameLoading( game_loading_pct );
+        //gameLogic.onGameLoading( game_loading_pct );
     });
 
-    socket.on( 'on_start_game', function( gameInstance )
-    {
-        console.log('SERVER IS STARTING OFFICIAL GAME!');
-        gameLogic.onStartGame( gameInstance, gameLogic.getPlayer() );
-    });
+    // socket.on( 'on_start_game', function( gameInstance )
+    // {
+    //     console.log('SERVER IS STARTING OFFICIAL GAME!');
+    //     gameLogic.onStartGame( gameInstance, gameLogic.getPlayer() );
+    // });
 
     // -------------------------------------------------------
     // Game Play
@@ -137,21 +140,6 @@ const fromServerSocket = function(socket, gameLogic, frontEnd )
     {
         gameLogic.onPlayerLeftRoom( player, room );
     });
-
-    // -------------------------------------------------------
-
-    // save our player in gameLogic
-    //gameLogic.setPlayer( player );
-
-    //_gameInstance = gameInstance;
-
-    // tell server we have joined the room
-    //socket.emit( 'player_joined', player );
-
-    // redraw UI with our name in the list
-    //_updateRoomListUI( gameInstance.players );
-
-    //console.log('ok, you\'ve joined room [' + gameInstance.game_id + ']');
 };
 
 

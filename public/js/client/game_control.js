@@ -3,7 +3,7 @@
 
 
 
-var GameControl = function( gameLogic )
+var GameControl = function( toServer, toClient, gameLogic )
 {
 	var clientRequest = {};
 	
@@ -15,6 +15,7 @@ var GameControl = function( gameLogic )
 		
 	// encapsulated methods to perform common game logic
 	var _gameLogic = gameLogic;
+
 
 	/**
 	 * Update UI list of room members
@@ -80,8 +81,8 @@ var GameControl = function( gameLogic )
 			console.log('on_player_attr_updated ' + serverPlayers);
 						
 			// find the player
-			var p = _gameLogic.getPlayer();
-			if ( p.player_id == updatedPlayer.player_id )
+			let p = _gameLogic.getPlayer();
+			if ( p.player_id === updatedPlayer.player_id )
 				_gameLogic.setPlayer( p );
 			
 			// redraw room members
@@ -180,7 +181,10 @@ var GameControl = function( gameLogic )
 	{
 		// don't send anything unless we've connected
 		if ( _gameInstance != null )
-			_socket.emit('player_attr_updated', _gameLogic.getPlayer() );
+		{
+            toServer._updatePlayerOnServer( _gameLogic.getPlayer() );
+            //_socket.emit('player_attr_updated', _gameLogic.getPlayer());
+        }
 	};
 	
 	
@@ -343,7 +347,7 @@ var GameControl = function( gameLogic )
 	
 	clientRequest.sendPosUpdate = function( spy )
 	{
-		if ( spy == undefined )
+		if ( spy === undefined )
 			return;
 		
 		_socket.emit('on_data', spy.getPos() );
@@ -362,9 +366,9 @@ var GameControl = function( gameLogic )
 
 var gameLogic = new GameLogic();
 
-var gameControl = new GameControl( gameLogic );
+//var gameControl = new GameControl( gameLogic );
 
-gameLogic.setGameControl( gameControl );
+//gameLogic.setGameControl( gameControl );
 
 
 
