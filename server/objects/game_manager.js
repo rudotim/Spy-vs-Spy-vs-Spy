@@ -50,27 +50,47 @@ module.exports = function ()
 		const player = new Player( newPlayerName );
 
 		// add player to default room
-		const lobby = this.getOrCreateRoomByName( "/" );
+		//const lobby = this.getOrCreateRoomByName( "/" );
 
-		addPlayerToRoom( player, lobby );
+		//this.addPlayerToRoom( player, lobby );
 
 		return _storePlayer( player );
 	};
 
-	// We are here.  Juggling rooms and players.  We're trying to ultimately get a list of players to the HTML.
 
-	function addPlayerToRoom( player, room )
+	GameManager.addPlayerToRoom = function( player, room )
 	{
-		room.players.push( player );
-	}
+		const playerIndex = room.players.findIndex( i => i.id === player.id );
 
-	function removePlayerFromRoom( player, room )
+		if ( playerIndex === -1 )
+			room.players.push( player );
+		else
+			console.error("addPlayer> Player with id %o already existed in room %o", player.id, room.name );
+	};
+
+	GameManager.removePlayerFromRoom = function( player, room )
 	{
-		// TODO: disassociate player with this room
-	}
+		// create new array that does not include our target player
+		room.players = room.players.filter(
+				function(value, index, arr)
+				{
+					return value.id !== player.id;
+				});
+	};
 
+	/**
+	 * Retrieve all players associated with the room with name roomName
+	 * @param roomName name of room for which we're requesting a player list
+	 * @returns {Array} list of players
+	 */
 	GameManager.findPlayersInRoom = function( roomName )
 	{
+		const room = this.findRoomByName( roomName );
+
+		if ( room === undefined )
+			console.error("Failed to find room with name ", roomName);
+		else
+			return room.players;
 	};
 
 

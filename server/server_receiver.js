@@ -104,7 +104,8 @@ module.exports = function (io, router, gameManager)
 			// -------------------------------------------------------
 
 			/**
-			 * Called when a client requests to create or join a room.
+			 * Received when a client requests to join a room.
+			 * If the room didn't exist, it will be created and the client will join.
 			 */
 			socket.on('join_room', function( data )
 			{
@@ -117,6 +118,11 @@ module.exports = function (io, router, gameManager)
 				serverLogic.joinRoom( data.playerId, data.roomName, socket );
 			});
 
+			/**
+			 * Received when a client requests to leave a room.
+			 *
+			 * todo: delete the room if the last user has left
+			 */
 			socket.on('leave_room', function( data )
 			{
 				console.log("player[%o] is leaving room [%o]", data.playerId, data.roomName);
@@ -128,10 +134,12 @@ module.exports = function (io, router, gameManager)
 				serverLogic.leaveRoom( data.playerId, data.roomName, socket );
 			});
 
-
+			/**
+			 * Received when a client requests a list of the people in a room.
+			 */
 			socket.on('list_players', function( data )
 			{
-				console.log("Request to list players in room[%o]", data.playerId, data.roomName);
+				console.log("Request to list players in room[%o]", data.roomName);
 
 				// returns a game but we dont' do anything with it?
 				serverLogic.listPlayers( data.roomName, socket );
@@ -180,7 +188,7 @@ module.exports = function (io, router, gameManager)
 				console.log('server received request to start the pre-game');				
 				chat.emit('on_start_pre_game', null );
 			});
-			
+
 			socket.on('start_game', function( game_id )
 			{
 				console.log('server received request to start the game');

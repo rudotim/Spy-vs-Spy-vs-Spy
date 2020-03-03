@@ -4,10 +4,8 @@
 
 var Player = require('./player.js');
 
-let Game = function( chatroom )
+let Game = function()
 {
-	this.chatroom = chatroom;
-
 	// unique identifier
 	//this.id = utils.guid();
 

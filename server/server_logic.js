@@ -38,22 +38,10 @@ module.exports = function (io, gameManager)
 	{
 		const player = gameManager.findPlayerById( playerId );
 
-		const room = gameManager.findRoomByName( roomName );
+		const room = gameManager.getOrCreateRoomByName( roomName );
 
 		// associate player with room
-
-
-		// const game = gameManager.findGameByName( gameName );
-		//
-		// // create it if it didn't exist
-		// if ( game == null )
-		// {
-		// 	return _createRoom( gameName, playerId );
-		// }
-		// else
-		// {
-		// 	return game;
-		// }
+		gameManager.addPlayerToRoom( player, room );
 
 		let data =
 		{
@@ -63,27 +51,26 @@ module.exports = function (io, gameManager)
 		};
 
 		// join it
-		socket.emit( "on_player_joined", data);
+		//socket.emit( "on_player_joined", data);
+		// Send to everone else
+		sendToEveryoneElseInRoom(socket, "on_player_joined", data.roomName, data );
 	};
 
 
+	/**
+	 * Leave a room
+	 * @param playerId
+	 * @param roomName
+	 * @param socket
+	 */
 	ServerLogic.leaveRoom = function( playerId, roomName, socket )
 	{
 		const player = gameManager.findPlayerById( playerId );
 
-		// disassociate player with room
+		const room = gameManager.findRoomByName( roomName );
 
-		// const game = gameManager.findGameByName( gameName );
-		//
-		// // create it if it didn't exist
-		// if ( game == null )
-		// {
-		// 	return _createRoom( gameName, playerId );
-		// }
-		// else
-		// {
-		// 	return game;
-		// }
+		// disassociate player with room
+		gameManager.removePlayerFromRoom( player, room );
 
 		let data =
 			{
@@ -92,24 +79,69 @@ module.exports = function (io, gameManager)
 				"roomName" : roomName
 			};
 
-		// join it
-		socket.to(roomName).emit( "on_player_left", data);
+		// Send to everone else
+		sendToEveryoneElseInRoom(socket, "on_player_left", data.roomName, data );
 	};
 
 
+	/**
+	 * Return list of all players in the room with name roomName
+	 * @param roomName name of room
+	 * @param socket socket connection to client
+	 */
 	ServerLogic.listPlayers = function( roomName, socket )
 	{
-		const player = gameManager.findPlayerById( playerId );
-		
+		const players = gameManager.findPlayersInRoom( roomName );
+
 		let data =
 		{
-			"players" : playerId,
+			"players" : players,
 		};
 
-		// join it
-		socket.to(roomName).emit( "on_list_players", data);
+		// send only to ourself
+		console.log("Sending player list to ourself in room %o", roomName );
+		sendToOurself( socket, "on_list_players", data );
+
+		// Send to each member of the room EXCEPT us
+		//socket.to(roomName).emit( "on_list_players", data);
+
+		// Send to each member of the room INCLUDING us
+		//io.sockets.in(roomName).emit("on_list_players", data );
 	};
 
+	/**
+	 * Send ONLY to the initial sender
+	 * @param socket
+	 * @param channel
+	 * @param data
+	 */
+	function sendToOurself( socket, channel, data )
+	{
+		io.to( socket.id ).emit("on_list_players", data);
+	}
+
+	/**
+	 * Send to each member of the room EXCEPT the initial sender
+	 * @param socket
+	 * @param channel
+	 * @param roomName
+	 * @param data
+	 */
+	function sendToEveryoneElseInRoom( socket, channel, roomName, data )
+	{
+		socket.to(roomName).emit( channel, data);
+	}
+
+	/**
+	 * Send to each member of the room INCLUDING the initial sender
+	 * @param channel
+	 * @param roomName
+	 * @param data
+	 */
+	function sendToEveryoneInRoom( channel, roomName, data )
+	{
+		io.sockets.in(roomName).emit( channel, data);
+	}
 
 	/**
 	 * Create a new room with name and set player as the leader.  Also configure
