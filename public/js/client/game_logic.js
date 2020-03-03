@@ -1,21 +1,25 @@
 
 
-var GameLogic = function( gameControl )
+let GameLogic = function( gameControl, player )
 {
 	let _gameOptions;
 
-	var ctrl = {};
+	let ctrl = {};
 		
 	// holds local copy of game data
-	var _gameInstance = {};
+	let _gameInstance = {};
 	
 	const _gameControl = gameControl;
-	
+
+	// Game Control
+	// ------------------------------------------
+	let gameHasStarted = false;
+
 	// Game Play
 	// ------------------------------------------
 
 	// holds all Spies in game
-	var _all_spies = {			
+	let _all_spies = {			
 	};
 	
 	// things we need to keep track of
@@ -25,51 +29,51 @@ var GameLogic = function( gameControl )
 	// current room:   _currentRoom
 	
 	// holds our local player 
-	var _player;
+	let _player;
 	
 	// our local Spy object
-	var _my_spy;
+	let _my_spy;
 	
 	// the room we're currently in
-	var _currentRoom;
+	let _currentRoom;
 	
 	// Phaser object holding the room images
-	var _roomData;
+	let _roomData;
 		
-	var roomScene;
+	let roomScene;
 	
 	// Phaser
 	// ------------------------------------------	
-	var phaserGame;
+	let phaserGame;
 	
 	// User Input
 	// ------------------------------------------
-	var buttonDown = false;
-	var joystick;
+	let buttonDown = false;
+	let joystick;
 
 	// Game UI
 	// ------------------------------------------
-	var BORDER_TOP = 157;
-	var BORDER_BOTTOM = 275;
-	var BORDER_LEFT = 18;
-	var BORDER_RIGHT = 548;
-	var TRIANGLE_LEFT = 152;
-	var TRIANGLE_RIGHT = 396;
+	let BORDER_TOP = 157;
+	let BORDER_BOTTOM = 275;
+	let BORDER_LEFT = 18;
+	let BORDER_RIGHT = 548;
+	let TRIANGLE_LEFT = 152;
+	let TRIANGLE_RIGHT = 396;
 
-	var GAME_HEIGHT = (BORDER_BOTTOM - BORDER_TOP);
+	let GAME_HEIGHT = (BORDER_BOTTOM - BORDER_TOP);
 
-	var NOTHING = -1;
-	var STOP = 0;
-	var RIGHT = 1;
-	var LEFT = 2;
-	var TOP = 3;
-	var BOTTOM = 4;
+	let NOTHING = -1;
+	let STOP = 0;
+	let RIGHT = 1;
+	let LEFT = 2;
+	let TOP = 3;
+	let BOTTOM = 4;
 
 	_drawRoomCollisions = function(phaseGame)
 	{
 		console.log('drawing room collisions');
 
-		var graphics = phaserGame.add.graphics(0, 0);
+		let graphics = phaserGame.add.graphics(0, 0);
 
 		// set a fill and line style
 		graphics.lineStyle(3, 0x33FF00);
@@ -99,7 +103,7 @@ var GameLogic = function( gameControl )
 	{
 		console.log('loading file [' + levelJsonFile + ']');
 
-		var jsonData = undefined;
+		let jsonData = undefined;
 		
 		$.ajax(
 		{
@@ -109,8 +113,8 @@ var GameLogic = function( gameControl )
 		.done(function(data) {
 			jsonData = data;
 						
-			var json = 'data/' + jsonData.asset_json_file;
-			var img = 'data/' + jsonData.asset_image_file;
+			let json = 'data/' + jsonData.asset_json_file;
+			let img = 'data/' + jsonData.asset_image_file;
 
 			// read game data from JSON file
 			phaserGame.load.atlas('room_atlas', img, json, Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
@@ -181,7 +185,7 @@ var GameLogic = function( gameControl )
 	function create()
 	{		
 		// TODO: draw the first room for the current player
-		var startingRoom = "room0";
+		let startingRoom = "room0";
 		roomScene = phaserGame.add.sprite(0, 0, 'room_atlas', startingRoom );
 
 		_drawRoomCollisions(phaserGame);
@@ -193,8 +197,8 @@ var GameLogic = function( gameControl )
 		joystick.start();
 
 		// ctrl is our 'game_logic::this' variable  (probably better way to pass this in)
-		_gameOptions = new GameOptions( ctrl, phaserGame );
-		_gameOptions.show( );		
+//		_gameOptions = new GameOptions( ctrl, phaserGame );
+//		_gameOptions.show( );
 	}
 	
 	function createSpy( id, posX, posY, playerConfig )
@@ -206,7 +210,7 @@ var GameLogic = function( gameControl )
 	function update()
 	{
 		// if there was joystick usage, get movement direction
-		var movement = joystick.setVelocity( _my_spy, 0, 4 );
+		let movement = joystick.setVelocity( _my_spy, 0, 4 );
 		
 		// if no joystick usage, check keyboard
 	    if ( movement == 0 )
@@ -288,7 +292,7 @@ var GameLogic = function( gameControl )
 
 	function checkItemInterations( spy )
 	{
-		var door;
+		let door;
 		if ( (door = _currentRoom.checkDoors( spy.box.getBounds() )) )
 		{
 			console.log('looks like we collided with a door> %o', door);
@@ -326,11 +330,11 @@ var GameLogic = function( gameControl )
 		// up
 		case 4:
 
-			var top_border = BORDER_TOP;
+			let top_border = BORDER_TOP;
 			// If we're in left triangle... 
 			if ( spy.box.x <= TRIANGLE_LEFT )
 			{									
-				var max_vert_dist = (spy.box.x - BORDER_LEFT);
+				let max_vert_dist = (spy.box.x - BORDER_LEFT);
 				top_border = (BORDER_BOTTOM - max_vert_dist);
 
 				//console.log('t_border: ' + top_border + ' max(' + max_vert_dist + ') y: ' + spy.y + '   box(' + spy.box.x + ', ' + spy.box.y + ')');				
@@ -338,7 +342,7 @@ var GameLogic = function( gameControl )
 			// right triangle
 			else if ( spy.box.x >= TRIANGLE_RIGHT )
 			{
-				var max_vert_dist = (BORDER_RIGHT - spy.box.x);				
+				let max_vert_dist = (BORDER_RIGHT - spy.box.x);				
 				top_border = (BORDER_BOTTOM - max_vert_dist);
 
 				//console.log('t_border: ' + top_border + ' max(' + max_vert_dist + ') y: ' + spy.y + '   box(' + spy.box.x + ', ' + spy.box.y + ')');				
@@ -358,7 +362,7 @@ var GameLogic = function( gameControl )
 		// left
 		case 3:
 			
-			var left_border = 0;
+			let left_border = 0;
 			
 			// If we're in our triangle... 
 			if ( (spy.box.x - spy.speed) <= TRIANGLE_LEFT )
@@ -377,7 +381,7 @@ var GameLogic = function( gameControl )
 		// right
 		case 1:
 				
-			var right_border = 0;
+			let right_border = 0;
 			
 			// If we're in our triangle... 
 			if ( (spy.box.x + spy.speed) >= TRIANGLE_RIGHT )
@@ -423,13 +427,13 @@ var GameLogic = function( gameControl )
 	// 	_gameControl = gameControl;
 	// }
 	
-	ctrl.onStartPreGame = function()
+	ctrl.onStartGame = function()
 	{
 		// inflate game_div
 		$('#game_div').toggleClass('fullscreen');
 		
-		var gameWidth = window.innerWidth; // * window.devicePixelRatio;
-		var gameHeight = window.innerHeight; // * window.devicePixelRatio;
+		const gameWidth = window.innerWidth; // * window.devicePixelRatio;
+		const gameHeight = window.innerHeight; // * window.devicePixelRatio;
 		
 		phaserGame = new Phaser.Game(
 				gameWidth, gameHeight, 
@@ -439,9 +443,15 @@ var GameLogic = function( gameControl )
 			create : create,
 			update : update,
 			render : render
-		});		
-		
-	};	
+		});
+
+		gameHasStarted = true;
+	};
+
+	ctrl.gameHasStarted = function()
+	{
+		return gameHasStarted;
+	}
 
 	ctrl.showGameOptions = function()
 	{
@@ -499,9 +509,9 @@ var GameLogic = function( gameControl )
 	{
 		_gameInstance = gameInstance;
 		
-		var roomId;
+		let roomId;
 		// parse everything
-		var r = _gameInstance.jsonMapData.rooms.length;
+		let r = _gameInstance.jsonMapData.rooms.length;
 		while ( r-- )
 		{
 			roomId = _gameInstance.jsonMapData.rooms[r].id;
@@ -512,13 +522,13 @@ var GameLogic = function( gameControl )
 		_gameControl.triggerPlayerLoadedMap( _player );
 	}
 
-	ctrl.onStartGame = function( gameInstance, player )
-	{
-		console.log('onStartGame> %o', player );
-		console.log('onStartGame gameInstance> %o', gameInstance );
-		
-		_gameOptions.hide();		
-	};	
+	// ctrl.onStartGame = function( gameInstance, player )
+	// {
+	// 	console.log('onStartGame> %o', player );
+	// 	console.log('onStartGame gameInstance> %o', gameInstance );
+	//
+	// 	_gameOptions.hide();
+	// };
 
 	
 	// -------------------------------------------------------
