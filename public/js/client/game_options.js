@@ -2,36 +2,36 @@
 
 
 
-var GameOptions = function( gameLogic, phaserGame )
+let GameOptions = function( gameLogic, phaserGame )
 {
-	var optionwindow = {};
+	let optionwindow = {};
 	
-	var _gameLogic = gameLogic;
-	var _phaser = phaserGame;
+	let _gameLogic = gameLogic;
+	let _phaser = phaserGame;
 	
-	var modal;
+	let modal;
 	
-	var tween = null;
-	var popup;
+	let tween = null;
+	let popup;
 	
-	var startButton;
+	let startButton;
 	
 	// color picker
-	var bmd;
-	var colorWheel;
-	var sprite;
-	var spyColor;
+	let bmd;
+	let colorWheel;
+	let sprite;
+	let spyColor;
 	
-	var spyModel;
-	var spyBitmap;
+	let spyModel;
+	let spyBitmap;
 		
 	_initModal = function()
 	{
 		console.log('initting modal...');
 		console.log(_phaser);
 			
-		var bg_width = 640;
-		var bg_height = 400;
+		let bg_width = 640;
+		let bg_height = 400;
 		
 	    //  You can drag the pop-up window around
 	    popup = _phaser.add.sprite(_phaser.world.centerX - (bg_width/2), _phaser.world.centerY - (bg_height/2), 'choosePlayerBG');
@@ -41,7 +41,7 @@ var GameOptions = function( gameLogic, phaserGame )
 		tooltip = _phaser.make.bitmapData(64, 64);
 		sprite = _phaser.add.sprite(0, 0, tooltip);
 
-		var wheel_width = 150, wheel_height = 150;
+		let wheel_width = 150, wheel_height = 150;
 	    colorWheel = _phaser.add.sprite(0, 0, 'colorWheel');
 	    colorWheel.width = wheel_width;
 	    colorWheel.height = wheel_height;
@@ -67,8 +67,8 @@ var GameOptions = function( gameLogic, phaserGame )
 	    startButton.events.onInputDown.add(_clickStart, this);
 		popup.addChild( startButton );
 				
-		var spyPosX = 210 - (150/2);
-		//var spyPosX = 100;
+		let spyPosX = 210 - (150/2);
+		//let spyPosX = 100;
 	    spyModel = _phaser.make.sprite(spyPosX, 100, 'spyWhite');
 	    spyModel.scale.set(5);
 	    popup.addChild( spyModel );
@@ -79,11 +79,11 @@ var GameOptions = function( gameLogic, phaserGame )
 		spyBitmap.add( spyModel );		
 		
 	    //  Position the close button to the top-right of the popup sprite (minus 8px for spacing)
-	    var pw = (popup.width) - 46;
-	    var ph = 10; //(popup.height) - 10;
+	    let pw = (popup.width) - 46;
+	    let ph = 10; //(popup.height) - 10;
 
 	    //  And click the close button to close it down again
-	    var closeButton = _phaser.make.sprite(pw, -ph, 'closeButton');
+	    let closeButton = _phaser.make.sprite(pw, -ph, 'closeButton');
 	    closeButton.inputEnabled = true;
 	    closeButton.input.priorityID = 1;
 	    closeButton.input.useHandCursor = true;
@@ -97,14 +97,13 @@ var GameOptions = function( gameLogic, phaserGame )
 	    popup.visible = false;
 	};
 	
-	var tooltip;
-	var sprite;
-	
+	let tooltip;
+
 	_updateTooltip = function(pointer, x, y) 
 	{
-		var px = parseInt(x - popup.x - 490 + 75, 10);
-		var py = parseInt(y - popup.y - 175 + 75, 10);
-		//var py = y - popup.y - 175 + 75;
+		let px = parseInt(x - popup.x - 490 + 75, 10);
+		let py = parseInt(y - popup.y - 175 + 75, 10);
+		//let py = y - popup.y - 175 + 75;
 		
 		//console.log('pointer(', x, y, ') colorWheel(', colorWheel.x, ', ', colorWheel.y, ') popup(', popup.x, ', ', popup.y, ')' );
 		//console.log('px/py(', px, py, ')');
@@ -126,7 +125,7 @@ var GameOptions = function( gameLogic, phaserGame )
 	{		
 		console.log('color chosen> %o', spyColor);
 		
-		var playerConfig = {
+		let playerConfig = {
 				'color' : spyColor
 		};
 		
@@ -161,10 +160,10 @@ var GameOptions = function( gameLogic, phaserGame )
 	
 	_startCountdown = function( startCount, x, y )
 	{
-	   //var item = modal.getModalItem("modalOptions", 5);
+	   //let item = modal.getModalItem("modalOptions", 5);
 	    //item.x = x;
 	    //item.y = y;
-	    //var index = Number(item.text);
+	    //let index = Number(item.text);
 
 	    _clickStart();
 		//gameControl.triggerStartGame();
@@ -181,7 +180,7 @@ var GameOptions = function( gameLogic, phaserGame )
 	_countDown = function(fn, startCount, x, y, endFn) {
 	    var endFn = endFn || function(){};
 
-	    var _timer = _phaser.time.create(false);
+	    let _timer = _phaser.time.create(false);
 	    _timer.start();
 	    _timer.onComplete.add(endFn);
 	    _timer.repeat(Phaser.Timer.SECOND, startCount, fn, this, startCount, x, y);
@@ -190,12 +189,12 @@ var GameOptions = function( gameLogic, phaserGame )
 
 	_updateCountdown = function( startCount, x, y ) {
 		/*
-	    var item = modal.getModalItem("modalOptions", 5);
+	    let item = modal.getModalItem("modalOptions", 5);
 	    
 	    if ( item.text == "Start" )
 	    	item.text = startCount;
 	    
-	    var index = Number(item.text);
+	    let index = Number(item.text);
 
 	    window.console.log("index: ", index, item);
 

@@ -197,8 +197,8 @@ let GameLogic = function( gameControl, player )
 		joystick.start();
 
 		// ctrl is our 'game_logic::this' variable  (probably better way to pass this in)
-//		_gameOptions = new GameOptions( ctrl, phaserGame );
-//		_gameOptions.show( );
+		_gameOptions = new GameOptions( ctrl, phaserGame );
+		_gameOptions.show( );
 	}
 	
 	function createSpy( id, posX, posY, playerConfig )
@@ -213,7 +213,7 @@ let GameLogic = function( gameControl, player )
 		let movement = joystick.setVelocity( _my_spy, 0, 4 );
 		
 		// if no joystick usage, check keyboard
-	    if ( movement == 0 )
+	    if ( movement === 0 )
 	    	{
 	    		if (phaserGame.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
 	    			movement = 1;
@@ -229,7 +229,7 @@ let GameLogic = function( gameControl, player )
 	    {
 		    Object.keys(_all_spies).forEach(function(key) 
 		    	{		    		
-		    		if ( _all_spies[key]._room_id == _currentRoom.id )
+		    		if ( _all_spies[key]._room_id === _currentRoom.id )
 		    		{
 		    			_all_spies[key].setVisibility( true );
 		    		}
@@ -241,7 +241,7 @@ let GameLogic = function( gameControl, player )
 	    }
 	    // if there was movement
 		// 0 = none, 1 = right, 2 = down, 3 = left, 4 = up
-		if ( movement != 0 )
+		if ( movement !== 0 )
 		{
 			switch ( movement )
 			{
@@ -261,7 +261,7 @@ let GameLogic = function( gameControl, player )
 			case 4:
 				_my_spy.y -= _my_spy.speed;
 				break;
-			};
+			}
 			
 			// check for collisions and boundaries
 			checkCollisions( _my_spy, movement );
@@ -404,7 +404,7 @@ let GameLogic = function( gameControl, player )
 		}
 		
 		spy.updateBox( spy );
-	};
+	}
 
 	
 	
@@ -415,12 +415,12 @@ let GameLogic = function( gameControl, player )
 	ctrl.getPlayer = function()
 	{
 		return _player;
-	}
+	};
 
 	ctrl.setPlayerName = function( newName )
 	{
 		_player.name = newName;
-	}
+	};
 	
 	// ctrl.setGameControl = function(gameControl)
 	// {
@@ -451,13 +451,13 @@ let GameLogic = function( gameControl, player )
 	ctrl.gameHasStarted = function()
 	{
 		return gameHasStarted;
-	}
+	};
 
 	ctrl.showGameOptions = function()
 	{
 		// draw gray rectangle on top of viewport
 		_gameOptions.show();		
-	}
+	};
 		
 	ctrl.invokeChoosePlayer = function( playerIndex, playerConfig, playerChosenCallback )
 	{
@@ -471,9 +471,9 @@ let GameLogic = function( gameControl, player )
 		//spy.setVisibility( false );
 		
 		// when it's us
-		if ( player_id == _player.id )
+		if ( player_id === _player.id )
 		{
-			if ( _my_spy != undefined )
+			if ( _my_spy !== undefined )
 				_my_spy.destroySprite();
 			
 			_my_spy = createSpy( player_id, 250, 200, player_config );
@@ -481,12 +481,12 @@ let GameLogic = function( gameControl, player )
 		else
 		// when it's someone else
 		{
-			if ( _all_spies[ player_id ] != undefined )
+			if ( _all_spies[ player_id ] !== undefined )
 				_all_spies[ player_id ].destroySprite();
 
 			_all_spies[ player_id ] = createSpy( player_id, 200, 125, player_config );
 		}	
-	}
+	};
 	
 	ctrl.playerIsReady = function()
 	{
@@ -498,12 +498,12 @@ let GameLogic = function( gameControl, player )
 	ctrl.onPlayerReady = function( player_id )
 	{
 		console.log('player> %o is ready', player_id);
-	}
+	};
 
 	ctrl.onGameLoading = function( game_loading_pct )
 	{
 		console.log('game loaded pct> %o', game_loading_pct);
-	}
+	};
 	
 	ctrl.onLoadMapData = function( gameInstance )
 	{
@@ -520,7 +520,7 @@ let GameLogic = function( gameControl, player )
 		
 		// let server know we've loaded everything
 		_gameControl.triggerPlayerLoadedMap( _player );
-	}
+	};
 
 	// ctrl.onStartGame = function( gameInstance, player )
 	// {
@@ -547,12 +547,12 @@ let GameLogic = function( gameControl, player )
 		console.log('onPlayerLeftRoom> player ', player.id, ' left room ', roomId );
 				
 		// if it's someone else, set their room so we'll know to stop drawing them
-		if ( player.id != _my_spy._player_id )
+		if ( player.id !== _my_spy._player_id )
 		{
 			console.log('we will stop drawing player ', player.id);
 			_all_spies[ player.id ].setRoom( roomId );
 		}		
-	}
+	};
 
 	ctrl.onPlayerEnteredRoom = function( player, teleports_to )
 	{
@@ -568,7 +568,7 @@ let GameLogic = function( gameControl, player )
 		*/
 		
 		// if it's us
-		if ( player.id == _my_spy._player_id )
+		if ( player.id === _my_spy._player_id )
 		{
 			//if ( _currentRoom === undefined /*|| _currentRoom.id == teleports_to.room */ )
 			{
