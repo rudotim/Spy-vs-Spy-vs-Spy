@@ -86,7 +86,7 @@ module.exports = function (io, gameManager)
 
 	/**
 	 * Return list of all players in the room with name roomName
-	 * @param roomName name of room
+	 * @param roomName name of chat room
 	 * @param socket socket connection to client
 	 */
 	ServerLogic.listPlayers = function( roomName, socket )
@@ -107,6 +107,18 @@ module.exports = function (io, gameManager)
 
 		// Send to each member of the room INCLUDING us
 		//io.sockets.in(roomName).emit("on_list_players", data );
+	};
+
+	/**
+	 * Send this chat message to everyone else in the chat room
+	 * @param roomName name of chat room
+	 * @param message text content to send to the other users in the room
+	 * @param socket socket connection to client
+	 */
+	ServerLogic.sendChat = function( roomName, message, socket )
+	{
+		// Send to everone else
+		sendToEveryoneElseInRoom(socket, "on_chat", roomName, message );
 	};
 
 	/**

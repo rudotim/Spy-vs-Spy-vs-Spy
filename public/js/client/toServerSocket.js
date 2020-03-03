@@ -47,42 +47,37 @@ const toServerSocket = function( socket )
 		socketRoom.emit( 'list_players', data );
 	};
 
-	// const _onJoinRoomSuccess = function( gameInstance, player )
-	// {
-	// 	var urlid = '/' + gameInstance.name;
-	//
-	// 	console.log('client joining ' + urlid + '/[' + gameInstance.datachannel + ']');
-	//
-	// 	// initialize socket to server and establish communication callback channels
-	// 	socket = io( urlid );
-	//
-	// 	socket.on('connection', function(msg)
-	// 	{
-	// 		console.log('CONNECTED TO SERVER');
-	// 	});
-	//
-	// 	// tell server we have joined the room
-	// 	socket.emit( 'player_joined', player );
-	//
-	// 	// redraw UI with our name in the list
-	// 	_updateRoomListUI( gameInstance.players );
-	//
-	// 	console.log('ok, you\'ve joined room [' + gameInstance.game_id + ']');
-	// };
-
-
-	clientRequest.sendPlayerJoined = function( player )
-	{
-		socket.emit('player_joined', player );
-	};
-
 	/**
-	 * Tell backend that one of our properties has updated.
+	 * Called when a user sends chat text.
+	 * @param roomName name of room the user is in
+	 * @param message text content to send to the other users in the room
+	 * @param socketRoom socket
 	 */
-	_updatePlayerOnServer = function( player )
+	clientRequest.sendChat = function( roomName, message, socketRoom )
 	{
-        socket.emit('player_attr_updated', player );
+		const data =
+			{
+				"roomName" : roomName,
+				"message" : message
+			};
+
+		console.log("sending chat data> ", data);
+
+		socketRoom.emit('on_chat', data);
 	};
+
+	// clientRequest.sendPlayerJoined = function( player )
+	// {
+	// 	socket.emit('player_joined', player );
+	// };
+	//
+	// /**
+	//  * Tell backend that one of our properties has updated.
+	//  */
+	// _updatePlayerOnServer = function( player )
+	// {
+     //    socket.emit('player_attr_updated', player );
+	// };
 	
 	
 	
@@ -210,12 +205,7 @@ const toServerSocket = function( socket )
 	{
 		socket.emit('player_left_room', player, roomId );
 	};
-	
-	clientRequest.sendChat = function( msg )
-	{
-		socket.emit('on_chat', msg);
-	};
-	
+
 	clientRequest.sendPosUpdate = function( spy )
 	{
 		if ( spy === undefined )

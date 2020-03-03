@@ -39,12 +39,13 @@ const GameController = function( frontEnd )
 
 	function init()
 	{
-		console.log("initialization");
-
 		// gameControl
 		_gameLogic = GameLogic( clientRequest );
 	}
 
+	// -------------------------------------------------------
+	// Lobby Config
+	// -------------------------------------------------------
 
 	/**
 	 * Create a new player on the server with the supplied name
@@ -116,7 +117,7 @@ const GameController = function( frontEnd )
 
 
 	/**
-	 * Called whenever we get notified that a new player has joined this chat room
+	 * Called when a new player has joined the room we're in.
 	 * @param playerId
 	 * @param playerName
 	 * @param chatRoomName
@@ -134,6 +135,12 @@ const GameController = function( frontEnd )
 		frontEnd.updateRoomListUI( _chatroom.players );
 	};
 
+	/**
+	 * Called when some other player in our room has left.
+	 * @param playerId
+	 * @param playerName
+	 * @param chatRoomName
+	 */
 	clientRequest.onPlayerLeftRoom = function( playerId, playerName, chatRoomName )
 	{
 		// todo: wrap in logic to control creation and structure
@@ -147,6 +154,32 @@ const GameController = function( frontEnd )
 	};
 
 	/**
+	 * Called when a new person has just joined a room.  They will have no idea who
+	 * is in the room unless they receive a complete list from the server.  This
+	 * message is sent only to the one user and not to anyone else.
+	 * @param players
+	 */
+	clientRequest.onListPlayers = function( players )
+	{
+		console.log("onListPlayers> %o", players );
+
+		_chatroom.players = players;
+
+		frontEnd.updateRoomListUI( players );
+	};
+
+
+	/**
+	 * Called when a user sends chat text.
+	 * @param message text content to send to the other users in the room
+	 */
+	clientRequest.sendChat = function( message )
+	{
+		_toServer.sendChat( currentRoomName, message, _socket );
+	};
+
+
+	/**
 	 * Called when the leader of a chat room has initiated the start of the game
 	 */
 	clientRequest.onStartGame = function()
@@ -158,67 +191,13 @@ const GameController = function( frontEnd )
 		_fromGameServerSocket = new fromServerSocket(_socket, _gameLogic, frontEnd);
 	};
 
-
-	clientRequest.onListPlayers = function( players )
-	{
-		console.log("onListPlayers> %o", players );
-
-		_chatroom.players = players;
-
-		frontEnd.updateRoomListUI( players );
-	};
-
-
-
-
-
 	/**
-	 * Tell backend that one of our properties has updated.
-	 */
-	let _updatePlayerOnServer = function()
-	{
-		// don't send anything unless we've connected
-		if ( _gameInstance != null )
-		{
-            //toServerSocket._updatePlayerOnServer( _gameLogic.getPlayer() );
-            //_socket.emit('player_attr_updated', _gameLogic.getPlayer());
-        }
-	};
-	
-	
-	
-	// -------------------------------------------------------
-	// Lobby Config
-	// -------------------------------------------------------
-	
-	/**
-	 * Change my player name in the game room lobby
-	 */
-	clientRequest.setPlayerName = function( newPlayerName )
-	{
-		console.log('setting player name: ' + newPlayerName );
-		
-		_gameLogic.getPlayer().name = newPlayerName;
-		
-		// fire player name update
-		_updatePlayerOnServer();
-	};
-		
-	/**
-	 * List any on-going games which I can join
+	 * List any on-going chat rooms which you can join
 	 */
 	clientRequest.listGames = function()
 	{
-		console.log('retrieving list of games from server');
-		
-		return "empty";
+		console.error('listing games has not yet been implemented');
 	};
-
-
-
-
-
-	
 
 
 	
@@ -289,8 +268,6 @@ const GameController = function( frontEnd )
 	// Game Play
 	// -------------------------------------------------------
 
-	
-	
 	clientRequest.sendPlayerEnteredRoom = function( player, teleports_to )
 	{
 		_socket.emit('player_entered_room', player, teleports_to );
@@ -300,20 +277,7 @@ const GameController = function( frontEnd )
 	{
 		_socket.emit('player_left_room', player, roomId );
 	};
-	
-	clientRequest.sendChat = function( msg )
-	{
-		const data =
-		{
-			"roomName" : currentRoomName,
-			"msg" : msg
-		};
 
-		console.log("sending chat data> ", data);
-
-		_socket.emit('on_chat', data);
-	};
-	
 	clientRequest.sendPosUpdate = function( spy )
 	{
 		if ( spy === undefined )
@@ -335,16 +299,7 @@ const GameController = function( frontEnd )
 
 let frontEnd = toFrontEnd();
 
-//let gameLogic = GameLogic();
-
 const gameControl = GameController( frontEnd );
-// let fromServerSocket = fromServerSocket( socket, gameLogic, frontEnd );
-
-//var gameLogic = new GameLogic();
-
-//var gameControl = new GameControl( gameLogic );
-
-//gameLogic.setGameControl( gameControl );
 
 
 

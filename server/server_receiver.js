@@ -141,13 +141,13 @@ module.exports = function (io, router, gameManager)
 			{
 				console.log("Request to list players in room[%o]", data.roomName);
 
-				// returns a game but we dont' do anything with it?
 				serverLogic.listPlayers( data.roomName, socket );
 			});
 
 
 			/**
 			 * Received when a player successfully joins a room.
+			 *
 			 * data.playerId
 			 * data.roomName
 			 */
@@ -158,17 +158,23 @@ module.exports = function (io, router, gameManager)
 				//socket.player = player;
 				serverLogic.playerHasJoined( data.playerId, data.roomName, socket );
 			});
-			
+
+			/**
+			 * Received when a player leaves a chat room
+			 */
 			socket.on('player_left', function( player )
 			{
 				serverLogic.playerHasLeft( player, socket );
 			});
-			
-			socket.on('player_attr_updated', function( player )
+
+			/**
+			 * Received when a player sends a chat message in a chat room
+			 */
+			socket.on('on_chat', function(data)
 			{
-				serverLogic.playerAttributeUpdated( player, socket );
+				serverLogic.sendChat( data.roomName, data.message, socket );
 			});
-			
+
 			// -------------------------------------------------------
 			// Game Play Config
 			// -------------------------------------------------------			
@@ -204,15 +210,7 @@ module.exports = function (io, router, gameManager)
 			// 	socket.broadcast.to(gameInstance.name).emit('on_data', spyPos);
 			// });
 			//
-			socket.on('on_chat', function(data)
-			{
-				console.log("got yo chat! %o", data);
-				//io.of(data.roomName).emit("on_chat", data.msg );
-				io.sockets.in(data.roomName).emit("on_chat", data.msg );
 
-				//chat.emit("on_chat", data);
-				//socket.broadcast.to(gameInstance.name).emit('on_chat', data);
-			});
 			//
 			// socket.on('player_entered_room', function(player, teleports_to)
 			// {

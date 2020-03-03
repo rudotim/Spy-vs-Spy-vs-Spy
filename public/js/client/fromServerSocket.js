@@ -56,6 +56,11 @@ const fromServerSocket = function( socket, gameController )
 		gameController.onListPlayers( data.players );
 	});
 
+	socket.on( 'on_chat', function(message)
+	{
+		console.log('got chat data[' + message + ']');
+	});
+
 	socket.on( 'on_start_game', function()
 	{
 		console.log('SERVER IS STARTING GAME!');
@@ -119,11 +124,6 @@ const fromServerSocket = function( socket, gameController )
     // -------------------------------------------------------
     // Game Play
     // -------------------------------------------------------
-
-    socket.on( 'on_chat', function(msg)
-    {
-        console.log('got chat data[' + msg + ']');
-    });
 
     socket.on( 'on_data', function( spyPos )
     {
