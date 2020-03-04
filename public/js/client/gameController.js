@@ -99,6 +99,8 @@ const GameController = function( frontEnd )
 			_toServer.joinRoom( _player, newRoomName, _socket );
 		}
 
+		// Issue: _chatroom is created new each time. so it can't have the gameStarted flag.  boyoyoyng!
+
 		// todo: create game instance so that we can locally add players and stuff
 		_chatroom = {
 			name : newRoomName,
@@ -106,11 +108,16 @@ const GameController = function( frontEnd )
 		};
 
 		// list players to find out who is here
-		_toServer.listPlayersInRoom( newRoomName, _socket );
-
-		// todo: check if game is in progress
+		//_toServer.listPlayersInRoom( newRoomName, _socket );
+		_toServer.getRoomStatus( newRoomName, _socket );
 
 		currentRoomName = newRoomName;
+
+		if ( _chatroom.gameStarted === true )
+		{
+			// the game has already started!  start it for the new guy!
+			this.onStartGame();
+		}
 
 		return _socket;
 	};
@@ -168,6 +175,23 @@ const GameController = function( frontEnd )
 		frontEnd.updateRoomListUI( players );
 	};
 
+	/**
+	 * Called when a new person has just joined a room.  This callback gives the new
+	 * user the basic information they need to know about what is happening in this room.
+	 *
+	 * @param players
+	 * @param gameStarted
+	 */
+	clientRequest.onReceiveRoomStatus = function( players, gameStarted )
+	{
+		console.log("onReceiveRoomStatus players> %o", players );
+		console.log("onReceiveRoomStatus gameStarted> %o", gameStarted );
+
+		_chatroom.players = players;
+		_chatroom.gameStarted = gameStarted;
+
+		frontEnd.updateRoomListUI( players );
+	};
 
 	/**
 	 * Called when a user sends chat text.
@@ -210,7 +234,7 @@ const GameController = function( frontEnd )
 		_gameLogic = new GameLogic( clientRequest, _player );
 
 		// start listening for game specific events
-		_fromGameServerSocket = new fromServerSocket(_socket, _gameLogic, frontEnd);
+		_fromGameServerSocket = new fromGameServerSocket(_socket, _gameLogic, frontEnd);
 
 		_gameLogic.onStartGame();
 	};

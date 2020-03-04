@@ -94,12 +94,9 @@ module.exports = function ()
 	};
 
 
-	GameManager.createGame = function( gameName, playerId )
+	GameManager.createGame = function( chatroom )
 	{
-		let game = new Game();
-
-		game.setName( gameName );
-		game.setLeader( playerId );
+		const game = new Game( chatroom );
 
 		return _storeGame( game );
 	};

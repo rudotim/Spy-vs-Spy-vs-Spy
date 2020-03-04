@@ -2,12 +2,6 @@
 
 const fromGameServerSocket = function( socket, gameController )
 {
-	// socket.on( 'on_start_game', function()
-	// {
-	// 	console.log('SERVER IS STARTING GAME!');
-	// 	gameLogic.onStartGame();
-	// });
-
     // -------------------------------------------------------
     // Game Play Config
     // -------------------------------------------------------
@@ -47,10 +41,10 @@ const fromGameServerSocket = function( socket, gameController )
     // Game Play
     // -------------------------------------------------------
 
-    socket.on( 'on_chat', function(msg)
-    {
-        console.log('got chat data[' + msg + ']');
-    });
+    // socket.on( 'on_chat', function(msg)
+    // {
+    //     console.log('got chat data[' + msg + ']');
+    // });
 
     socket.on( 'on_data', function( spyPos )
     {

@@ -50,8 +50,6 @@ module.exports = function (io, gameManager)
 			"roomName" : roomName
 		};
 
-		// join it
-		//socket.emit( "on_player_joined", data);
 		// Send to everone else
 		sendToEveryoneElseInRoom(socket, "on_player_joined", data.roomName, data );
 	};
@@ -104,12 +102,30 @@ module.exports = function (io, gameManager)
 		// send only to ourself
 		console.log("Sending player list to ourself in room %o", roomName );
 		sendToOurself( socket, "on_list_players", data );
+	};
 
-		// Send to each member of the room EXCEPT us
-		//socket.to(roomName).emit( "on_list_players", data);
+	/**
+	 * Return the current status of the room.
+	 * This includes a list of each player
+	 * and whether or not a game has been started
+	 * @param roomName
+	 * @param socket
+	 */
+	ServerLogic.getRoomStatus = function( roomName, socket )
+	{
+		const players = gameManager.findPlayersInRoom( roomName );
 
-		// Send to each member of the room INCLUDING us
-		//io.sockets.in(roomName).emit("on_list_players", data );
+		const game = gameManager.findGameByName( roomName );
+
+		let data =
+			{
+				"gameStarted" : game !== undefined,
+				"players" : players,
+			};
+
+		// send only to ourself
+		//console.log("Sending to room %o, the status: %o", roomName, data );
+		sendToOurself( socket, "on_room_status", data );
 	};
 
 	/**
@@ -127,7 +143,9 @@ module.exports = function (io, gameManager)
 
 	ServerLogic.startGame = function( roomName, socket )
 	{
-		// todo: mark this game as having been started
+		const chatroom = gameManager.findRoomByName( roomName );
+
+		_gameManager.createGame( chatroom );
 
 		// Send to everone else
 		sendToEveryoneInRoom( "on_start_game", roomName );
@@ -141,7 +159,7 @@ module.exports = function (io, gameManager)
 	 */
 	function sendToOurself( socket, channel, data )
 	{
-		io.to( socket.id ).emit("on_list_players", data);
+		io.to( socket.id ).emit(channel, data);
 	}
 
 	/**
@@ -260,51 +278,51 @@ module.exports = function (io, gameManager)
 
 
 
-	/**
-	 * Called when a player successfully joins a room.
-	 * data.playerId
-	 * data.roomName
-	 */
-	ServerLogic.playerHasJoined = function( playerId, roomName, socket )
-	{
-		console.log('playerHasJoined> %o', playerId );
-
-		// TODO: We are currently not doing anything with the room name?
-
-		const player = gameManager.findPlayerById( playerId );
-
-		// find game associated with player
-		const  game = gameManager.findGameByPlayerId( playerId );
-		const serverPlayers = game.players;
-
-		// notify other clients that a player has joined
-		socket.broadcast.to(game.name).emit('on_player_joined', serverPlayers, player.name);
-	};
-	
-	ServerLogic.playerHasLeft = function( player, socket )
-	{
-		console.log('playerHasLeft> %o', player );
-	
-		// find game associated with player
-		//let game = gameManager.findGameByPlayerId( player.id );
-		
-		//game.removePlayerById( player.id );
-		
-		//socket.broadcast.to(game.name).emit('on_player_left', game.players, player);
-	};
-	
-	ServerLogic.playerAttributeUpdated = function( player, socket )
-	{
-		console.log('playerAttributeUpdated> %o', player );
-		
-		// find game associated with player
-		let game = gameManager.findGameByPlayerId( player.id );
-		
-		// TODO: change player attribute
-		
-		console.log('server[player_attr_updated]> got data : ' + player.name);
-		socket.broadcast.to(game.name).emit('on_player_attr_updated', game.players, player);
-	};
+	// /**
+	//  * Called when a player successfully joins a room.
+	//  * data.playerId
+	//  * data.roomName
+	//  */
+	// ServerLogic.playerHasJoined = function( playerId, roomName, socket )
+	// {
+	// 	console.log('playerHasJoined> %o', playerId );
+	//
+	// 	// TODO: We are currently not doing anything with the room name?
+	//
+	// 	const player = gameManager.findPlayerById( playerId );
+	//
+	// 	// find game associated with player
+	// 	const  game = gameManager.findGameByPlayerId( playerId );
+	// 	const serverPlayers = game.players;
+	//
+	// 	// notify other clients that a player has joined
+	// 	socket.broadcast.to(game.name).emit('on_player_joined', serverPlayers, player.name);
+	// };
+	//
+	// ServerLogic.playerHasLeft = function( player, socket )
+	// {
+	// 	console.log('playerHasLeft> %o', player );
+	//
+	// 	// find game associated with player
+	// 	//let game = gameManager.findGameByPlayerId( player.id );
+	//
+	// 	//game.removePlayerById( player.id );
+	//
+	// 	//socket.broadcast.to(game.name).emit('on_player_left', game.players, player);
+	// };
+	//
+	// ServerLogic.playerAttributeUpdated = function( player, socket )
+	// {
+	// 	console.log('playerAttributeUpdated> %o', player );
+	//
+	// 	// find game associated with player
+	// 	let game = gameManager.findGameByPlayerId( player.id );
+	//
+	// 	// TODO: change player attribute
+	//
+	// 	console.log('server[player_attr_updated]> got data : ' + player.name);
+	// 	socket.broadcast.to(game.name).emit('on_player_attr_updated', game.players, player);
+	// };
 	
 	ServerLogic.playerIsReady = function( player, socket )
 	{

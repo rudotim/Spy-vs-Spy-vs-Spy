@@ -47,6 +47,17 @@ const toServerSocket = function( socket )
 		socketRoom.emit( 'list_players', data );
 	};
 
+	clientRequest.getRoomStatus = function( roomName, socketRoom )
+	{
+		console.log('Requesting status for room %o', roomName );
+
+		const data = {
+			roomName : roomName
+		};
+
+		socketRoom.emit( 'get_room_status', data );
+	};
+
 	/**
 	 * Called when a user sends chat text.
 	 * @param roomName name of room the user is in
