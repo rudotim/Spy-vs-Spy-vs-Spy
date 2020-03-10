@@ -108,16 +108,9 @@ const GameController = function( frontEnd )
 		};
 
 		// list players to find out who is here
-		//_toServer.listPlayersInRoom( newRoomName, _socket );
 		_toServer.getRoomStatus( newRoomName, _socket );
 
 		currentRoomName = newRoomName;
-
-		if ( _chatroom.gameStarted === true )
-		{
-			// the game has already started!  start it for the new guy!
-			this.onStartGame();
-		}
 
 		return _socket;
 	};
@@ -191,6 +184,12 @@ const GameController = function( frontEnd )
 		_chatroom.gameStarted = gameStarted;
 
 		frontEnd.updateRoomListUI( players );
+
+		if ( _chatroom.gameStarted === true )
+		{
+			// the game has already started!  start it for the new guy!
+			this.onStartGame();
+		}
 	};
 
 	/**
