@@ -45,7 +45,7 @@ let GameLogic = function( gameControl, player )
 	// Phaser
 	// ------------------------------------------	
 	let phaserGame;
-	
+
 	// User Input
 	// ------------------------------------------
 	let buttonDown = false;
@@ -69,12 +69,13 @@ let GameLogic = function( gameControl, player )
 	let TOP = 3;
 	let BOTTOM = 4;
 
-	_drawRoomCollisions = function(phaseGame)
+	const _drawRoomCollisions = function()
 	{
 		console.log('drawing room collisions');
 
-		let graphics = phaserGame.add.graphics(0, 0);
+		let graphics = this.add.graphics(0, 0);
 
+		graphics.beginPath();
 		// set a fill and line style
 		graphics.lineStyle(3, 0x33FF00);
 
@@ -96,14 +97,16 @@ let GameLogic = function( gameControl, player )
 		// show 45 degree angle
 		graphics.lineStyle(3, 0x3300FF);
 		graphics.moveTo(18, 274);
-		graphics.lineTo(218, 74);
-	}
+		graphics.closePath();
+		graphics.strokePath();
+	};
 
-	_loadLevel = function(levelJsonFile, phaserGame)
+	const _loadLevel = function(levelJsonFile)
 	{
 		console.log('loading file [' + levelJsonFile + ']');
 
 		let jsonData = undefined;
+		const that=this;
 		
 		$.ajax(
 		{
@@ -117,7 +120,7 @@ let GameLogic = function( gameControl, player )
 			let img = 'data/' + jsonData.asset_image_file;
 
 			// read game data from JSON file
-			phaserGame.load.atlas('room_atlas', img, json, Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
+			that.load.atlas('room_atlas', img, json, Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
 		})
 		.fail(function(data) {
 			console.log( "error> $o", data );
@@ -151,77 +154,142 @@ let GameLogic = function( gameControl, player )
 	function preload()
 	{
 		// set scaling
-		phaserGame.scale.scaleMode = Phaser.ScaleManager.RESIZE;
+		// doesn't work in 3.2
+		//this.scale.scaleMode = Phaser.ScaleManager.RESIZE;
 
 		// This function will be executed at the beginning
 		// That's where we load the images and sounds
 		// game.scale.scaleMode = Phaser.ScaleManager.SHOW_ALL;
 		// game.scale.pageAlignHorizontally = true;
 		// game.scale.pageAlignVertically = true;
-		phaserGame.stage.backgroundColor = '#eee';
+
+		// doesn't work in 3.2
+		//this.stage.backgroundColor = '#eee';
 
 		// load entire spy vs spy sheet
-		phaserGame.load.atlasJSONHash('spies', 'img/spritesheet.png', 'img/sprites.json');
+		//this.load.atlasJSONHash('spies', 'img/spritesheet.png', 'img/sprites.json');
 
 		// synchronus loading of JSON data
-		_roomData = _loadLevel('data/level_lobby.json', phaserGame);
+		_roomData = _loadLevel.call(this, 'data/level_lobby.json');
 
-		phaserGame.load.image('startButton', 'img/buttonStart.png');
-		phaserGame.load.image('closeButton', 'img/closeButton.png');
-		phaserGame.load.image("colorWheel","img/colorWheel.png");
-		
-		phaserGame.load.image("modalBG","img/modalBG.png");
-		phaserGame.load.image("choosePlayerBG","img/choose_player_bg.png");
+		//this.load.plugin('DialogModalPlugin', './js/client/dialog_plugin.js');
+		//this.load.plugin('BasePlugin', './js/phaser/plugins/TimDialog.js');
+		this.load.scenePlugin({
+		    key: 'BasePlugin',
+		    url: './js/phaser/plugins/TimDialog.js',
+		    sceneKey: 'BasePlugin'
+		});
+
+		this.load.image('startButton', 'img/buttonStart.png');
+		this.load.image('closeButton', 'img/closeButton.png');
+		this.load.image("colorWheel","img/colorWheel.png");
+
+		this.load.image("modalBG","img/modalBG.png");
+		this.load.image("choosePlayerBG","img/choose_player_bg.png");
 
 		// spies
-		phaserGame.load.image('spyWhite', 'img/spy0.png');
-		phaserGame.load.image('spyRed', 'img/spy0Red.png');
-		phaserGame.load.image('spyGreen', 'img/spy0Green.png');
-		phaserGame.load.image('spyCyan', 'img/spy0Cyan.png');
-		
-		joystick = phaserGame.plugins.add(new Phaser.Plugin.VirtualJoystick(phaserGame, null));
+		this.load.image('spyWhite', 'img/spy0.png');
+		this.load.image('spyRed', 'img/spy0Red.png');
+		this.load.image('spyGreen', 'img/spy0Green.png');
+		this.load.image('spyCyan', 'img/spy0Cyan.png');
+
+		//const url = 'https://raw.githubusercontent.com/rexrainbow/phaser3-rex-notes/master/dist/rexvirtualjoystickplugin.min.js';
+		const url = './js/phaser/plugins/joystick.js';
+		this.load.plugin('rexvirtualjoystickplugin', url, true);
+
+		this.load.scenePlugin({
+			key: 'player_selection',
+			url: './js/phaser/plugins/player_selection.js',
+			sceneKey: 'player_selection'
+		});
+
+		//this.load.scenePlugin('player_selection', './js/phaser/plugins/player_selection.js');
+		//this.load.scenePlugin('game_loop', './js/phaser/plugins/game_loop.js');
 	}
 
 	function create()
 	{		
 		// TODO: draw the first room for the current player
 		let startingRoom = "room0";
-		roomScene = phaserGame.add.sprite(0, 0, 'room_atlas', startingRoom );
+//		roomScene = this.add.sprite(0, 0, 'room_atlas', startingRoom );
+//		roomScene.setOrigin(0);
 
-		_drawRoomCollisions(phaserGame);
+		this.sys.install('player_selection');
 
-		phaserGame.input.mouse.capture = true;
-				
+		_drawRoomCollisions.call( this );
+
+		this.input.mouse.capture = true;
+
+		this.cursors = this.input.keyboard.createCursorKeys();
+
+		//this.sys.install('BasePlugin');
+		// this.joyStick = this.plugins.get('rexvirtualjoystickplugin').add(this, {
+		// 	x: 400,
+		// 	y: 300,
+		// 	radius: 100,
+		// 	base: this.add.circle(0, 0, 100, 0x888888),
+		// 	thumb: this.add.circle(0, 0, 50, 0xcccccc),
+		// 	// dir: '8dir',   // 'up&down'|0|'left&right'|1|'4dir'|2|'8dir'|3
+		// 	// forceMin: 16,
+		// 	// enable: true
+		// }).on('update', dumpJoyStickState, this);
+		//
+		// this.text = this.add.text(0, 0);
+		// dumpJoyStickState.call( this );
+
 		// x, y, baseDiameter, stickDiameter, limit, baseColor, stickColor) {
-		joystick.init(phaserGame.width-80, phaserGame.height-90, 80, 60, 40, "#AA3300", "#cccccc");
-		joystick.start();
+//		joystick.init(phaserGame.width-80, phaserGame.height-90, 80, 60, 40, "#AA3300", "#cccccc");
+//		joystick.start();
+
+//		this.stage.backgroundColor = '#4d4d4d';
+//		this.scale.fullScreenScaleMode = Phaser.ScaleManager.EXACT_FIT;
+
+		// this.sys.install('DialogModalPlugin');
+		// console.log(this.sys.dialogModal);
+		// this.sys.dialogModal.init();
+		// this.sys.dialogModal.setText('Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.', true);
 
 		// ctrl is our 'game_logic::this' variable  (probably better way to pass this in)
-		_gameOptions = new GameOptions( ctrl, phaserGame );
-		_gameOptions.show( );
+		//_gameOptions = new GameOptions( ctrl, this );
+		//_gameOptions.show( );
 	}
-	
+
+	function dumpJoyStickState()
+	{
+		var cursorKeys = this.joyStick.createCursorKeys();
+		var s = 'Key down: ';
+		for (var name in cursorKeys) {
+			if (cursorKeys[name].isDown) {
+				s += name + ' ';
+			}
+		}
+		s += '\n';
+		s += ('Force: ' + Math.floor(this.joyStick.force * 100) / 100 + '\n');
+		s += ('Angle: ' + Math.floor(this.joyStick.angle * 100) / 100 + '\n');
+		this.text.setText(s);
+	}
+
 	function createSpy( id, posX, posY, playerConfig )
 	{
 		return new Spy(phaserGame, id, posX, posY, playerConfig, _gameControl);				
 	}
 
-	
 	function update()
 	{
 		// if there was joystick usage, get movement direction
-		let movement = joystick.setVelocity( _my_spy, 0, 4 );
+//		let movement = joystick.setVelocity( _my_spy, 0, 4 );
+		let movement = 0;
 		
 		// if no joystick usage, check keyboard
 	    if ( movement === 0 )
 	    	{
-	    		if (phaserGame.input.keyboard.isDown(Phaser.Keyboard.RIGHT))
+	    		if (this.cursors.right.isDown)
 	    			movement = 1;
-	    		else if (phaserGame.input.keyboard.isDown(Phaser.Keyboard.DOWN))
+	    		else if (this.cursors.down.isDown)
 	    			movement = 2;
-	    		else if (phaserGame.input.keyboard.isDown(Phaser.Keyboard.LEFT))
+	    		else if (this.cursors.left.isDown)
 	    			movement = 3;
-	    		else if (phaserGame.input.keyboard.isDown(Phaser.Keyboard.UP))
+	    		else if (this.cursors.up.isDown)
 	    			movement = 4;
 	    	}
 
@@ -274,20 +342,12 @@ let GameLogic = function( gameControl, player )
 			checkItemInterations( _my_spy );
 		}
 		
-		joystick.update();		
+//		joystick.update();
 	}
 
-	
-	
-	
-	// on each update:
-	// 
-	// check if spy has violated any boundaries (triggers, hard perimeter)
-	// 
-	
 	function render()
 	{
-		phaserGame.debug.text("(x: " + phaserGame.input.mousePointer.x + ", y: " + phaserGame.input.mousePointer.y + ")", 0, 50);
+		this.debug.text("(x: " + this.input.mousePointer.x + ", y: " + this.input.mousePointer.y + ")", 0, 50);
 	}
 
 	function checkItemInterations( spy )
@@ -406,8 +466,6 @@ let GameLogic = function( gameControl, player )
 		spy.updateBox( spy );
 	}
 
-	
-	
 	// -------------------------------------------------------
 	// Game Play Config
 	// -------------------------------------------------------
@@ -421,29 +479,61 @@ let GameLogic = function( gameControl, player )
 	{
 		_player.name = newName;
 	};
-	
-	// ctrl.setGameControl = function(gameControl)
-	// {
-	// 	_gameControl = gameControl;
-	// }
-	
+
 	ctrl.onStartGame = function()
 	{
 		// inflate game_div
-		$('#game_div').toggleClass('fullscreen');
+		//$('#game_div').toggleClass('fullscreen');
 		
-		const gameWidth = window.innerWidth; // * window.devicePixelRatio;
-		const gameHeight = window.innerHeight; // * window.devicePixelRatio;
-		
-		phaserGame = new Phaser.Game(
-				gameWidth, gameHeight, 
-				Phaser.AUTO, 'game_div',
-		{
-			preload : preload,
-			create : create,
-			update : update,
-			render : render
-		});
+		let gameWidth = window.innerWidth; // * window.devicePixelRatio;
+		let gameHeight = window.innerHeight; // * window.devicePixelRatio;
+
+		//gameWidth = window.innerWidth * window.devicePixelRatio;
+		//gameHeight = window.innerHeight * window.devicePixelRatio;
+
+		const scaleRatio = window.devicePixelRatio / 3;
+
+		console.log('scale rario> ', scaleRatio);
+
+		console.log("width/height: ", gameWidth, gameHeight);
+
+		const config = {
+			type: Phaser.AUTO,
+			scale: {
+				mode: Phaser.Scale.FIT,
+				parent: 'phaser-example',
+				autoCenter: Phaser.Scale.CENTER_BOTH,
+				width: 800,
+				height: 600
+			},
+			// physics: {
+			// 	default: 'arcade',
+			// 	arcade: {
+			// 		gravity: { y: 300 },
+			// 		debug: false
+			// 	}
+			// },
+			scene : [ PlayerSelection, GameLoop ]
+			// scene: {
+			// 	preload : preload,
+			// 	create : create,
+			// 	update : update,
+			// 	render : render
+			// }
+		};
+
+		phaserGame = new Phaser.Game(config);
+
+		// phaserGame = new Phaser.Game(
+		//
+		// 		gameWidth, gameHeight,
+		// 		Phaser.AUTO, 'game_div',
+		// {
+		// 	preload : preload,
+		// 	create : create,
+		// 	update : update,
+		// 	render : render
+		// });
 
 		gameHasStarted = true;
 	};

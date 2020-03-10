@@ -25,42 +25,46 @@ let GameOptions = function( gameLogic, phaserGame )
 	let spyModel;
 	let spyBitmap;
 		
-	_initModal = function()
+	const _initModal = function()
 	{
 		console.log('initting modal...');
 		console.log(_phaser);
-			
-		let bg_width = 640;
-		let bg_height = 400;
+
+		const scaleRatio = 1; //0.6666666666666666;
+
+		let bg_width = 640 * scaleRatio;
+		let bg_height = 400 * scaleRatio;
 		
 	    //  You can drag the pop-up window around
-	    popup = _phaser.add.sprite(_phaser.world.centerX - (bg_width/2), _phaser.world.centerY - (bg_height/2), 'choosePlayerBG');
+		//popup = _phaser.add.sprite(_phaser.world.centerX - (bg_width/2), _phaser.world.centerY - (bg_height/2), 'choosePlayerBG');
+	    popup = _phaser.add.sprite(0, 0, 'choosePlayerBG');
 	    popup.alpha = 1;
 	    popup.inputEnabled = true;
 
-		tooltip = _phaser.make.bitmapData(64, 64);
-		sprite = _phaser.add.sprite(0, 0, tooltip);
-
-		let wheel_width = 150, wheel_height = 150;
-	    colorWheel = _phaser.add.sprite(0, 0, 'colorWheel');
-	    colorWheel.width = wheel_width;
-	    colorWheel.height = wheel_height;
-	    colorWheel.inputEnabled = true;
-	    colorWheel.events.onInputDown.add(_choosePlayer, this);
-	    	    
-		bmd = _phaser.make.bitmapData(wheel_width, wheel_height);
-		bmd.draw( colorWheel );
-		bmd.update();
-
-		colorWheel.x = 490 - (wheel_width/2);
-		colorWheel.y = 175 - (wheel_height/2);
-		
-		popup.addChild( colorWheel );
-		
-		
+		// tooltip = _phaser.make.bitmapData(64, 64);
+		// sprite = _phaser.add.sprite(0, 0, tooltip);
+		//
+		// let wheel_width = 150, wheel_height = 150;
+		// colorWheel = _phaser.add.sprite(0, 0, 'colorWheel');
+		// colorWheel.width = wheel_width;
+		// colorWheel.height = wheel_height;
+		// colorWheel.inputEnabled = true;
+		// colorWheel.events.onInputDown.add(_choosePlayer, this);
+	    	//
+		// bmd = _phaser.make.bitmapData(wheel_width, wheel_height);
+		// bmd.draw( colorWheel );
+		// bmd.update();
+		//
+		// colorWheel.x = 490 - (wheel_width/2);
+		// colorWheel.y = 175 - (wheel_height/2);
+		//
+		// popup.addChild( colorWheel );
 		
 		
-	    startButton = _phaser.add.sprite(colorWheel.x, colorWheel.y+200, 'startButton');
+		
+		
+	    //startButton = _phaser.add.sprite(colorWheel.x, colorWheel.y+200, 'startButton');
+		startButton = _phaser.add.sprite(0, 0, 'startButton');
 	    startButton.width = 190;
 	    startButton.height = 74;
 	    startButton.inputEnabled = true;
@@ -73,10 +77,10 @@ let GameOptions = function( gameLogic, phaserGame )
 	    spyModel.scale.set(5);
 	    popup.addChild( spyModel );
 	    
-		// spy bitmap
-		spyBitmap = _phaser.make.bitmapData(); // bitmapData( 24, 37 );
-		spyBitmap.load( 'spyWhite' );
-		spyBitmap.add( spyModel );		
+		// // spy bitmap
+		// spyBitmap = _phaser.make.bitmapData(); // bitmapData( 24, 37 );
+		// spyBitmap.load( 'spyWhite' );
+		// spyBitmap.add( spyModel );
 		
 	    //  Position the close button to the top-right of the popup sprite (minus 8px for spacing)
 	    let pw = (popup.width) - 46;
@@ -99,7 +103,7 @@ let GameOptions = function( gameLogic, phaserGame )
 	
 	let tooltip;
 
-	_updateTooltip = function(pointer, x, y) 
+	const _updateTooltip = function(pointer, x, y)
 	{
 		let px = parseInt(x - popup.x - 490 + 75, 10);
 		let py = parseInt(y - popup.y - 175 + 75, 10);
@@ -120,8 +124,8 @@ let GameOptions = function( gameLogic, phaserGame )
 			sprite.visible = true;
 		}
 	};
-	
-	_choosePlayer = function()
+
+	const _choosePlayer = function()
 	{		
 		console.log('color chosen> %o', spyColor);
 		
@@ -131,8 +135,8 @@ let GameOptions = function( gameLogic, phaserGame )
 		
 		_gameLogic.invokeChoosePlayer( 0, playerConfig, _playerChosen );
 	}
-	
-	_playerChosen = function( playerIndex, modalPlayerConfig, success )
+
+	const _playerChosen = function( playerIndex, modalPlayerConfig, success )
 	{
 		console.log('_playerChosen : success?> ' + success );
 		console.log('_playerChosen : modalPlayerConfig?> ' + modalPlayerConfig );
@@ -152,13 +156,13 @@ let GameOptions = function( gameLogic, phaserGame )
 			
 		}
 	};
-	
-	_clickStart = function()
+
+	const _clickStart = function()
 	{
 		_gameLogic.playerIsReady();
 	};
-	
-	_startCountdown = function( startCount, x, y )
+
+	const _startCountdown = function( startCount, x, y )
 	{
 	   //let item = modal.getModalItem("modalOptions", 5);
 	    //item.x = x;
@@ -176,8 +180,8 @@ let GameOptions = function( gameLogic, phaserGame )
 		  });
 		  */		
 	};
-	
-	_countDown = function(fn, startCount, x, y, endFn) {
+
+	const _countDown = function(fn, startCount, x, y, endFn) {
 	    var endFn = endFn || function(){};
 
 	    let _timer = _phaser.time.create(false);
@@ -187,7 +191,7 @@ let GameOptions = function( gameLogic, phaserGame )
 	    window.console.log("adding timer", _phaser);
 	};
 
-	_updateCountdown = function( startCount, x, y ) {
+	const _updateCountdown = function( startCount, x, y ) {
 		/*
 	    let item = modal.getModalItem("modalOptions", 5);
 	    
@@ -204,8 +208,8 @@ let GameOptions = function( gameLogic, phaserGame )
 	    item.y = y;
 	    */
 	};
-	
-	_drawWindow = function()
+
+	const _drawWindow = function()
 	{	
 	    popup.visible = true;
 
@@ -220,8 +224,8 @@ let GameOptions = function( gameLogic, phaserGame )
 	    
 		_phaser.input.addMoveCallback(_updateTooltip, this);	     
 	};
-	
-	_hideWindow = function()
+
+	const _hideWindow = function()
 	{
 	    if (tween && tween.isRunning || popup.scale.x === 0.1)
 	    {
