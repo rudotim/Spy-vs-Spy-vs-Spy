@@ -14,102 +14,58 @@ var PlayerSelection = new Phaser.Class({
 
 			this.text1;
 			this.text2;
-			this.graphics;
-			this.show_tooltip;
 			this.wheel;
+			this.wheelpos;
 		},
 
 	preload: function ()
 	{
 		this.load.image('spyWhite', 'img/spy0.png');
+		this.load.image('wheel', 'img/color-ring.jpg');
 	},
 
 	create: function ()
 	{
-		//this.cameras.main.centerOn(0, 0);
-
 		this.text1 = this.add.text(10, 10, '', { fill: '#00ff00' });
 		this.text2 = this.add.text(500, 10, '', { fill: '#00ff00' });
 
-		//this.add.sprite(Phaser.Math.Between(0, 800), 300, 'mech');
 		this.input.mouse.disableContextMenu();
 
-
 		const spy = this.add.image( this.cameras.main.centerX, this.cameras.main.centerY, "spyWhite" );
+		spy.setScale( 3 );
 
-		//spy.scale.set(5);
+		this.wheel = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'wheel');
+		const wheelScale = 0.75;
+		this.wheel.setScale( wheelScale );
 
-		// this.input.once('pointerdown', function (event)
-		// {
-		// 	console.log('From PlayerSelection to GameLoop');
-		//
-		// 	this.scene.start('game_loop');
-		//
-		// }, this);
+		this.wheelpos = {
+			x1 : this.cameras.main.centerX - (this.wheel.displayWidth/2),
+			y1 : this.cameras.main.centerY - (this.wheel.displayHeight/2),
+			x2 : this.cameras.main.centerX + (this.wheel.displayWidth/2),
+			y2 : this.cameras.main.centerY + (this.wheel.displayHeight/2)
+		};
 
-		let colors = Phaser.Display.Color.HSVColorWheel(1, 1);
+		let graphics = this.add.graphics( { x: 0, y: 0 });
 
-		this.graphics = this.add.graphics(0, 0);
-		this.graphics.fillStyle(0x2200ff,0.4);
-		this.graphics.fillRect(0,0,300,300);
+		let _this = this;
 
-		const that = this;
-		let innerRadius = 50, outerRadius = 150;
+		this.input.on('pointermove', function (pointer) {
 
-		const w = 150; //this.cameras.main.centerX;
-		const h = 150; //this.cameras.main.centerY;
-		colors.forEach(function (item, i)
-		{
-			let a = DegToRad(i);
-			let cosA = Math.cos(a);
-			let sinA = Math.sin(a);
+			let color = _this.textures.getPixel((pointer.x - _this.wheelpos.x1) / wheelScale, (pointer.y - _this.wheelpos.y1) / wheelScale, 'wheel');
 
-			that.graphics
-				.lineStyle(3, item.color)
-				.lineBetween(
-					w + (innerRadius * cosA),  // x1
-					h + (innerRadius * sinA),  // y1
-					w + (outerRadius * cosA),  // x2
-					h + (outerRadius * sinA)   // y2
-				)
+			graphics.clear();
 
-			// that.graphics
-			// 	.lineStyle(3, item.color)
-			// 	.lineBetween(
-			// 		400 + (r0 * cosA),
-			// 		300 + (r0 * sinA),
-			// 		400 + (r1 * cosA),
-			// 		300 + (r1 * sinA)
-			// 	)
+			if (color)
+			{
+				graphics.lineStyle(1, 0x000000, 1);
+				graphics.strokeRect(pointer.x - 1, pointer.y - 1, 34, 34);
+
+				graphics.fillStyle(color.color, 1);
+				graphics.fillRect(pointer.x, pointer.y, 32, 32);
+			}
 		});
 
-		this.graphics.generateTexture('hudbar', 300, 300);
-		this.graphics.destroy();
-
-		this.wheel = this.add.image( this.cameras.main.centerX, this.cameras.main.centerY, 'hudbar' ).setInteractive();
-
-//		this.color_tooltip = this.make.graphics({x : 0, y : 0, add : false});
-
-		// this.graphic2=this.make.graphics({x: 0, y: 0, add: false});
-		// this.graphic2.fillStyle(0x2200ff,0.4);
-		// this.graphic2.fillRect(0,0,400,400);
-		// this.graphic2.generateTexture('wheel',400,400);
-
-//		this.wheel = this.add.sprite(0,0,'wheel').setInteractive();
-
-		this.wheel.on('pointerdown', function (pointer)
-		{
-			this.show_tooltip = true;
-		}, this );
-
-		this.wheel.on('pointerup', function (pointer)
-		{
-			this.show_tooltip = false;
-		}, this );
-
-
 		// todo: also add in pointerout to reset tooltip
-
 	},
 
 	update : function()
@@ -121,38 +77,5 @@ var PlayerSelection = new Phaser.Class({
 			'y: ' + pointer.worldY,
 			'isDown: ' + pointer.isDown
 		]);
-
-		if ( this.show_tooltip === true )
-		{
-			this.updateTooltip( pointer.worldX, pointer.worldY );
-		}
 	},
-
-	updateTooltip : function(x, y)
-	{
-		const color = this.textures.getPixel(x - 250, y - 150, 'hudbar');
-
-		console.log('color> ', color);
-
-
-		// let px = parseInt(x - popup.x - 490 + 75, 10);
-		// let py = parseInt(y - popup.y - 175 + 75, 10);
-		// //let py = y - popup.y - 175 + 75;
-		//
-		// //console.log('pointer(', x, y, ') colorWheel(', colorWheel.x, ', ', colorWheel.y, ') popup(', popup.x, ', ', popup.y, ')' );
-		// //console.log('px/py(', px, py, ')');
-		//
-		// if (px >= 0 && px <= bmd.width && py >= 0 && py <= bmd.height)
-		// {
-		// 	spyColor = bmd.getPixelRGB(px, py);
-		//
-		// 	tooltip.fill(0, 0, 0);
-		// 	tooltip.rect(1, 1, 62, 62, spyColor.rgba);
-		//
-		// 	sprite.x = x;
-		// 	sprite.y = y;
-		// 	sprite.visible = true;
-		// }
-	}
-
 });

@@ -222,6 +222,8 @@ let GameLogic = function( gameControl, player )
 
 		this.cursors = this.input.keyboard.createCursorKeys();
 
+		this.scale.startFullscreen();
+
 		//this.sys.install('BasePlugin');
 		// this.joyStick = this.plugins.get('rexvirtualjoystickplugin').add(this, {
 		// 	x: 400,
@@ -483,7 +485,7 @@ let GameLogic = function( gameControl, player )
 	ctrl.onStartGame = function()
 	{
 		// inflate game_div
-		//$('#game_div').toggleClass('fullscreen');
+		$('#game_div').toggleClass('fullscreen');
 		
 		let gameWidth = window.innerWidth; // * window.devicePixelRatio;
 		let gameHeight = window.innerHeight; // * window.devicePixelRatio;
@@ -501,7 +503,7 @@ let GameLogic = function( gameControl, player )
 			type: Phaser.AUTO,
 			scale: {
 				mode: Phaser.Scale.FIT,
-				parent: 'phaser-example',
+				parent: 'game_div',
 				autoCenter: Phaser.Scale.CENTER_BOTH,
 				width: 800,
 				height: 600
