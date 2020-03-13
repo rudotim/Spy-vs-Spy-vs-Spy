@@ -2,6 +2,38 @@
 const HSVToRGB = Phaser.Display.Color.HSVToRGB;
 const DegToRad = Phaser.Math.DegToRad;
 
+class Button extends Phaser.GameObjects.Sprite {
+	onInputOver = () => {};
+	onInputOut = () => {};
+	onInputUp = () => {};
+
+	constructor(scene, x, y, texture, actionOnClick = () => {}, overFrame, outFrame, downFrame) {
+		super(scene, x, y, texture);
+		scene.add.existing(this);
+
+		this.setFrame(outFrame)
+			.setInteractive()
+
+			.on('pointerover', () => {
+				this.onInputOver();
+				this.setFrame(overFrame)
+			})
+			.on('pointerdown', () => {
+				actionOnClick();
+				this.setFrame(downFrame)
+			})
+			.on('pointerup', () => {
+				this.onInputUp();
+				this.setFrame(overFrame)
+			})
+			.on('pointerout', () => {
+				this.onInputOut();
+				this.setFrame(outFrame)
+			})
+	}
+}
+
+
 var PlayerSelection = new Phaser.Class({
 
 	Extends: Phaser.Scene,
@@ -23,6 +55,10 @@ var PlayerSelection = new Phaser.Class({
 	{
 		this.load.image('spyWhite', 'img/spy0.png');
 		this.load.image('wheel', 'img/color-ring.jpg');
+
+
+		this.load.spritesheet('button', 'https://examples.phaser.io/assets/buttons/button_sprite_sheet.png', { frameWidth: 193, frameHeight: 71 });
+		this.load.atlas('buttonAtlas', 'https://examples.phaser.io/assets/buttons/button_texture_atlas.png', 'https://examples.phaser.io/assets/buttons/button_texture_atlas.json')
 	},
 
 	create: function ()
@@ -77,7 +113,15 @@ var PlayerSelection = new Phaser.Class({
 			}
 		});
 
+		const actionOnClick = () => {
+			console.log('click')
+		};
 
+		let btn1 = new Button(this, this.cameras.main.displayWidth - 200, this.cameras.main.displayHeight - 80, 'button', actionOnClick, 2, 1, 0);
+		btn1.onInputOut = () => {
+			console.log('Btn1: onInputOut')
+		};
+		btn1.setOrigin(0);
 
 		// todo: also add in pointerout to reset tooltip
 	},
