@@ -114,7 +114,8 @@ var PlayerSelection = new Phaser.Class({
 		});
 
 		const actionOnClick = () => {
-			console.log('click')
+			// exit out of this scene with our new color
+			this.scene.start('game_loop');
 		};
 
 		let btn1 = new Button(this, this.cameras.main.displayWidth - 200, this.cameras.main.displayHeight - 80, 'button', actionOnClick, 2, 1, 0);
@@ -167,37 +168,37 @@ var PlayerSelection = new Phaser.Class({
 		texture.refresh();
 	},
 
-	replaceColor : function( img )
-	{
-		let spySrc = this.textures.get('spyWhite').getSourceImage();
-
-		let texture = this.textures.createCanvas('tmpspy', spySrc.width, spySrc.height).draw(0, 0, spySrc);
-
-		console.log('tex> ', texture);
-		let pixels = texture.getPixels( 0, 0, texture.width, texture.height );
-
-		const white = 0xFFFFFF;
-		const color = 0xFF0000;
-
-		let pixel;
-		for ( let row = 0; row < pixels.length; row++ )
-		{
-			for ( let col = 0; col < pixels[row].length; col++ )
-			{
-				pixel = pixels[row][col];
-
-				if ( pixel.color === white )
-				{
-					texture.setPixel( pixel.x, pixel.y, 255, 0, 0 );
-				}
-			}
-		}
-
-		texture.refresh();
-
-		let tmp = this.add.image( 50, 200, 'tmpspy' );
-		tmp.setScale( 3 );
-	},
+	// replaceColor : function( img )
+	// {
+	// 	let spySrc = this.textures.get('spyWhite').getSourceImage();
+	//
+	// 	let texture = this.textures.createCanvas('tmpspy', spySrc.width, spySrc.height).draw(0, 0, spySrc);
+	//
+	// 	console.log('tex> ', texture);
+	// 	let pixels = texture.getPixels( 0, 0, texture.width, texture.height );
+	//
+	// 	const white = 0xFFFFFF;
+	// 	const color = 0xFF0000;
+	//
+	// 	let pixel;
+	// 	for ( let row = 0; row < pixels.length; row++ )
+	// 	{
+	// 		for ( let col = 0; col < pixels[row].length; col++ )
+	// 		{
+	// 			pixel = pixels[row][col];
+	//
+	// 			if ( pixel.color === white )
+	// 			{
+	// 				texture.setPixel( pixel.x, pixel.y, 255, 0, 0 );
+	// 			}
+	// 		}
+	// 	}
+	//
+	// 	texture.refresh();
+	//
+	// 	let tmp = this.add.image( 50, 200, 'tmpspy' );
+	// 	tmp.setScale( 3 );
+	// },
 
 	update : function()
 	{
