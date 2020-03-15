@@ -184,7 +184,16 @@ module.exports = function (io, router, gameManager)
 			// -------------------------------------------------------
 			// Game Play Config
 			// -------------------------------------------------------			
-			
+
+			socket.on('player_update_options', function( playerOptions )
+			{
+				serverLogic.playerUpdateOptions( socket, playerOptions.roomName, playerOptions );
+			});
+
+
+
+
+
 			socket.on('player_is_ready', function( player )
 			{
 				serverLogic.playerIsReady( player, socket );		

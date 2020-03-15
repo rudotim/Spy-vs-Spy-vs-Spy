@@ -1,11 +1,11 @@
 
-const GameController = function( frontEnd, socket )
+const GameController = function( socket, frontEnd, chatroom, player )
 {
 	const clientRequest = {};
 
 	// the encapsulation of logic calls to receive data from the server
 	const _fromGameServerSocket = fromGameServerSocket( socket, clientRequest );
-
+	
 	// the encapsulation of logic calls to send data to the server
 	const _toServer = toGameServerSocket( socket );
 
@@ -13,7 +13,7 @@ const GameController = function( frontEnd, socket )
 	const _gameLogic = GameLogic( clientRequest );
 
 	// your player object
-	let _player;
+	const _player = player;
 
 	// local copy of game data
 	let _gameInstance = null;
@@ -104,8 +104,33 @@ const GameController = function( frontEnd, socket )
 	};
 
 
+	clientRequest.sendPlayerUpdateOptions = function( color, ready )
+	{
+		console.log('chatroom> ', chatroom);
+		const playerOptions = {
+			roomName : chatroom.name,
+			id : _player.id,
+			color : color,
+			ready : ready
+		};
 
+		_toServer.sendPlayerUpdateOptions( socket, playerOptions );
+	};
 
+	clientRequest.onPlayerUpdateOptions = function( playerOptions )
+	{
+		// call any interested listeners
+		listeners.forEach( listener =>
+		{
+			listener.config.forEach( cfg =>
+			{
+				if ( cfg.channel === "on_player_update_options" )
+				{
+					cfg.callback(cfg._this, playerOptions);
+				}
+			});
+		});
+	};
 	
 	/**
 	 * Pop-up the options (player selection) modal window

@@ -174,11 +174,11 @@ let GameLogic = function( gameControl, player )
 
 		//this.load.plugin('DialogModalPlugin', './js/client/dialog_plugin.js');
 		//this.load.plugin('BasePlugin', './js/phaser/plugins/TimDialog.js');
-		this.load.scenePlugin({
-		    key: 'BasePlugin',
-		    url: './js/phaser/plugins/TimDialog.js',
-		    sceneKey: 'BasePlugin'
-		});
+		// this.load.scenePlugin({
+		//     key: 'BasePlugin',
+		//     url: './js/phaser/plugins/TimDialog.js',
+		//     sceneKey: 'BasePlugin'
+		// });
 
 		this.load.image('startButton', 'img/buttonStart.png');
 		this.load.image('closeButton', 'img/closeButton.png');
@@ -485,7 +485,7 @@ let GameLogic = function( gameControl, player )
 	ctrl.onStartGame = function()
 	{
 		// inflate game_div
-		$('#game_div').toggleClass('fullscreen');
+		//$('#game_div').toggleClass('fullscreen');
 		
 		let gameWidth = window.innerWidth; // * window.devicePixelRatio;
 		let gameHeight = window.innerHeight; // * window.devicePixelRatio;

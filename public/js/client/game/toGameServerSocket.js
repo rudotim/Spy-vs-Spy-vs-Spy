@@ -7,6 +7,11 @@ const toGameServerSocket = function( socket )
 	// Game Play Setup
 	// -------------------------------------------------------
 
+	clientRequest.sendPlayerUpdateOptions = function( sock, playerOptions )
+	{
+		sock.emit( 'player_update_options', playerOptions );
+	};
+
 	clientRequest.triggerPlayerIsReady = function( player )
 	{
 		socket.emit( 'player_is_ready', player );

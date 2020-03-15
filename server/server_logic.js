@@ -51,7 +51,7 @@ module.exports = function (io, gameManager)
 		};
 
 		// Send to everone else
-		sendToEveryoneElseInRoom(socket, "on_player_joined", data.roomName, data );
+		sendToEveryoneElseInRoom(socket, data.roomName, "on_player_joined", data );
 	};
 
 
@@ -78,7 +78,7 @@ module.exports = function (io, gameManager)
 			};
 
 		// Send to everone else
-		sendToEveryoneElseInRoom(socket, "on_player_left", data.roomName, data );
+		sendToEveryoneElseInRoom(socket, data.roomName, "on_player_left", data );
 	};
 
 
@@ -136,7 +136,7 @@ module.exports = function (io, gameManager)
 	ServerLogic.sendChat = function( roomName, message, socket )
 	{
 		// Send to everone else
-		sendToEveryoneElseInRoom(socket, "on_chat", roomName, message );
+		sendToEveryoneElseInRoom(socket, roomName, "on_chat", message );
 	};
 
 
@@ -147,8 +147,21 @@ module.exports = function (io, gameManager)
 		_gameManager.createGame( chatroom );
 
 		// Send to everone else
-		sendToEveryoneInRoom( "on_start_game", roomName );
+		sendToEveryoneInRoom( roomName, "on_start_game" );
 	};
+
+
+	ServerLogic.playerUpdateOptions = function( socket, roomName, playerOptions )
+	{
+		//console.log("player update options room> ", roomName, " options:", playerOptions );
+
+		// Send everone
+		sendToEveryoneInRoom( roomName, "on_player_update_options", playerOptions );
+	};
+
+
+
+
 
 	/**
 	 * Send ONLY to the initial sender
@@ -168,7 +181,7 @@ module.exports = function (io, gameManager)
 	 * @param roomName
 	 * @param data
 	 */
-	function sendToEveryoneElseInRoom( socket, channel, roomName, data )
+	function sendToEveryoneElseInRoom( socket, roomName, channel, data )
 	{
 		socket.to(roomName).emit( channel, data);
 	}
@@ -179,10 +192,15 @@ module.exports = function (io, gameManager)
 	 * @param roomName
 	 * @param data
 	 */
-	function sendToEveryoneInRoom( channel, roomName, data )
+	function sendToEveryoneInRoom( roomName, channel, data )
 	{
 		io.sockets.in(roomName).emit( channel, data);
 	}
+
+
+
+
+
 
 	/**
 	 * Create a new room with name and set player as the leader.  Also configure

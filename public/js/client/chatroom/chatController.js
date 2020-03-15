@@ -43,7 +43,10 @@ const ChatController = function( frontEnd )
 
 				// upon sucessful creation of a new player, save a reference
 				// to the player id and dump the player into the default room (lobby)
-				_player = data.playerId;
+				_player = {
+					name : newPlayerName,
+					id : data.playerId
+				};
 
 				this.joinRoom( LOBBY );
 			})
@@ -69,17 +72,17 @@ const ChatController = function( frontEnd )
 
 			_toServer = toChatServerSocket( _socket );
 
-			_toServer.joinRoom( _player, newRoomName, _socket );
+			_toServer.joinRoom( _player.id, newRoomName, _socket );
 		}
 		else
 		{
-			console.log('Player %o joining room: ', _player, newRoomName);
+			console.log('Player %o joining room: ', _player.id, newRoomName);
 
 			// leave old room
-			_toServer.leaveRoom( _player, currentRoomName, _socket );
+			_toServer.leaveRoom( _player.id, currentRoomName, _socket );
 
 			// join new room
-			_toServer.joinRoom( _player, newRoomName, _socket );
+			_toServer.joinRoom( _player.id, newRoomName, _socket );
 		}
 
 		// Issue: _chatroom is created new each time. so it can't have the gameStarted flag.  boyoyoyng!
@@ -177,7 +180,7 @@ const ChatController = function( frontEnd )
 		if ( _chatroom.gameStarted === true )
 		{
 			// the game has already started!  start it for the new guy!
-			this.onStartGame();
+			//this.onStartGame();
 		}
 	};
 
@@ -216,7 +219,7 @@ const ChatController = function( frontEnd )
 	 */
 	clientRequest.onStartGame = function()
 	{
-		_gameControl = GameController( frontEnd, _socket );
+		_gameControl = GameController( _socket, frontEnd, _chatroom, _player );
 		_gameControl.onStartGame();
 	};
 

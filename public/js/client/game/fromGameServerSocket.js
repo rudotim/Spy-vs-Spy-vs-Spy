@@ -2,11 +2,9 @@
 
 const fromGameServerSocket = function( socket, gameController )
 {
-    socket.on('on_chosen_player', function( player_id, player_config )
+    socket.on('on_player_update_options', function( playerOptions )
     {
-        console.log('someone has chosen a player> %o %o', player_id, player_config );
-
-	    gameController.onChoosePlayer( player_id, player_config );
+	    gameController.onPlayerUpdateOptions( playerOptions );
     });
 
     socket.on( 'on_player_is_ready', function( player_id )
