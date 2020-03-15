@@ -104,29 +104,29 @@ module.exports = function (io, gameManager)
 		sendToOurself( socket, "on_list_players", data );
 	};
 
-	/**
-	 * Return the current status of the room.
-	 * This includes a list of each player
-	 * and whether or not a game has been started
-	 * @param roomName
-	 * @param socket
-	 */
-	ServerLogic.getRoomStatus = function( roomName, socket )
-	{
-		const players = gameManager.findPlayersInRoom( roomName );
-
-		const game = gameManager.findGameByName( roomName );
-
-		let data =
-			{
-				"gameStarted" : game !== undefined,
-				"players" : players,
-			};
-
-		// send only to ourself
-		//console.log("Sending to room %o, the status: %o", roomName, data );
-		sendToOurself( socket, "on_room_status", data );
-	};
+	// /**
+	//  * Return the current status of the room.
+	//  * This includes a list of each player
+	//  * and whether or not a game has been started
+	//  * @param roomName
+	//  * @param socket
+	//  */
+	// ServerLogic.getRoomStatus = function( roomName, socket )
+	// {
+	// 	const players = gameManager.findPlayersInRoom( roomName );
+	//
+	// 	const game = gameManager.findGameByName( roomName );
+	//
+	// 	let data =
+	// 		{
+	// 			"gameStarted" : game !== undefined,
+	// 			"players" : players,
+	// 		};
+	//
+	// 	// send only to ourself
+	// 	//console.log("Sending to room %o, the status: %o", roomName, data );
+	// 	sendToOurself( socket, "on_room_status", data );
+	// };
 
 	/**
 	 * Send this chat message to everyone else in the chat room

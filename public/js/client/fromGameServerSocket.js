@@ -41,11 +41,6 @@ const fromGameServerSocket = function( socket, gameController )
     // Game Play
     // -------------------------------------------------------
 
-    // socket.on( 'on_chat', function(msg)
-    // {
-    //     console.log('got chat data[' + msg + ']');
-    // });
-
     socket.on( 'on_data', function( spyPos )
     {
         // update spy with data

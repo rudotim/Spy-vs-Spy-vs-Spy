@@ -144,12 +144,12 @@ module.exports = function (io, router, gameManager)
 				serverLogic.listPlayers( data.roomName, socket );
 			});
 
-			socket.on('get_room_status', function( data )
-			{
-				console.log("Request for status in room[%o]", data.roomName);
-
-				serverLogic.getRoomStatus( data.roomName, socket );
-			});
+			// socket.on('get_room_status', function( data )
+			// {
+			// 	console.log("Request for status in room[%o]", data.roomName);
+			//
+			// 	serverLogic.getRoomStatus( data.roomName, socket );
+			// });
 
 			/**
 			 * Received when a player successfully joins a room.
