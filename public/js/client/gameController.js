@@ -35,6 +35,9 @@ const GameController = function( frontEnd )
 	// local copy of game data
 	let _gameInstance = null;
 
+	let listeners = [];
+
+
 	init();
 
 	function init()
@@ -116,6 +119,34 @@ const GameController = function( frontEnd )
 	};
 
 
+	// const cfgRequest = [
+	// 	{
+	// 		channel : "onplayerjoined",
+	// 		callback : ()
+	// 	}
+	// ];
+
+	clientRequest.addListener = function( listenerConfigRequest )
+	{
+		const listenerConfig = {
+			config : listenerConfigRequest,
+			id : uuid()
+		};
+
+		listeners.push( listenerConfig );
+
+		return listenerConfig.id;
+	};
+
+	clientRequest.removeListener = function( listenerConfigId )
+	{
+		listeners = listeners.filter(
+			function(value, index, arr)
+			{
+				return value.id !== listenerConfigId;
+			});
+	};
+
 	/**
 	 * Called when a new player has joined the room we're in.
 	 * @param playerId
@@ -133,6 +164,18 @@ const GameController = function( frontEnd )
 		);
 
 		frontEnd.updateRoomListUI( _chatroom.players );
+
+		// call any interested listeners
+		listeners.forEach( listener =>
+		{
+			listener.config.forEach( cfg =>
+			{
+				if ( cfg.channel === "on_player_joined" )
+				{
+					cfg.callback(cfg._this, playerId, playerName);
+				}
+			});
+		});
 	};
 
 	/**
@@ -323,7 +366,18 @@ const GameController = function( frontEnd )
 
 		_socket.emit( 'on_data', pos );
 	};
-		
+
+	function uuid()
+	{
+		var dt = new Date().getTime();
+		var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+			var r = (dt + Math.random()*16)%16 | 0;
+			dt = Math.floor(dt/16);
+			return (c=='x' ? r :(r&0x3|0x8)).toString(16);
+		});
+		return uuid;
+	}
+
 	return clientRequest;
 };
 

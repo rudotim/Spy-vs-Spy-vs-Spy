@@ -49,13 +49,46 @@ var PlayerSelection = new Phaser.Class({
 			this.wheel;
 			this.wheelpos;
 			this.mycolor;
+
+			this.gameControl;
+
+			// keep track of player names, color, status
+			this.players = [];
 		},
+
+	init: function (data)
+	{
+		console.log('player_selection init', data);
+
+		this.gameControl = data.gameControl;
+
+		console.log("callback this> ", this);
+		const listenerConfig = [
+			{
+				channel : "on_player_joined",
+				callback : this.onPlayerJoined,
+				_this : this
+			}
+		];
+
+		this.gameControl.addListener( listenerConfig );
+
+		const myname = "My Name";
+
+		const playerConfig = {
+			name : myname,
+			color : 0xFFFFFF,
+			done : false,
+			text : undefined
+		};
+
+		this.players.push( playerConfig );
+	},
 
 	preload: function ()
 	{
 		this.load.image('spyWhite', 'img/spy0.png');
 		this.load.image('wheel', 'img/color-ring.jpg');
-
 
 		this.load.spritesheet('button', 'https://examples.phaser.io/assets/buttons/button_sprite_sheet.png', { frameWidth: 193, frameHeight: 71 });
 		this.load.atlas('buttonAtlas', 'https://examples.phaser.io/assets/buttons/button_texture_atlas.png', 'https://examples.phaser.io/assets/buttons/button_texture_atlas.json')
@@ -68,25 +101,29 @@ var PlayerSelection = new Phaser.Class({
 
 		this.input.mouse.disableContextMenu();
 
-		this.wheel = this.add.image(this.cameras.main.centerX, this.cameras.main.centerY, 'wheel');
+		const centerOffsetX = -125;
+		const centerOffsetY = +50;
+		this.wheel = this.add.image(this.cameras.main.centerX + centerOffsetX, this.cameras.main.centerY + centerOffsetY, 'wheel');
 		const wheelScale = 0.75;
 		this.wheel.setScale( wheelScale );
 
 		this.wheelpos = {
-			x1 : this.cameras.main.centerX - (this.wheel.displayWidth/2),
-			y1 : this.cameras.main.centerY - (this.wheel.displayHeight/2),
-			x2 : this.cameras.main.centerX + (this.wheel.displayWidth/2),
-			y2 : this.cameras.main.centerY + (this.wheel.displayHeight/2)
+			x1 : this.cameras.main.centerX - (this.wheel.displayWidth/2) + centerOffsetX,
+			y1 : this.cameras.main.centerY - (this.wheel.displayHeight/2) + centerOffsetY,
+			x2 : this.cameras.main.centerX + (this.wheel.displayWidth/2) + centerOffsetX,
+			y2 : this.cameras.main.centerY + (this.wheel.displayHeight/2) + centerOffsetY
 		};
 
 		let graphics = this.add.graphics( { x: 0, y: 0 });
 
 		let texture = this.copyTextureFromImage( 'spyWhite', 'spyDynamic' );
 
-		const spy = this.add.image( this.cameras.main.centerX, this.cameras.main.centerY, "spyDynamic" );
+		const spy = this.add.image( this.cameras.main.centerX + centerOffsetX, this.cameras.main.centerY + centerOffsetY, "spyDynamic" );
 		spy.setScale( 3 );
 
 		let _this = this;
+
+		this.drawPlayerStatus( this.players );
 
 		this.input.on('pointermove', function (pointer) {
 
@@ -110,6 +147,7 @@ var PlayerSelection = new Phaser.Class({
 			{
 				// replace all white pixels on our spy with the color chosen by the user
 				_this.updateTextureColor( texture, 0xFFFFFF, _this.mycolor );
+				_this.sendPlayerUpdate( _this.mycolor );
 			}
 		});
 
@@ -126,6 +164,56 @@ var PlayerSelection = new Phaser.Class({
 
 		// todo: also add in pointerout to reset tooltip
 	},
+
+	onPlayerUpdate : function( player )
+	{
+		console.log('onPlayerUpdate> ', player);
+	},
+
+
+	onPlayerJoined : function( _this, playerId, playerName )
+	{
+		console.log('onPlayerJoined> name: ', playerName, ' id: ', playerId );
+
+		const playerConfig = {
+			name : playerName,
+			color : 0xFFFFFF,
+			done : false,
+			text : undefined
+		};
+
+		_this.players.push( playerConfig );
+
+		_this.drawPlayerStatus( _this.players );
+	},
+
+	sendPlayerUpdate : function( color )
+	{
+		//this.gameControl.sendChat("get fucked, color> " + color );
+	},
+
+	drawPlayerStatus : function( players )
+	{
+		let x = 560;
+		let y = 130;
+		let rowHeight = 50;
+
+		// draw text
+		players.forEach( player =>
+		{
+			console.log("player> ", player);
+
+			player.text = this.add.text(x, y, player.name);
+			y += rowHeight;
+		});
+
+		// draw player icon
+		const spy = this.add.image( x - 35, y - 40, "spyDynamic" );
+		spy.setScale( 1.5 );
+
+	},
+
+
 
 	/**
 	 * Make a copy of the texture identified by srcTextureKey and store it on a new canvas identified by destTextureKey
@@ -167,38 +255,6 @@ var PlayerSelection = new Phaser.Class({
 
 		texture.refresh();
 	},
-
-	// replaceColor : function( img )
-	// {
-	// 	let spySrc = this.textures.get('spyWhite').getSourceImage();
-	//
-	// 	let texture = this.textures.createCanvas('tmpspy', spySrc.width, spySrc.height).draw(0, 0, spySrc);
-	//
-	// 	console.log('tex> ', texture);
-	// 	let pixels = texture.getPixels( 0, 0, texture.width, texture.height );
-	//
-	// 	const white = 0xFFFFFF;
-	// 	const color = 0xFF0000;
-	//
-	// 	let pixel;
-	// 	for ( let row = 0; row < pixels.length; row++ )
-	// 	{
-	// 		for ( let col = 0; col < pixels[row].length; col++ )
-	// 		{
-	// 			pixel = pixels[row][col];
-	//
-	// 			if ( pixel.color === white )
-	// 			{
-	// 				texture.setPixel( pixel.x, pixel.y, 255, 0, 0 );
-	// 			}
-	// 		}
-	// 	}
-	//
-	// 	texture.refresh();
-	//
-	// 	let tmp = this.add.image( 50, 200, 'tmpspy' );
-	// 	tmp.setScale( 3 );
-	// },
 
 	update : function()
 	{

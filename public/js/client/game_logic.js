@@ -256,20 +256,20 @@ let GameLogic = function( gameControl, player )
 		//_gameOptions.show( );
 	}
 
-	function dumpJoyStickState()
-	{
-		var cursorKeys = this.joyStick.createCursorKeys();
-		var s = 'Key down: ';
-		for (var name in cursorKeys) {
-			if (cursorKeys[name].isDown) {
-				s += name + ' ';
-			}
-		}
-		s += '\n';
-		s += ('Force: ' + Math.floor(this.joyStick.force * 100) / 100 + '\n');
-		s += ('Angle: ' + Math.floor(this.joyStick.angle * 100) / 100 + '\n');
-		this.text.setText(s);
-	}
+	// function dumpJoyStickState()
+	// {
+	// 	var cursorKeys = this.joyStick.createCursorKeys();
+	// 	var s = 'Key down: ';
+	// 	for (var name in cursorKeys) {
+	// 		if (cursorKeys[name].isDown) {
+	// 			s += name + ' ';
+	// 		}
+	// 	}
+	// 	s += '\n';
+	// 	s += ('Force: ' + Math.floor(this.joyStick.force * 100) / 100 + '\n');
+	// 	s += ('Angle: ' + Math.floor(this.joyStick.angle * 100) / 100 + '\n');
+	// 	this.text.setText(s);
+	// }
 
 	function createSpy( id, posX, posY, playerConfig )
 	{
@@ -515,7 +515,7 @@ let GameLogic = function( gameControl, player )
 			// 		debug: false
 			// 	}
 			// },
-			scene : [ PlayerSelection, GameLoop ]
+//			scene : [ PlayerSelection, GameLoop ]
 			// scene: {
 			// 	preload : preload,
 			// 	create : create,
@@ -526,16 +526,8 @@ let GameLogic = function( gameControl, player )
 
 		phaserGame = new Phaser.Game(config);
 
-		// phaserGame = new Phaser.Game(
-		//
-		// 		gameWidth, gameHeight,
-		// 		Phaser.AUTO, 'game_div',
-		// {
-		// 	preload : preload,
-		// 	create : create,
-		// 	update : update,
-		// 	render : render
-		// });
+		phaserGame.scene.add('player_selection', PlayerSelection, true, {"gameControl": _gameControl});
+		phaserGame.scene.add('game_loop', GameLoop, false, {"boogy" : "woogy"});
 
 		gameHasStarted = true;
 	};
@@ -614,15 +606,6 @@ let GameLogic = function( gameControl, player )
 		_gameControl.triggerPlayerLoadedMap( _player );
 	};
 
-	// ctrl.onStartGame = function( gameInstance, player )
-	// {
-	// 	console.log('onStartGame> %o', player );
-	// 	console.log('onStartGame gameInstance> %o', gameInstance );
-	//
-	// 	_gameOptions.hide();
-	// };
-
-	
 	// -------------------------------------------------------
 	// Game Play
 	// -------------------------------------------------------
