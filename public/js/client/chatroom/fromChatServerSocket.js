@@ -1,9 +1,7 @@
 
 
 
-
-
-const fromServerSocket = function( socket, gameController )
+const fromChatServerSocket = function( socket, chatController )
 {
     socket.on('connection', function()
     {
@@ -28,14 +26,14 @@ const fromServerSocket = function( socket, gameController )
 
         console.log('on player joined room> %o', data );
 
-        gameController.onPlayerJoinedRoom( data.playerId, data.playerName, data.roomName );
+        chatController.onPlayerJoinedChatRoom( data.playerId, data.playerName, data.roomName );
     });
 
     socket.on('on_player_left', function( data )
     {
         console.log('player left room> ', data );
 
-	    gameController.onPlayerLeftRoom( data.playerId, data.playerName, data.roomName );
+	    chatController.onPlayerLeftChatRoom( data.playerId, data.playerName, data.roomName );
     });
 
 	/**
@@ -45,15 +43,15 @@ const fromServerSocket = function( socket, gameController )
 	{
 		console.log('listing players> %o', data );
 
-		gameController.onListPlayers( data.players );
+		chatController.onListPlayers( data.players );
 	});
 
-	// socket.on('on_room_status', function( data )
-	// {
-	// 	console.log('received status for room> %o', data );
-	//
-	// 	gameController.onReceiveRoomStatus( data.players, data.gameStarted );
-	// });
+	socket.on('on_room_status', function( data )
+	{
+		console.log('received status for room> %o', data );
+
+		chatController.onReceiveRoomStatus( data.players, data.gameStarted );
+	});
 
 	socket.on( 'on_chat', function(message)
 	{
@@ -63,7 +61,7 @@ const fromServerSocket = function( socket, gameController )
 	socket.on( 'on_start_game', function()
 	{
 		console.log('SERVER IS STARTING GAME!');
-		gameController.onStartGame();
+		chatController.onStartGame();
 	});
 };
 

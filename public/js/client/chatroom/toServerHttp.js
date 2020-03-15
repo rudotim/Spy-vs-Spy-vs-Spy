@@ -33,8 +33,6 @@ const toServerHttp = function( )
 				{
 					if ( data != null )
 					{
-						//data.socket = _onJoinLobbySuccess();
-
 						resolve( data );
 					}
 					else
@@ -44,39 +42,9 @@ const toServerHttp = function( )
 				},
 				error : function( error )
 				{
-					//console.error('ERROR> %o', err );
 					reject( error );
 				}
 			}));
-	};
-
-	const _onJoinLobbySuccess = function()
-	{
-		const urlid = '/';
-
-		console.log('client joining ' + urlid + '');
-
-		// initialize socket to server and establish communication callback channels
-		const socket = io( urlid );
-
-		//socket.emit( 'test', "client joined the lobby!" );
-
-		// _socket.on('connection', function(msg)
-		// {
-		// 	console.log('CONNECTED TO SERVER');
-		// });
-
-		// get game list
-
-		// tell server we have joined the room
-		//socket.emit( 'player_joined', player );
-
-		// redraw UI with our name in the list
-		//_updateRoomListUI( gameInstance.players );
-
-		//console.log('ok, you\'ve joined room [' + gameInstance.game_id + ']');
-
-		return socket;
 	};
 
 	return clientRequest;

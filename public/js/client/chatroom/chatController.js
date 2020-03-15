@@ -1,9 +1,5 @@
 
-
-
-
-
-const GameController = function( frontEnd )
+const ChatController = function( frontEnd )
 {
 	const clientRequest = {};
 	const LOBBY = "/";
@@ -21,30 +17,14 @@ const GameController = function( frontEnd )
 	// the encapsulation of logic calls to receive data from the server
 	let _toClient;
 
-	let _fromGameServerSocket;
-
 	// the encapsulation of logic calls to send data to the server
 	let _toServer;
 
-	// the core game logic
-	let _gameLogic;
-
+	// the current chatroom that we're in
 	let _chatroom;
 
-	// ---------------
-	// local copy of game data
-	let _gameInstance = null;
-
-	let listeners = [];
-
-
-	init();
-
-	function init()
-	{
-		// gameControl
-		_gameLogic = GameLogic( clientRequest );
-	}
+	// the game controller
+	let _gameControl;
 
 	// -------------------------------------------------------
 	// Lobby Config
@@ -85,9 +65,9 @@ const GameController = function( frontEnd )
 			console.log('Joining room: lobby');
 			_socket = io(newRoomName);
 
-			_toClient = fromServerSocket( _socket, clientRequest );
+			_toClient = fromChatServerSocket( _socket, clientRequest );
 
-			_toServer = toServerSocket( _socket );
+			_toServer = toChatServerSocket( _socket );
 
 			_toServer.joinRoom( _player, newRoomName, _socket );
 		}
@@ -119,41 +99,13 @@ const GameController = function( frontEnd )
 	};
 
 
-	// const cfgRequest = [
-	// 	{
-	// 		channel : "onplayerjoined",
-	// 		callback : ()
-	// 	}
-	// ];
-
-	clientRequest.addListener = function( listenerConfigRequest )
-	{
-		const listenerConfig = {
-			config : listenerConfigRequest,
-			id : uuid()
-		};
-
-		listeners.push( listenerConfig );
-
-		return listenerConfig.id;
-	};
-
-	clientRequest.removeListener = function( listenerConfigId )
-	{
-		listeners = listeners.filter(
-			function(value, index, arr)
-			{
-				return value.id !== listenerConfigId;
-			});
-	};
-
 	/**
 	 * Called when a new player has joined the room we're in.
 	 * @param playerId
 	 * @param playerName
 	 * @param chatRoomName
 	 */
-	clientRequest.onPlayerJoinedRoom = function( playerId, playerName, chatRoomName )
+	clientRequest.onPlayerJoinedChatRoom = function( playerId, playerName, chatRoomName )
 	{
 		// todo: wrap in logic to control creation and structure
 		_chatroom.players.push(
@@ -165,17 +117,8 @@ const GameController = function( frontEnd )
 
 		frontEnd.updateRoomListUI( _chatroom.players );
 
-		// call any interested listeners
-		listeners.forEach( listener =>
-		{
-			listener.config.forEach( cfg =>
-			{
-				if ( cfg.channel === "on_player_joined" )
-				{
-					cfg.callback(cfg._this, playerId, playerName);
-				}
-			});
-		});
+		if ( _gameControl )
+			_gameControl.onPlayerJoinedChatRoom( playerId, playerName, chatRoomName );
 	};
 
 	/**
@@ -184,7 +127,7 @@ const GameController = function( frontEnd )
 	 * @param playerName
 	 * @param chatRoomName
 	 */
-	clientRequest.onPlayerLeftRoom = function( playerId, playerName, chatRoomName )
+	clientRequest.onPlayerLeftChatRoom = function( playerId, playerName, chatRoomName )
 	{
 		// todo: wrap in logic to control creation and structure
 		_chatroom.players = _chatroom.players.filter(
@@ -194,6 +137,9 @@ const GameController = function( frontEnd )
 			});
 
 		frontEnd.updateRoomListUI( _chatroom.players );
+
+		if ( _gameControl )
+			_gameControl.onPlayerLeftChatRoom( playerId, playerName, chatRoomName );
 	};
 
 	/**
@@ -252,8 +198,6 @@ const GameController = function( frontEnd )
 		console.error('listing games has not yet been implemented');
 	};
 
-
-	
 	// -------------------------------------------------------
 	// Game Play Setup
 	// -------------------------------------------------------
@@ -272,118 +216,11 @@ const GameController = function( frontEnd )
 	 */
 	clientRequest.onStartGame = function()
 	{
-		// initiate the logic container for our game specific stuff
-		_gameLogic = new GameLogic( clientRequest, _player );
-
-		// start listening for game specific events
-		_fromGameServerSocket = new fromGameServerSocket(_socket, _gameLogic, frontEnd);
-
-		_gameLogic.onStartGame();
+		_gameControl = GameController( frontEnd, _socket );
+		_gameControl.onStartGame();
 	};
-
-
-	
-	/**
-	 * Pop-up the options (player selection) modal window
-	 */
-	clientRequest.showGameOptions = function()
-	{
-		_gameLogic.showGameOptions();
-	};
-	
-	clientRequest.triggerPlayerIsReady = function( player )
-	{
-		_socket.emit( 'player_is_ready', player );	
-	};
-
-	clientRequest.triggerPlayerLoadedMap = function( player )
-	{
-		_socket.emit( 'player_has_loaded_map', player );	
-	};
-
-
-	// clientRequest.triggerStartPreGame = function()
-	// {
-	// 	_socket.emit( 'start_pre_game', null );
-	// };
-
-	
-	clientRequest.choosePlayer = function( player, playerIndex, playerConfig, playerChosenCallback )
-	{
-		const clientData = {
-				player : player,
-				playerConfig : playerConfig,
-				gameId : _gameInstance.game_id
-		};
-
-		$.ajax({
-			type : 'post',
-			url : '/player/choose/',
-			data : JSON.stringify(clientData),
-			contentType : "application/json",
-			success : function(data) {
-				
-				console.log(data);				
-				playerChosenCallback( playerIndex, playerConfig, data.success );
-			},
-			error : function(err) {
-				console.error('ERROR! ' + err.responseText);
-				console.error(err);
-				
-				//playerChosenCallback( playerIndex, false );
-			}
-		});
-	};
-	
-
-	
-	// -------------------------------------------------------
-	// Game Play
-	// -------------------------------------------------------
-
-	clientRequest.sendPlayerEnteredRoom = function( player, teleports_to )
-	{
-		_socket.emit('player_entered_room', player, teleports_to );
-	};
-	
-	clientRequest.sendPlayerLeftRoom = function( player, roomId )
-	{
-		_socket.emit('player_left_room', player, roomId );
-	};
-
-	clientRequest.sendPosUpdate = function( spy )
-	{
-		if ( spy === undefined )
-			return;
-		
-		_socket.emit('on_data', spy.getPos() );
-	};
-
-	clientRequest.sendStopUpdate = function( spy )
-	{
-		const pos = spy.getPos();
-		pos.extra = 'stop';
-
-		_socket.emit( 'on_data', pos );
-	};
-
-	function uuid()
-	{
-		var dt = new Date().getTime();
-		var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-			var r = (dt + Math.random()*16)%16 | 0;
-			dt = Math.floor(dt/16);
-			return (c=='x' ? r :(r&0x3|0x8)).toString(16);
-		});
-		return uuid;
-	}
 
 	return clientRequest;
 };
 
-let frontEnd = toFrontEnd();
-
-const gameControl = GameController( frontEnd );
-
-
-
+const chatControl = ChatController( toFrontEnd() );
