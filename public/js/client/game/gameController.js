@@ -3,9 +3,6 @@ const GameController = function( frontEnd, socket )
 {
 	const clientRequest = {};
 
-	// your player object
-	let _player;
-
 	// the encapsulation of logic calls to receive data from the server
 	const _fromGameServerSocket = fromGameServerSocket( socket, clientRequest );
 
@@ -15,7 +12,9 @@ const GameController = function( frontEnd, socket )
 	// the core game logic
 	const _gameLogic = GameLogic( clientRequest );
 
-	// ---------------
+	// your player object
+	let _player;
+
 	// local copy of game data
 	let _gameInstance = null;
 
@@ -59,27 +58,17 @@ const GameController = function( frontEnd, socket )
 	 */
 	clientRequest.onPlayerJoinedRoom = function( playerId, playerName, chatRoomName )
 	{
-		// // todo: wrap in logic to control creation and structure
-		// _chatroom.players.push(
-		// 	{
-		// 		name : playerName,
-		// 		id : playerId
-		// 	}
-		// );
-		//
-		// frontEnd.updateRoomListUI( _chatroom.players );
-		//
-		// // call any interested listeners
-		// listeners.forEach( listener =>
-		// {
-		// 	listener.config.forEach( cfg =>
-		// 	{
-		// 		if ( cfg.channel === "on_player_joined" )
-		// 		{
-		// 			cfg.callback(cfg._this, playerId, playerName);
-		// 		}
-		// 	});
-		// });
+		// call any interested listeners
+		listeners.forEach( listener =>
+		{
+			listener.config.forEach( cfg =>
+			{
+				if ( cfg.channel === "on_player_joined" )
+				{
+					cfg.callback(cfg._this, playerId, playerName);
+				}
+			});
+		});
 	};
 
 	/**
@@ -90,14 +79,17 @@ const GameController = function( frontEnd, socket )
 	 */
 	clientRequest.onPlayerLeftRoom = function( playerId, playerName, chatRoomName )
 	{
-		// // todo: wrap in logic to control creation and structure
-		// _chatroom.players = _chatroom.players.filter(
-		// 	function(value, index, arr)
-		// 	{
-		// 		return value.id !== playerId;
-		// 	});
-		//
-		// frontEnd.updateRoomListUI( _chatroom.players );
+		// call any interested listeners
+		listeners.forEach( listener =>
+		{
+			listener.config.forEach( cfg =>
+			{
+				if ( cfg.channel === "on_player_left" )
+				{
+					cfg.callback(cfg._this, playerId, playerName);
+				}
+			});
+		});
 	};
 
 	/**
@@ -109,10 +101,6 @@ const GameController = function( frontEnd, socket )
 	clientRequest.onListPlayers = function( players )
 	{
 		console.log("onListPlayers> %o", players );
-
-		_chatroom.players = players;
-
-		frontEnd.updateRoomListUI( players );
 	};
 
 

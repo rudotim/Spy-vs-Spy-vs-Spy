@@ -1,8 +1,4 @@
 
-
-
-
-
 const ChatController = function( frontEnd )
 {
 	const clientRequest = {};
@@ -24,14 +20,11 @@ const ChatController = function( frontEnd )
 	// the encapsulation of logic calls to send data to the server
 	let _toServer;
 
+	// the current chatroom that we're in
 	let _chatroom;
 
-	// ---------------
-
+	// the game controller
 	let _gameControl;
-
-	let listeners = [];
-
 
 	// -------------------------------------------------------
 	// Lobby Config
@@ -106,27 +99,6 @@ const ChatController = function( frontEnd )
 	};
 
 
-	clientRequest.addListener = function( listenerConfigRequest )
-	{
-		const listenerConfig = {
-			config : listenerConfigRequest,
-			id : uuid()
-		};
-
-		listeners.push( listenerConfig );
-
-		return listenerConfig.id;
-	};
-
-	clientRequest.removeListener = function( listenerConfigId )
-	{
-		listeners = listeners.filter(
-			function(value, index, arr)
-			{
-				return value.id !== listenerConfigId;
-			});
-	};
-
 	/**
 	 * Called when a new player has joined the room we're in.
 	 * @param playerId
@@ -145,17 +117,8 @@ const ChatController = function( frontEnd )
 
 		frontEnd.updateRoomListUI( _chatroom.players );
 
-		// call any interested listeners
-		listeners.forEach( listener =>
-		{
-			listener.config.forEach( cfg =>
-			{
-				if ( cfg.channel === "on_player_joined" )
-				{
-					cfg.callback(cfg._this, playerId, playerName);
-				}
-			});
-		});
+		if ( _gameControl )
+			_gameControl.onPlayerJoinedRoom( playerId, playerName, chatRoomName );
 	};
 
 	/**
@@ -174,6 +137,9 @@ const ChatController = function( frontEnd )
 			});
 
 		frontEnd.updateRoomListUI( _chatroom.players );
+
+		if ( _gameControl )
+			_gameControl.onPlayerLeftRoom( playerId, playerName, chatRoomName );
 	};
 
 	/**
@@ -258,6 +224,3 @@ const ChatController = function( frontEnd )
 };
 
 const chatControl = ChatController( toFrontEnd() );
-
-
-

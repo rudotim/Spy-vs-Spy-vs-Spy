@@ -1,16 +1,11 @@
 
-
 const toGameServerSocket = function( socket )
 {
-	console.log("Creating GAME server socket");
-
 	let clientRequest = {};
-
 
 	// -------------------------------------------------------
 	// Game Play Setup
 	// -------------------------------------------------------
-
 
 	clientRequest.triggerPlayerIsReady = function( player )
 	{
@@ -65,8 +60,6 @@ const toGameServerSocket = function( socket )
 	// Game Play
 	// -------------------------------------------------------
 
-
-
 	clientRequest.sendPlayerEnteredRoom = function( player, teleports_to )
 	{
 		socket.emit('player_entered_room', player, teleports_to );
@@ -95,6 +88,3 @@ const toGameServerSocket = function( socket )
 		
 	return clientRequest;
 };
-
-
-
