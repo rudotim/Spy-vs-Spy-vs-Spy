@@ -105,7 +105,7 @@ const ChatController = function( frontEnd )
 	 * @param playerName
 	 * @param chatRoomName
 	 */
-	clientRequest.onPlayerJoinedRoom = function( playerId, playerName, chatRoomName )
+	clientRequest.onPlayerJoinedChatRoom = function( playerId, playerName, chatRoomName )
 	{
 		// todo: wrap in logic to control creation and structure
 		_chatroom.players.push(
@@ -118,7 +118,7 @@ const ChatController = function( frontEnd )
 		frontEnd.updateRoomListUI( _chatroom.players );
 
 		if ( _gameControl )
-			_gameControl.onPlayerJoinedRoom( playerId, playerName, chatRoomName );
+			_gameControl.onPlayerJoinedChatRoom( playerId, playerName, chatRoomName );
 	};
 
 	/**
@@ -127,7 +127,7 @@ const ChatController = function( frontEnd )
 	 * @param playerName
 	 * @param chatRoomName
 	 */
-	clientRequest.onPlayerLeftRoom = function( playerId, playerName, chatRoomName )
+	clientRequest.onPlayerLeftChatRoom = function( playerId, playerName, chatRoomName )
 	{
 		// todo: wrap in logic to control creation and structure
 		_chatroom.players = _chatroom.players.filter(
@@ -139,7 +139,7 @@ const ChatController = function( frontEnd )
 		frontEnd.updateRoomListUI( _chatroom.players );
 
 		if ( _gameControl )
-			_gameControl.onPlayerLeftRoom( playerId, playerName, chatRoomName );
+			_gameControl.onPlayerLeftChatRoom( playerId, playerName, chatRoomName );
 	};
 
 	/**

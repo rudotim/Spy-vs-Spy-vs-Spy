@@ -26,14 +26,14 @@ const fromChatServerSocket = function( socket, chatController )
 
         console.log('on player joined room> %o', data );
 
-        chatController.onPlayerJoinedRoom( data.playerId, data.playerName, data.roomName );
+        chatController.onPlayerJoinedChatRoom( data.playerId, data.playerName, data.roomName );
     });
 
     socket.on('on_player_left', function( data )
     {
         console.log('player left room> ', data );
 
-	    chatController.onPlayerLeftRoom( data.playerId, data.playerName, data.roomName );
+	    chatController.onPlayerLeftChatRoom( data.playerId, data.playerName, data.roomName );
     });
 
 	/**

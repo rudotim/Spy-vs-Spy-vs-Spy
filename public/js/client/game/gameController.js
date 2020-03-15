@@ -56,7 +56,7 @@ const GameController = function( frontEnd, socket )
 	 * @param playerName
 	 * @param chatRoomName
 	 */
-	clientRequest.onPlayerJoinedRoom = function( playerId, playerName, chatRoomName )
+	clientRequest.onPlayerJoinedChatRoom = function( playerId, playerName, chatRoomName )
 	{
 		// call any interested listeners
 		listeners.forEach( listener =>
@@ -77,7 +77,7 @@ const GameController = function( frontEnd, socket )
 	 * @param playerName
 	 * @param chatRoomName
 	 */
-	clientRequest.onPlayerLeftRoom = function( playerId, playerName, chatRoomName )
+	clientRequest.onPlayerLeftChatRoom = function( playerId, playerName, chatRoomName )
 	{
 		// call any interested listeners
 		listeners.forEach( listener =>
