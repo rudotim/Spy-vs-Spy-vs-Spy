@@ -13,7 +13,7 @@ var GameLoop = new Phaser.Class({
 	{
 		this.load.image("room","img/demoroom.png");
 
-		const url = './js/phaser/plugins/joystick.js';
+		const url = '/js/client/game/phaser/plugins/joystick.js';
 		this.load.plugin('rexvirtualjoystickplugin', url, true);
 	},
 

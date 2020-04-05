@@ -1,5 +1,4 @@
 
-const Game = require('./game.js');
 const Player = require('./player.js');
 const ChatRoom = require('./chatroom.js');
 
@@ -89,24 +88,6 @@ module.exports = function ()
 	};
 
 
-	GameManager.createGame = function( chatroom )
-	{
-		const game = new Game( chatroom );
-
-		return _storeGame( game );
-	};
-
-	GameManager.findGameByName = function( gameName )
-	{
-		for ( let k = 0; k < gameIds.length; k++ )
-		{
-			if ( allGames[ gameIds[k] ].name === gameName )
-				return allGames[ gameIds[k] ];
-		}
-
-		return null;
-	};
-
 	function createChatRoom( roomName )
 	{
 		return _storeRoom( new ChatRoom( roomName ) );
@@ -129,19 +110,55 @@ module.exports = function ()
 		return newPlayer;
 	};
 
-	const _storeGame = function( newGame )
+
+	// -------------------------------------
+	// Game Reference logic
+	// -------------------------------------
+
+	// GameManager.createGame = function( chatroom )
+	// {
+	// 	const game = new Game( chatroom );
+	//
+	// 	return _storeGame( game );
+	// };
+	//
+
+	/**
+	 * Return the reference to the game object with name
+	 * @param gameName
+	 * @returns {*}
+	 */
+	GameManager.findGameByName = function( gameName )
 	{
-		gameIds.push( newGame.id );
-		allGames[ newGame.id ] = newGame;
+		for ( let k = 0; k < gameIds.length; k++ )
+		{
+			if ( allGames[ gameIds[k] ].name === gameName )
+				return allGames[ gameIds[k] ];
+		}
 
-		// store keys in array
-		//this.keys.push( newGame.game_id );
-		
-		// store objects associated by key
-		//allGames[ newGame.game_id ] = newGame;
-
-		return newGame;
+		return null;
 	};
+
+	// const _storeGame = function( newGame )
+	// {
+	// 	gameIds.push( newGame.id );
+	// 	allGames[ newGame.id ] = newGame;
+	//
+	// 	// store keys in array
+	// 	//this.keys.push( newGame.game_id );
+	//
+	// 	// store objects associated by key
+	// 	//allGames[ newGame.game_id ] = newGame;
+	//
+	// 	return newGame;
+	// };
+
+
+
+
+
+
+
 
 	GameManager.findPlayerById = function( playerId )
 	{

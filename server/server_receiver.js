@@ -187,7 +187,8 @@ module.exports = function (io, router, gameManager)
 
 			socket.on('player_update_options', function( playerOptions )
 			{
-				serverLogic.playerUpdateOptions( socket, playerOptions.roomName, playerOptions );
+				console.log("got update> ", playerOptions );
+				serverLogic.playerUpdateOptions( socket, playerOptions );
 			});
 
 

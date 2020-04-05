@@ -134,7 +134,7 @@ const ChatController = function( frontEnd )
 	{
 		// todo: wrap in logic to control creation and structure
 		_chatroom.players = _chatroom.players.filter(
-			function(value, index, arr)
+			function(value) // , index, arr)
 			{
 				return value.id !== playerId;
 			});

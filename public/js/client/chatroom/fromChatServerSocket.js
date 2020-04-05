@@ -58,9 +58,11 @@ const fromChatServerSocket = function( socket, chatController )
 		console.log('got chat data[' + message + ']');
 	});
 
-	socket.on( 'on_start_game', function()
+	//moved to fromGameServer - delete this when working
+	socket.on( 'on_start_game', function( game )
 	{
 		console.log('SERVER IS STARTING GAME!');
+		console.log( game );
 		chatController.onStartGame();
 	});
 };

@@ -23,14 +23,15 @@ const server = require('http').Server(app);
 const io = require('socket.io')(server);
 app.set('io', io);
 
-const gameManager = require('../server/objects/game_manager');
+const  gameManager = require('../server/game/game_object_manager');
+const  gameLogic = require('../server/game/game_logic')( io, gameManager );
+const gameReceiver = require('../server/game/game_receiver')( io, gameLogic, gameManager );
 
-// var blob = require('../server/objects/blobbo');
-// blob.getAllGames();
+const  chatManager = require('../server/chatroom/chat_object_manager');
+const  chatLogic = require('../server/chatroom/chat_logic')( io, chatManager, gameLogic );
+const chatReceiver = require('../server/chatroom/chat_receiver')( io, app.get('router'), chatLogic, chatManager, gameReceiver );
 
-const gameServer = require('../server/server_receiver')( io, app.get('router'), gameManager );
-
-app.use('/', gameServer);
+app.use('/', chatReceiver);
 
 /**
  * Listen on provided port, on all network interfaces.

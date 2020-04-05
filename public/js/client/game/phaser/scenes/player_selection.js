@@ -70,6 +70,16 @@ var PlayerSelection = new Phaser.Class({
 				_this : this
 			},
 			{
+				channel : "on_player_left",
+				callback : this.onPlayerLeft,
+				_this : this
+			},
+			{
+				channel : "on_list_players",
+				callback : this.onListPlayers,
+				_this : this
+			},
+			{
 				channel : "on_player_update_options",
 				callback : this.onPlayerUpdateOptions,
 				_this : this
@@ -78,16 +88,21 @@ var PlayerSelection = new Phaser.Class({
 
 		this.gameControl.addListener( listenerConfig );
 
-		const myname = "My Name";
+		this.players = this.gameControl.players;
 
-		const playerConfig = {
-			name : myname,
-			color : 0xFFFFFF,
-			done : false,
-			text : undefined
-		};
+		this.prepPlayers( this.players );
+	},
 
-		this.players.push( playerConfig );
+	prepPlayers: function( players )
+	{
+		players.forEach( player =>
+		{
+			player.color = 0xFFFFFF;
+			player.ready = false;
+			player.text = undefined
+
+			console.log("player prepped> ", player );
+		});
 	},
 
 	preload: function ()
@@ -174,7 +189,11 @@ var PlayerSelection = new Phaser.Class({
 
 	sendPlayerUpdateOptions : function( color, ready )
 	{
-		this.gameControl.sendPlayerUpdateOptions( color, ready );
+		//this.gameControl.sendPlayerUpdateOptions( color, ready );
+
+		this.gameControl.player.color = color;
+		this.gameControl.player.ready = ready;
+		this.gameControl.sendPlayerUpdateOptions( this.gameControl.player );
 	},
 
 	onPlayerUpdateOptions : function( _this, playerOptions )
@@ -197,6 +216,11 @@ var PlayerSelection = new Phaser.Class({
 	{
 		console.log('onPlayerJoined> name: ', playerName, ' id: ', playerId );
 
+		// don't add the same player twice
+		const playerIndex = _this.players.findIndex( p => p.id === playerId );
+		if ( playerIndex === -1 )
+			return;
+
 		const playerConfig = {
 			name : playerName,
 			id : playerId,
@@ -210,6 +234,27 @@ var PlayerSelection = new Phaser.Class({
 		_this.drawPlayerStatus( _this.players );
 	},
 
+	onPlayerLeft : function( _this, playerId, playerName )
+	{
+		console.log('onPlayerLeft> name: ', playerName, ' id: ', playerId );
+
+		// remove player with matching id
+		_this.players = _this.players.filter(
+			function(player)
+			{
+				return player.id !== playerId;
+			});
+
+		_this.drawPlayerStatus( _this.players );
+	},
+
+	onListPlayers : function( _this, players )
+	{
+		console.log('onListPlayers> ', players);
+
+
+	},
+
 	drawPlayerStatus : function( players )
 	{
 		let x = 560;
@@ -221,7 +266,9 @@ var PlayerSelection = new Phaser.Class({
 		{
 			console.log("player> ", player);
 
-			player.text = this.add.text(x, y, player.name);
+			if ( player.text === undefined )
+				player.text = this.add.text(x, y, player.name);
+
 			y += rowHeight;
 		});
 

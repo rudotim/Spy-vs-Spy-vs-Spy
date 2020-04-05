@@ -1,13 +1,9 @@
-//var express = require('express');
-//var router = express.Router();
 const fs = require('fs');
 
-//const GameManager = require('./objects/game_manager.js');
-//let gameManager = new GameManager();
 
-module.exports = function (io, gameManager)
+module.exports = function (io, chatManager, gameLogic)
 {
-	const _gameManager = gameManager;
+	const _chatManager = chatManager;
 
 	let ServerLogic = function()
 	{
@@ -20,7 +16,7 @@ module.exports = function (io, gameManager)
 	ServerLogic.createPlayer = function( playerName )
 	{
 		// create and add ourself
-		const newPlayer = _gameManager.createPlayer( playerName );
+		const newPlayer = _chatManager.createPlayer( playerName );
 
 		// return data to ourself
 		return {
@@ -36,12 +32,12 @@ module.exports = function (io, gameManager)
 	 */
 	ServerLogic.joinRoom = function( playerId, roomName, socket )
 	{
-		const player = gameManager.findPlayerById( playerId );
+		const player = chatManager.findPlayerById( playerId );
 
-		const room = gameManager.getOrCreateRoomByName( roomName );
+		const room = chatManager.getOrCreateRoomByName( roomName );
 
 		// associate player with room
-		gameManager.addPlayerToRoom( player, room );
+		chatManager.addPlayerToRoom( player, room );
 
 		let data =
 		{
@@ -63,12 +59,12 @@ module.exports = function (io, gameManager)
 	 */
 	ServerLogic.leaveRoom = function( playerId, roomName, socket )
 	{
-		const player = gameManager.findPlayerById( playerId );
+		const player = chatManager.findPlayerById( playerId );
 
-		const room = gameManager.findRoomByName( roomName );
+		const room = chatManager.findRoomByName( roomName );
 
 		// disassociate player with room
-		gameManager.removePlayerFromRoom( player, room );
+		chatManager.removePlayerFromRoom( player, room );
 
 		let data =
 			{
@@ -92,7 +88,7 @@ module.exports = function (io, gameManager)
 	 */
 	ServerLogic.listPlayers = function( roomName, socket )
 	{
-		const players = gameManager.findPlayersInRoom( roomName );
+		const players = chatManager.findPlayersInRoom( roomName );
 
 		let data =
 		{
@@ -113,9 +109,9 @@ module.exports = function (io, gameManager)
 	 */
 	ServerLogic.getRoomStatus = function( roomName, socket )
 	{
-		const players = gameManager.findPlayersInRoom( roomName );
+		const players = chatManager.findPlayersInRoom( roomName );
 
-		const game = gameManager.findGameByName( roomName );
+		const game = chatManager.findGameByName( roomName );
 
 		let data =
 			{
@@ -140,24 +136,29 @@ module.exports = function (io, gameManager)
 	};
 
 
-	ServerLogic.startGame = function( roomName, socket )
+	ServerLogic.startGame = function( roomName )
 	{
-		const chatroom = gameManager.findRoomByName( roomName );
+		const chatroom = chatManager.findRoomByName( roomName );
 
-		_gameManager.createGame( chatroom );
+		// create game object in game obj manager
+		const game = gameLogic.createGame( chatroom );
+
+		// save reference to game in chatroom
+
+		// save reference to chatroom in game
 
 		// Send to everone else
-		sendToEveryoneInRoom( roomName, "on_start_game" );
+		sendToEveryoneInRoom( roomName, "on_start_game", game );
 	};
 
 
-	ServerLogic.playerUpdateOptions = function( socket, playerOptions )
-	{
-		//console.log("player update options room> ", roomName, " options:", playerOptions );
-
-		// Send everone
-		sendToEveryoneElseInRoom( socket, roomName, "on_player_update_options", playerOptions );
-	};
+	// ServerLogic.playerUpdateOptions = function( socket, playerOptions )
+	// {
+	// 	//console.log("player update options room> ", roomName, " options:", playerOptions );
+	//
+	// 	// Send everone
+	// 	sendToEveryoneElseInRoom( socket, roomName, "on_player_update_options", playerOptions );
+	// };
 
 
 
@@ -209,13 +210,13 @@ module.exports = function (io, gameManager)
 	function _createRoom( gameName, playerId )
 	{
 		// check if it already exists
-		let game = gameManager.findGameByName( gameName );
+		let game = chatManager.findGameByName( gameName );
 
 		// if it doesn't, create it
 		if ( game == null )
 		{
 			// add game to list of known active games
-			game = gameManager.createGame( gameName, playerId );
+			game = chatManager.createGame( gameName, playerId );
 		}
 
 		return game;
@@ -257,7 +258,7 @@ module.exports = function (io, gameManager)
 
 	ServerLogic.choosePlayer = function( gameId, playerId, playerConfigJson )
 	{
-		const current_player = gameManager.findPlayerByGameId( gameId, playerId );
+		const current_player = chatManager.findPlayerByGameId( gameId, playerId );
 
 		// // find the other players in the game
         // let players = activeGames.findPlayersByGameId( gameId );
@@ -283,7 +284,7 @@ module.exports = function (io, gameManager)
 		// set server player property
 		current_player.player_def = playerConfigJson;
 		
-		let game = gameManager.findGameById( gameId );
+		let game = chatManager.findGameById( gameId );
 		
 		console.log('game name> %o', game.name);
 		
@@ -343,7 +344,7 @@ module.exports = function (io, gameManager)
 	
 	ServerLogic.playerIsReady = function( player, socket )
 	{
-		let game = gameManager.findGameByPlayerId( player.id );
+		let game = chatManager.findGameByPlayerId( player.id );
 	
 		socket.broadcast.to(game.name).emit('on_player_is_ready', player);
 	
@@ -365,7 +366,7 @@ module.exports = function (io, gameManager)
 	
 	ServerLogic.playerHasFinishedLoadingResources = function( player, socket )
 	{
-		let game = gameManager.findGameByPlayerId( player.id );
+		let game = chatManager.findGameByPlayerId( player.id );
 		
 		// keep track of players loaded to provide feedback to waiting players as to who is the slow poke
 		if ( game.verifyMapsLoaded(player) === true )

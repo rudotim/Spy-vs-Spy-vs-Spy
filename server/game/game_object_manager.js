@@ -1,7 +1,7 @@
 
 const Game = require('./game.js');
 const Player = require('./player.js');
-const ChatRoom = require('./chatroom.js');
+const ChatRoom = require('../chatroom/chatroom.js');
 
 module.exports = function ()
 {
@@ -89,24 +89,6 @@ module.exports = function ()
 	};
 
 
-	GameManager.createGame = function( chatroom )
-	{
-		const game = new Game( chatroom );
-
-		return _storeGame( game );
-	};
-
-	GameManager.findGameByName = function( gameName )
-	{
-		for ( let k = 0; k < gameIds.length; k++ )
-		{
-			if ( allGames[ gameIds[k] ].name === gameName )
-				return allGames[ gameIds[k] ];
-		}
-
-		return null;
-	};
-
 	function createChatRoom( roomName )
 	{
 		return _storeRoom( new ChatRoom( roomName ) );
@@ -129,6 +111,44 @@ module.exports = function ()
 		return newPlayer;
 	};
 
+
+
+	// each chatroom can potentially have a reference to a game within
+
+	// creating a game adds a reference within a chatroom
+
+	// game is created in the /game package
+
+
+	// determine:
+	// sending game data to all players in room
+	// forwarding player join/leave to game
+	// add game reference when game starts
+	// remove game reference when game ends
+
+	// chat request for start game
+	// --> create game
+	// --> associate with chat room (put chatroom name in game object)
+	// --> return game (with players?) as response
+
+	GameManager.createGame = function( chatroom )
+	{
+		const game = new Game( chatroom );
+
+		return _storeGame( game );
+	};
+
+	GameManager.findGameByName = function( gameName )
+	{
+		for ( let k = 0; k < gameIds.length; k++ )
+		{
+			if ( allGames[ gameIds[k] ].name === gameName )
+				return allGames[ gameIds[k] ];
+		}
+
+		return null;
+	};
+
 	const _storeGame = function( newGame )
 	{
 		gameIds.push( newGame.id );
@@ -142,6 +162,8 @@ module.exports = function ()
 
 		return newGame;
 	};
+
+
 
 	GameManager.findPlayerById = function( playerId )
 	{

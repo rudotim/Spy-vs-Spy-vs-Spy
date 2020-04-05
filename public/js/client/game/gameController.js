@@ -5,7 +5,7 @@ const GameController = function( socket, frontEnd, chatroom, player )
 
 	// the encapsulation of logic calls to receive data from the server
 	const _fromGameServerSocket = fromGameServerSocket( socket, clientRequest );
-	
+
 	// the encapsulation of logic calls to send data to the server
 	const _toServer = toGameServerSocket( socket );
 
@@ -20,6 +20,13 @@ const GameController = function( socket, frontEnd, chatroom, player )
 
 	let listeners = [];
 
+	// Property exports:
+
+	clientRequest.player = _player;
+	clientRequest.players = chatroom.players;
+
+
+
 	/**
 	 * Called when the leader of a chat room has initiated the start of the game
 	 */
@@ -27,6 +34,15 @@ const GameController = function( socket, frontEnd, chatroom, player )
 	{
 		_gameLogic.onStartGame();
 	};
+
+	// function prepPlayers( players )
+	// {
+	// 	players.forEach( player =>
+	// 	{
+	// 		player.color = 0xFFFFFF;
+	// 		player.ready = false;
+	// 	});
+	// }
 
 
 	clientRequest.addListener = function( listenerConfigRequest )
@@ -104,17 +120,24 @@ const GameController = function( socket, frontEnd, chatroom, player )
 	};
 
 
-	clientRequest.sendPlayerUpdateOptions = function( color, ready )
-	{
-		console.log('chatroom> ', chatroom);
-		const playerOptions = {
-			roomName : chatroom.name,
-			id : _player.id,
-			color : color,
-			ready : ready
-		};
+	// clientRequest.sendPlayerUpdateOptions = function( color, ready )
+	// {
+	// 	console.log('sendPlayerUpdateOptions> ', color, ready);
+	// 	const playerOptions = {
+	// 		roomName : chatroom.name,
+	// 		id : _player.id,
+	// 		color : color,
+	// 		ready : ready
+	// 	};
+	//
+	// 	_toServer.sendPlayerUpdateOptions( socket, playerOptions );
+	// };
 
-		_toServer.sendPlayerUpdateOptions( socket, playerOptions );
+	clientRequest.sendPlayerUpdateOptions = function( player )
+	{
+		console.log('sendPlayerUpdateOptions> ', player);
+
+		_toServer.sendPlayerUpdateOptions( socket, player );
 	};
 
 	clientRequest.onPlayerUpdateOptions = function( playerOptions )

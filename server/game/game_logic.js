@@ -2,8 +2,6 @@
 //var router = express.Router();
 const fs = require('fs');
 
-//const GameManager = require('./objects/game_manager.js');
-//let gameManager = new GameManager();
 
 module.exports = function (io, gameManager)
 {
@@ -14,141 +12,17 @@ module.exports = function (io, gameManager)
 		console.log('server logic constructor');
 	};
 
-	/**
-	 * Create a new player based on their name.
-	 */
-	ServerLogic.createPlayer = function( playerName )
-	{
-		// create and add ourself
-		const newPlayer = _gameManager.createPlayer( playerName );
-
-		// return data to ourself
-		return {
-			"playerId" : newPlayer.id
-		}
-	};
 
 	/**
-	 * Join a room.  This will create the room and add you to it if it did not exist.
-	 * If the room did not exist, you will be marked as the leader of the room.
-	 * That means you can perform admin actions like starting the game,
-	 * removing users and changing admin properties.
+	 * Create a new game.
+	 * @param chatroom the chatroom object containing the player starting the game
+	 * @returns {*}
 	 */
-	ServerLogic.joinRoom = function( playerId, roomName, socket )
+	ServerLogic.createGame = function( chatroom )
 	{
-		const player = gameManager.findPlayerById( playerId );
-
-		const room = gameManager.getOrCreateRoomByName( roomName );
-
-		// associate player with room
-		gameManager.addPlayerToRoom( player, room );
-
-		let data =
-		{
-			"playerId" : playerId,
-			"playerName" : player.name,
-			"roomName" : roomName
-		};
-
-		// Send to everone else
-		sendToEveryoneElseInRoom(socket, data.roomName, "on_player_joined", data );
+		return gameManager.createGame( chatroom );
 	};
 
-
-	/**
-	 * Leave a room
-	 * @param playerId
-	 * @param roomName
-	 * @param socket
-	 */
-	ServerLogic.leaveRoom = function( playerId, roomName, socket )
-	{
-		const player = gameManager.findPlayerById( playerId );
-
-		const room = gameManager.findRoomByName( roomName );
-
-		// disassociate player with room
-		gameManager.removePlayerFromRoom( player, room );
-
-		let data =
-			{
-				"playerId" : playerId,
-				"playerName" : player.name,
-				"roomName" : roomName
-			};
-
-		// Send to everone else
-		sendToEveryoneElseInRoom(socket, data.roomName, "on_player_left", data );
-	};
-
-
-	// todo: possibly change listPlayers to 'get room status'
-	// This might include the player list and the current state of the game.
-
-	/**
-	 * Return list of all players in the room with name roomName
-	 * @param roomName name of chat room
-	 * @param socket socket connection to client
-	 */
-	ServerLogic.listPlayers = function( roomName, socket )
-	{
-		const players = gameManager.findPlayersInRoom( roomName );
-
-		let data =
-		{
-			"players" : players,
-		};
-
-		// send only to ourself
-		console.log("Sending player list to ourself in room %o", roomName );
-		sendToOurself( socket, "on_list_players", data );
-	};
-
-	/**
-	 * Return the current status of the room.
-	 * This includes a list of each player
-	 * and whether or not a game has been started
-	 * @param roomName
-	 * @param socket
-	 */
-	ServerLogic.getRoomStatus = function( roomName, socket )
-	{
-		const players = gameManager.findPlayersInRoom( roomName );
-
-		const game = gameManager.findGameByName( roomName );
-
-		let data =
-			{
-				"gameStarted" : game !== undefined,
-				"players" : players,
-			};
-
-		// send only to ourself
-		sendToOurself( socket, "on_room_status", data );
-	};
-
-	/**
-	 * Send this chat message to everyone else in the chat room
-	 * @param roomName name of chat room
-	 * @param message text content to send to the other users in the room
-	 * @param socket socket connection to client
-	 */
-	ServerLogic.sendChat = function( roomName, message, socket )
-	{
-		// Send to everone else
-		sendToEveryoneElseInRoom(socket, roomName, "on_chat", message );
-	};
-
-
-	ServerLogic.startGame = function( roomName, socket )
-	{
-		const chatroom = gameManager.findRoomByName( roomName );
-
-		_gameManager.createGame( chatroom );
-
-		// Send to everone else
-		sendToEveryoneInRoom( roomName, "on_start_game" );
-	};
 
 
 	ServerLogic.playerUpdateOptions = function( socket, playerOptions )
