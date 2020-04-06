@@ -62,13 +62,7 @@ const fromChatServerSocket = function( socket, chatController )
 	socket.on( 'on_start_game', function( game )
 	{
 		console.log('SERVER IS STARTING GAME!');
-		console.log( game );
-		chatController.onStartGame();
+		chatController.onStartGame( game );
 	});
 };
-
-
-
-
-
 

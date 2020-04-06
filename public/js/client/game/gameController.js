@@ -1,5 +1,5 @@
 
-const GameController = function( socket, frontEnd, chatroom, player )
+const GameController = function( socket, frontEnd, chatroom, game, player )
 {
 	const clientRequest = {};
 
@@ -137,7 +137,12 @@ const GameController = function( socket, frontEnd, chatroom, player )
 	{
 		console.log('sendPlayerUpdateOptions> ', player);
 
-		_toServer.sendPlayerUpdateOptions( socket, player );
+		const data = {
+			roomName : game.chatroom.name,
+			player : player
+		};
+
+		_toServer.sendPlayerUpdateOptions( socket, data );
 	};
 
 	clientRequest.onPlayerUpdateOptions = function( playerOptions )

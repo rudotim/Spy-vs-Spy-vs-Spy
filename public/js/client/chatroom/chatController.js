@@ -217,9 +217,9 @@ const ChatController = function( frontEnd )
 	/**
 	 * Called when the leader of a chat room has initiated the start of the game
 	 */
-	clientRequest.onStartGame = function()
+	clientRequest.onStartGame = function( game )
 	{
-		_gameControl = GameController( _socket, frontEnd, _chatroom, _player );
+		_gameControl = GameController( _socket, frontEnd, _chatroom, game, _player );
 		_gameControl.onStartGame();
 	};
 

@@ -25,12 +25,13 @@ module.exports = function (io, gameManager)
 
 
 
-	ServerLogic.playerUpdateOptions = function( socket, playerOptions )
+	ServerLogic.playerUpdateOptions = function( socket, roomName, playerOptions )
 	{
 		//console.log("player update options room> ", roomName, " options:", playerOptions );
 
 		// Send everone
-		sendToEveryoneElseInRoom( socket, roomName, "on_player_update_options", playerOptions );
+		//sendToEveryoneElseInRoom( socket, roomName, "on_player_update_options", playerOptions );
+		sendToEveryoneInRoom( roomName, "on_player_update_options", playerOptions );
 	};
 
 
@@ -237,7 +238,7 @@ module.exports = function (io, gameManager)
 		}			
 	};
 	
-	ServerLogic.playerHasFinishedLoadingResources = function( player, socket )
+	ServerLogic.playerHasFinishedLoadingResources = function( player )
 	{
 		let game = gameManager.findGameByPlayerId( player.id );
 		

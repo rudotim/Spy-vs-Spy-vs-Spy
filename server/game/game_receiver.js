@@ -16,7 +16,18 @@ module.exports = function (io, gameLogic, gameManager)
 
 		socket.on('player_has_loaded_map', function( player )
 		{
-			gameLogic.playerHasFinishedLoadingResources( player, socket );
+			gameLogic.playerHasFinishedLoadingResources( player );
+		});
+
+		// -------------------------------------------------------
+		// Game Play Config
+		// -------------------------------------------------------
+
+		socket.on('player_update_options', function( data )
+		{
+			console.log("got update> ", data );
+
+			gameLogic.playerUpdateOptions( socket, data.roomName, data.player );
 		});
 
 		// not really a thing anymore.  get rid of this

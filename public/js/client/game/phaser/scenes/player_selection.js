@@ -44,13 +44,13 @@ var PlayerSelection = new Phaser.Class({
 		{
 			Phaser.Scene.call(this, { key: 'player_selection' });
 
-			this.text1;
-			this.text2;
-			this.wheel;
-			this.wheelpos;
-			this.mycolor;
+			this.text1 = undefined;
+			this.text2 = undefined;
+			this.wheel = undefined;
+			this.wheelpos = undefined;
+			this.mycolor = undefined;
 
-			this.gameControl;
+			this.gameControl = undefined;
 
 			// keep track of player names, color, status
 			this.players = [];
@@ -93,13 +93,14 @@ var PlayerSelection = new Phaser.Class({
 		this.prepPlayers( this.players );
 	},
 
+
 	prepPlayers: function( players )
 	{
 		players.forEach( player =>
 		{
-			player.color = 0xFFFFFF;
+			player.color = Phaser.Display.Color.HexStringToColor( "0xFFFFFF" );  // 0xFFFFFF;
 			player.ready = false;
-			player.text = undefined
+			player.text = undefined;
 
 			console.log("player prepped> ", player );
 		});
@@ -136,6 +137,7 @@ var PlayerSelection = new Phaser.Class({
 
 		let graphics = this.add.graphics( { x: 0, y: 0 });
 
+		// copy texture from 'spyWhite' to a new one 'spyDynamic'
 		let texture = this.copyTextureFromImage( 'spyWhite', 'spyDynamic' );
 
 		const spy = this.add.image( this.cameras.main.centerX + centerOffsetX, this.cameras.main.centerY + centerOffsetY, "spyDynamic" );
@@ -189,8 +191,6 @@ var PlayerSelection = new Phaser.Class({
 
 	sendPlayerUpdateOptions : function( color, ready )
 	{
-		//this.gameControl.sendPlayerUpdateOptions( color, ready );
-
 		this.gameControl.player.color = color;
 		this.gameControl.player.ready = ready;
 		this.gameControl.sendPlayerUpdateOptions( this.gameControl.player );
@@ -198,7 +198,7 @@ var PlayerSelection = new Phaser.Class({
 
 	onPlayerUpdateOptions : function( _this, playerOptions )
 	{
-		console.log('onPlayerUpdateOptions> ', playerOptions);
+		//console.log('onPlayerUpdateOptions> ', playerOptions);
 
 		// find player with 'id', change spy color to 'color'
 		const player = _this.players.find( p => p.id === playerOptions.id );
@@ -265,17 +265,28 @@ var PlayerSelection = new Phaser.Class({
 		players.forEach( player =>
 		{
 			console.log("player> ", player);
+			console.log("player color> ", player.color );
 
 			if ( player.text === undefined )
 				player.text = this.add.text(x, y, player.name);
 
+			// todo: update player color
+
+			if ( player.image === undefined )
+			{
+				// copy texture from 'spyWhite' to a new one 'spyDynamic'
+				player.texture = this.copyTextureFromImage( 'spyWhite', 'spy_' + player.id );
+
+				player.image = this.add.image( x - 35, y, 'spy_' + player.id );
+				player.image.setScale( 1.5 );
+			}
+			else
+			{
+				this.updateTextureColor( player.texture, 0xFFFFFF, player.color );
+			}
+
 			y += rowHeight;
 		});
-
-		// draw player icon
-		const spy = this.add.image( x - 35, y - 40, "spyDynamic" );
-		spy.setScale( 1.5 );
-
 	},
 
 
