@@ -12,7 +12,6 @@ module.exports = function (io, gameManager)
 		console.log('server logic constructor');
 	};
 
-
 	/**
 	 * Create a new game.
 	 * @param chatroom the chatroom object containing the player starting the game
@@ -23,14 +22,14 @@ module.exports = function (io, gameManager)
 		return gameManager.createGame( chatroom );
 	};
 
-
-
+	/**
+	 * Update player options like choosing colors.
+	 * @param socket
+	 * @param roomName
+	 * @param playerOptions
+	 */
 	ServerLogic.playerUpdateOptions = function( socket, roomName, playerOptions )
 	{
-		//console.log("player update options room> ", roomName, " options:", playerOptions );
-
-		// Send everone
-		//sendToEveryoneElseInRoom( socket, roomName, "on_player_update_options", playerOptions );
 		sendToEveryoneInRoom( roomName, "on_player_update_options", playerOptions );
 	};
 
@@ -73,62 +72,6 @@ module.exports = function (io, gameManager)
 	}
 
 
-
-
-
-
-	/**
-	 * Create a new room with name and set player as the leader.  Also configure
-	 * first time socket subscriptions.
-	 */
-	function _createRoom( gameName, playerId )
-	{
-		// check if it already exists
-		let game = gameManager.findGameByName( gameName );
-
-		// if it doesn't, create it
-		if ( game == null )
-		{
-			// add game to list of known active games
-			game = gameManager.createGame( gameName, playerId );
-		}
-
-		return game;
-	}
-
-
-
-
-
-	// /**
-	//  * Create a new room with name and set player as the leader.  Also configure
-	//  * first time socket subscriptions.
-	//  */
-	// function _createRoom( gameName, playerObj, configureSocketSubscriptions )
-	// {
-	// 	// check if it already exists
-	// 	let game = gameManager.findGameByName( gameName );
-	// 	const isLeader = (game == null);
-	//
-	// 	// if it doesn't, create it
-	// 	if ( game == null )
-	// 	{
-	// 		// add game to list of known active games
-	// 		game = gameManager.createGame( gameName );
-	//
-	// 		// set up socket listeners for client actions
-	// 		configureSocketSubscriptions( game );
-	// 	}
-	//
-	// 	// // create and add ourself
-	// 	// const newPlayer = game.createPlayer( playerObj.name, isLeader );
-	// 	//
-	// 	// // return data to ourself
-	// 	// return {
-	// 	// 	"game"	: game,
-	// 	// 	"player" 		: newPlayer
-	// 	// };
-	// }
 
 	ServerLogic.choosePlayer = function( gameId, playerId, playerConfigJson )
 	{

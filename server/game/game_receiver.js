@@ -9,10 +9,6 @@ module.exports = function (io, gameLogic, gameManager)
 
 	ServerReceiver.configureSockets = function( socket )
 	{
-		socket.on('player_is_ready', function( player )
-		{
-			gameLogic.playerIsReady( player, socket );
-		});
 
 		socket.on('player_has_loaded_map', function( player )
 		{
@@ -23,11 +19,21 @@ module.exports = function (io, gameLogic, gameManager)
 		// Game Play Config
 		// -------------------------------------------------------
 
+		/**
+		 * Received when a player chooses pre-game options like character color.
+		 */
 		socket.on('player_update_options', function( data )
 		{
-			console.log("got update> ", data );
-
 			gameLogic.playerUpdateOptions( socket, data.roomName, data.player );
+		});
+
+		/**
+		 * Received when a player has indicated they are done choosing
+		 * options and are ready to start.
+		 */
+		socket.on('player_is_ready', function( player )
+		{
+			gameLogic.playerIsReady( player, socket );
 		});
 
 		// not really a thing anymore.  get rid of this

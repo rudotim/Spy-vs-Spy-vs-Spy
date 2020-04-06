@@ -94,11 +94,15 @@ var PlayerSelection = new Phaser.Class({
 	},
 
 
+	/**
+	 * Initialize all player data to defaults
+	 * @param players
+	 */
 	prepPlayers: function( players )
 	{
 		players.forEach( player =>
 		{
-			player.color = Phaser.Display.Color.HexStringToColor( "0xFFFFFF" );  // 0xFFFFFF;
+			player.color = Phaser.Display.Color.HexStringToColor( "0xFFFFFF" );
 			player.ready = false;
 			player.text = undefined;
 
@@ -198,8 +202,6 @@ var PlayerSelection = new Phaser.Class({
 
 	onPlayerUpdateOptions : function( _this, playerOptions )
 	{
-		//console.log('onPlayerUpdateOptions> ', playerOptions);
-
 		// find player with 'id', change spy color to 'color'
 		const player = _this.players.find( p => p.id === playerOptions.id );
 
@@ -265,7 +267,6 @@ var PlayerSelection = new Phaser.Class({
 		players.forEach( player =>
 		{
 			console.log("player> ", player);
-			console.log("player color> ", player.color );
 
 			if ( player.text === undefined )
 				player.text = this.add.text(x, y, player.name);

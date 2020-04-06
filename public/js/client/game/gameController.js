@@ -35,16 +35,7 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 		_gameLogic.onStartGame();
 	};
 
-	// function prepPlayers( players )
-	// {
-	// 	players.forEach( player =>
-	// 	{
-	// 		player.color = 0xFFFFFF;
-	// 		player.ready = false;
-	// 	});
-	// }
-
-
+	
 	clientRequest.addListener = function( listenerConfigRequest )
 	{
 		const listenerConfig = {
