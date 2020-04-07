@@ -132,12 +132,10 @@ const ChatController = function( frontEnd )
 	 */
 	clientRequest.onPlayerLeftChatRoom = function( playerId, playerName, chatRoomName )
 	{
-		// todo: wrap in logic to control creation and structure
-		_chatroom.players = _chatroom.players.filter(
-			function(value) // , index, arr)
-			{
-				return value.id !== playerId;
-			});
+		const playerIndex = _chatroom.players.findIndex( (player) => player.id === playerId );
+
+		if ( playerIndex !== -1 )
+			_chatroom.players.splice(playerIndex, 1);
 
 		frontEnd.updateRoomListUI( _chatroom.players );
 

@@ -34,6 +34,15 @@ module.exports = function (io, gameManager)
 	};
 
 
+	ServerLogic.leaveRoom = function( playerId, roomName )
+	{
+		//const player = chatManager.findPlayerById( playerId );
+
+		const game = gameManager.findGameByName( roomName );
+
+		// disassociate player with room
+		//chatManager.removePlayerFromRoom( player, room );
+	};
 
 
 

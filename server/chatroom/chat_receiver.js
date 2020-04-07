@@ -36,20 +36,27 @@ module.exports = function (io, router, chatLogic, chatManager, gameReceiver)
  		const urlid = '/';
 	
 		console.log('attaching CHAT IO> joining %o', urlid);
-	
+
+		const allSockets = [];
+
 		// create sockets, pass back chat names
         const chat = io.of(urlid).on('connection', function(socket)
 		{
+			allSockets.push( socket );
+
 			console.log('server_receiver> SOCKET CONNECTED TO CLIENT');
 
 			gameReceiver.configureSockets( socket );
 
 			socket.on('disconnect', function ()
 			{
-				console.log('disconnected player_id=' + socket.player);
+				const socketIndex = allSockets.indexOf(socket);
+				const currentSocket = allSockets[ socketIndex ];
+
+				console.log('disconnected socket: ', currentSocket.playerId);
 				
 				// remove from server list
-				//serverLogic.playerHasLeft( socket.player, socket );
+				chatLogic.playerHasLeft( socket, currentSocket.roomName, currentSocket.playerId );
 			});
 	
 			// -------------------------------------------------------
@@ -62,9 +69,13 @@ module.exports = function (io, router, chatLogic, chatManager, gameReceiver)
 			 */
 			socket.on('join_room', function( data )
 			{
+				const socketIndex = allSockets.indexOf(socket);
+				const currentSocket = allSockets[ socketIndex ];
+				currentSocket.playerId = data.playerId;
+				currentSocket.roomName = data.roomName;
+
 				console.log("player[%o] is joining room[%o]", data.playerId, data.roomName);
 
-				//socket.join( (data.roomName[0] !== '/' ? '/' : '') + data.roomName );
 				socket.join( data.roomName );
 
 				// returns a game but we dont' do anything with it?
@@ -80,7 +91,6 @@ module.exports = function (io, router, chatLogic, chatManager, gameReceiver)
 			{
 				console.log("player[%o] is leaving room [%o]", data.playerId, data.roomName);
 
-				//socket.leave( (data.roomName[0] !== '/' ? '/' : '') + data.roomName );
 				socket.leave( data.roomName );
 
 				// returns a game but we dont' do anything with it?

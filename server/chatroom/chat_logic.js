@@ -66,6 +66,8 @@ module.exports = function (io, chatManager, gameLogic)
 		// disassociate player with room
 		chatManager.removePlayerFromRoom( player, room );
 
+		gameLogic.leaveRoom( playerId, roomName );
+
 		let data =
 			{
 				"playerId" : playerId,
@@ -149,6 +151,25 @@ module.exports = function (io, chatManager, gameLogic)
 
 		// Send to everone else
 		sendToEveryoneInRoom( roomName, "on_start_game", game );
+	};
+
+	/**
+	 * Inform everyone in the game that a player has left
+	 * @param socket
+	 * @param roomName
+	 * @param playerId
+	 */
+	ServerLogic.playerHasLeft = function( socket, roomName, playerId )
+	{
+		console.log('playerHasLeft> ', roomName, playerId );
+
+		const data = {
+			playerId : playerId,
+			playerName : "nobody",
+			roomName : roomName
+		};
+
+		sendToEveryoneInRoom( roomName, "on_player_left", data );
 	};
 
 
@@ -317,17 +338,6 @@ module.exports = function (io, chatManager, gameLogic)
 	// 	socket.broadcast.to(game.name).emit('on_player_joined', serverPlayers, player.name);
 	// };
 	//
-	// ServerLogic.playerHasLeft = function( player, socket )
-	// {
-	// 	console.log('playerHasLeft> %o', player );
-	//
-	// 	// find game associated with player
-	// 	//let game = gameManager.findGameByPlayerId( player.id );
-	//
-	// 	//game.removePlayerById( player.id );
-	//
-	// 	//socket.broadcast.to(game.name).emit('on_player_left', game.players, player);
-	// };
 	//
 	// ServerLogic.playerAttributeUpdated = function( player, socket )
 	// {

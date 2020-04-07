@@ -218,21 +218,6 @@ var PlayerSelection = new Phaser.Class({
 	{
 		console.log('onPlayerJoined> name: ', playerName, ' id: ', playerId );
 
-		// don't add the same player twice
-		const playerIndex = _this.players.findIndex( p => p.id === playerId );
-		if ( playerIndex === -1 )
-			return;
-
-		const playerConfig = {
-			name : playerName,
-			id : playerId,
-			color : 0xFFFFFF,
-			done : false,
-			text : undefined
-		};
-
-		_this.players.push( playerConfig );
-
 		_this.drawPlayerStatus( _this.players );
 	},
 
@@ -240,21 +225,12 @@ var PlayerSelection = new Phaser.Class({
 	{
 		console.log('onPlayerLeft> name: ', playerName, ' id: ', playerId );
 
-		// remove player with matching id
-		_this.players = _this.players.filter(
-			function(player)
-			{
-				return player.id !== playerId;
-			});
-
 		_this.drawPlayerStatus( _this.players );
 	},
 
 	onListPlayers : function( _this, players )
 	{
 		console.log('onListPlayers> ', players);
-
-
 	},
 
 	drawPlayerStatus : function( players )
