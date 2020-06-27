@@ -4,9 +4,6 @@ const ChatRoom = require('./chatroom.js');
 
 module.exports = function ()
 {
-	const gameIds = [];
-	const allGames = {};
-
 	const playerIds = [];
 	const allPlayers = {};
 
@@ -23,6 +20,11 @@ module.exports = function ()
 
 	GameManager.prototype.constructor = GameManager;
 
+	/**
+	 * Retrieve the room object associated with roomName.
+	 * @param roomName
+	 * @returns {*} return the room object. If one did not exist, create it and return it.
+	 */
 	GameManager.getOrCreateRoomByName = function( roomName )
 	{
 		let room = this.findRoomByName( roomName );
@@ -33,6 +35,11 @@ module.exports = function ()
 		return room;
 	};
 
+	/**
+	 * Retrieve the room object associated with roomName.
+	 * @param roomName
+	 * @returns {*} return the room object. If one did not exist, return undefined.
+	 */
 	GameManager.findRoomByName = function( roomName )
 	{
 		for ( let k = 0; k < roomIds.length; k++ )
@@ -44,6 +51,11 @@ module.exports = function ()
 		return undefined;
 	};
 
+	/**
+	 * Create a new player object based on the new player's name.
+	 * @param newPlayerName
+	 * @returns {*}
+	 */
 	GameManager.createPlayer = function( newPlayerName )
 	{
 		const player = new Player( newPlayerName );
@@ -51,7 +63,11 @@ module.exports = function ()
 		return _storePlayer( player );
 	};
 
-
+	/**
+	 * Add a player to a room.
+	 * @param player
+	 * @param room
+	 */
 	GameManager.addPlayerToRoom = function( player, room )
 	{
 		const playerIndex = room.players.findIndex( i => i.id === player.id );
@@ -62,6 +78,11 @@ module.exports = function ()
 			console.error("addPlayer> Player with id %o already existed in room %o", player.id, room.name );
 	};
 
+	/**
+	 * Remove a player from a room
+	 * @param player
+	 * @param room
+	 */
 	GameManager.removePlayerFromRoom = function( player, room )
 	{
 		// create new array that does not include our target player
@@ -87,12 +108,22 @@ module.exports = function ()
 			return room.players;
 	};
 
-
+	/**
+	 * Create a new chat room based on the new chat room's name
+	 * @param roomName
+	 * @returns {*} the newly created chat room object
+	 */
 	function createChatRoom( roomName )
 	{
 		return _storeRoom( new ChatRoom( roomName ) );
 	}
 
+	/**
+	 * Store a chat room object
+	 * @param chatroom
+	 * @returns {*} the stored chat room object
+	 * @private
+	 */
 	function _storeRoom( chatroom )
 	{
 		console.log("Chat room %o created", chatroom.name);
@@ -102,6 +133,12 @@ module.exports = function ()
 		return chatroom;
 	}
 
+	/**
+	 * Store a player object.
+	 * @param newPlayer
+	 * @returns {*} the stored player object
+	 * @private
+	 */
 	const _storePlayer = function( newPlayer )
 	{
 		playerIds.push( newPlayer.id );
@@ -110,146 +147,15 @@ module.exports = function ()
 		return newPlayer;
 	};
 
-
-	// -------------------------------------
-	// Game Reference logic
-	// -------------------------------------
-
-	// GameManager.createGame = function( chatroom )
-	// {
-	// 	const game = new Game( chatroom );
-	//
-	// 	return _storeGame( game );
-	// };
-	//
-
 	/**
-	 * Return the reference to the game object with name
-	 * @param gameName
-	 * @returns {*}
+	 * Find a player object by the corresponding player id
+	 * @param playerId
+	 * @returns {*} the player object
 	 */
-	GameManager.findGameByName = function( gameName )
-	{
-		for ( let k = 0; k < gameIds.length; k++ )
-		{
-			if ( allGames[ gameIds[k] ].name === gameName )
-				return allGames[ gameIds[k] ];
-		}
-
-		return null;
-	};
-
-	// const _storeGame = function( newGame )
-	// {
-	// 	gameIds.push( newGame.id );
-	// 	allGames[ newGame.id ] = newGame;
-	//
-	// 	// store keys in array
-	// 	//this.keys.push( newGame.game_id );
-	//
-	// 	// store objects associated by key
-	// 	//allGames[ newGame.game_id ] = newGame;
-	//
-	// 	return newGame;
-	// };
-
-
-
-
-
-
-
-
 	GameManager.findPlayerById = function( playerId )
 	{
 		return allPlayers[ playerId ];
 	};
-	
-	GameManager.findGameById = function( game_id )
-	{
-		return allGames[ game_id ];
-	};
-	
-
-
-	GameManager.findPlayerByGameId = function(game_id, player_id )
-	{
-        let game = this.findGameById( game_id );
-
-        let pId = game.players.player_data[player_id];
-				
-		return pId;
-		
-		/*
-		var p = 0;
-		for ( p = 0; p<game.players.length; p++ )
-		{
-			if ( game.players[p].player_id == player_id )
-			{
-				// getPlayerById
-			}
-		}
-		*/
-		//return this.allGames[ game_id ];
-	};
-	
-	GameManager.findPlayersByGameId = function(game_id )
-	{
-        let game = this.findGameById( game_id );
-		
-		return game.players;
-	};
-	
-	/*
-	Game_manager.prototype.findAllPlayersExceptThisOneByGameId = function( game_id, player_id )
-	{
-		var game = findGameById( game_id );
-		
-		return game.players;
-	};
-	*/	
-
-	GameManager.findGameByPlayerId = function(player_id )
-	{
-        let game, p;
-		
-		for ( let k = 0; k < this.keys.length; k++ )
-		{
-			game = this.allGames[ this.keys[k] ];
-
-			console.log('checking game \'' + this.keys[k] + '\' for players...');
-
-			console.log('checking for player_id[' + player_id + ']');
-			p = game.getPlayerById( player_id );
-			
-			if ( p != 'undefined' && p != null )
-			{
-				console.log('found player');
-				console.log( p );
-				//return p;
-				return game;
-			}
-		}
-		
-		console.error('found nothing');
-		return null;
-	};
-	
-	GameManager.getAllGames = function()
-	{
-		let names = [];
-		
-		for ( let k = 0; k < this.keys.length; k++ )
-			names.push( this.allGames[ this.keys[k] ].game_id );
-		
-		return names;
-	};
-	
-	// if ( ! (typeof module === 'undefined') )
-	// {
-	// 	console.log('Game_manager exported');
-	// 	module.exports = GameManager;
-	// }
 
 	return GameManager;
 }();

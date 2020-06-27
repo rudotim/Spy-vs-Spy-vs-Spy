@@ -17,99 +17,96 @@ module.exports = function ()
     const GameManager = function()
     {
     	console.log('game manager constructor');
-
-    	// Create the default lobby chat room
-	    createChatRoom( "/" );
     };
 
 	GameManager.prototype.constructor = GameManager;
 
-	GameManager.getOrCreateRoomByName = function( roomName )
-	{
-		let room = this.findRoomByName( roomName );
-
-		if ( room === undefined )
-			room = createChatRoom( roomName );
-
-		return room;
-	};
-
-	GameManager.findRoomByName = function( roomName )
-	{
-		for ( let k = 0; k < roomIds.length; k++ )
-		{
-			if ( allRooms[ roomIds[k] ].name === roomName )
-				return allRooms[ roomIds[k] ];
-		}
-
-		return undefined;
-	};
-
-	GameManager.createPlayer = function( newPlayerName )
-	{
-		const player = new Player( newPlayerName );
-
-		return _storePlayer( player );
-	};
-
-
-	GameManager.addPlayerToRoom = function( player, room )
-	{
-		const playerIndex = room.players.findIndex( i => i.id === player.id );
-
-		if ( playerIndex === -1 )
-			room.players.push( player );
-		else
-			console.error("addPlayer> Player with id %o already existed in room %o", player.id, room.name );
-	};
-
-	GameManager.removePlayerFromRoom = function( player, room )
-	{
-		// create new array that does not include our target player
-		room.players = room.players.filter(
-				function(value, index, arr)
-				{
-					return value.id !== player.id;
-				});
-	};
-
-	/**
-	 * Retrieve all players associated with the room with name roomName
-	 * @param roomName name of room for which we're requesting a player list
-	 * @returns {Array} list of players
-	 */
-	GameManager.findPlayersInRoom = function( roomName )
-	{
-		const room = this.findRoomByName( roomName );
-
-		if ( room === undefined )
-			console.error("Failed to find room with name ", roomName);
-		else
-			return room.players;
-	};
-
-
-	function createChatRoom( roomName )
-	{
-		return _storeRoom( new ChatRoom( roomName ) );
-	}
-
-	function _storeRoom( chatroom )
-	{
-		console.log("Chat room %o created", chatroom.name);
-		roomIds.push( chatroom.id );
-		allRooms[ chatroom.id ] = chatroom;
-
-		return chatroom;
-	}
-
-	const _storePlayer = function( newPlayer )
-	{
-		playerIds.push( newPlayer.id );
-		allPlayers[ newPlayer.id ] = newPlayer;
-
-		return newPlayer;
-	};
+	// GameManager.getOrCreateRoomByName = function( roomName )
+	// {
+	// 	let room = this.findRoomByName( roomName );
+	//
+	// 	if ( room === undefined )
+	// 		room = createChatRoom( roomName );
+	//
+	// 	return room;
+	// };
+	//
+	// GameManager.findRoomByName = function( roomName )
+	// {
+	// 	for ( let k = 0; k < roomIds.length; k++ )
+	// 	{
+	// 		if ( allRooms[ roomIds[k] ].name === roomName )
+	// 			return allRooms[ roomIds[k] ];
+	// 	}
+	//
+	// 	return undefined;
+	// };
+	//
+	// GameManager.createPlayer = function( newPlayerName )
+	// {
+	// 	const player = new Player( newPlayerName );
+	//
+	// 	return _storePlayer( player );
+	// };
+	//
+	//
+	// GameManager.addPlayerToRoom = function( player, room )
+	// {
+	// 	const playerIndex = room.players.findIndex( i => i.id === player.id );
+	//
+	// 	if ( playerIndex === -1 )
+	// 		room.players.push( player );
+	// 	else
+	// 		console.error("addPlayer> Player with id %o already existed in room %o", player.id, room.name );
+	// };
+	//
+	// GameManager.removePlayerFromRoom = function( player, room )
+	// {
+	// 	// create new array that does not include our target player
+	// 	room.players = room.players.filter(
+	// 			function(value, index, arr)
+	// 			{
+	// 				return value.id !== player.id;
+	// 			});
+	// };
+	//
+	// /**
+	//  * Retrieve all players associated with the room with name roomName
+	//  * @param roomName name of room for which we're requesting a player list
+	//  * @returns {Array} list of players
+	//  */
+	// GameManager.findPlayersInRoom = function( roomName )
+	// {
+	// 	const room = this.findRoomByName( roomName );
+	//
+	// 	if ( room === undefined )
+	// 		console.error("Failed to find room with name ", roomName);
+	// 	else
+	// 		return room.players;
+	// };
+	//
+	//
+	// function createChatRoom( roomName )
+	// {
+	// 	return _storeRoom( new ChatRoom( roomName ) );
+	// }
+	//
+	// function _storeRoom( chatroom )
+	// {
+	// 	console.log("Chat room %o created", chatroom.name);
+	// 	roomIds.push( chatroom.id );
+	// 	allRooms[ chatroom.id ] = chatroom;
+	//
+	// 	return chatroom;
+	// }
+	//
+	// const _storePlayer = function( newPlayer )
+	// {
+	// 	playerIds.push( newPlayer.id );
+	// 	allPlayers[ newPlayer.id ] = newPlayer;
+	//
+	// 	return newPlayer;
+	// };
 
 
 
@@ -169,7 +166,12 @@ module.exports = function ()
 	{
 		return allPlayers[ playerId ];
 	};
-	
+
+	// GameManager.findPlayerById = function( playerId )
+	// {
+	// 	return allPlayers[ playerId ];
+	// };
+
 	GameManager.findGameById = function( game_id )
 	{
 		return allGames[ game_id ];
@@ -249,12 +251,6 @@ module.exports = function ()
 		
 		return names;
 	};
-	
-	// if ( ! (typeof module === 'undefined') )
-	// {
-	// 	console.log('Game_manager exported');
-	// 	module.exports = GameManager;
-	// }
 
 	return GameManager;
 }();

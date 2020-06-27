@@ -1,9 +1,8 @@
 const fs = require('fs');
 
 
-module.exports = function (io, chatManager, gameLogic)
+module.exports = function (io, chatManager, gameManager, gameLogic)
 {
-	const _chatManager = chatManager;
 
 	let ServerLogic = function()
 	{
@@ -16,7 +15,7 @@ module.exports = function (io, chatManager, gameLogic)
 	ServerLogic.createPlayer = function( playerName )
 	{
 		// create and add ourself
-		const newPlayer = _chatManager.createPlayer( playerName );
+		const newPlayer = chatManager.createPlayer( playerName );
 
 		// return data to ourself
 		return {
@@ -52,7 +51,8 @@ module.exports = function (io, chatManager, gameLogic)
 
 
 	/**
-	 * Leave a room
+	 * Leave a room.  If successful, the player will be left in limbo.
+	 * You will need to call joinRoom afterwards.
 	 * @param playerId
 	 * @param roomName
 	 * @param socket
@@ -78,10 +78,6 @@ module.exports = function (io, chatManager, gameLogic)
 		// Send to everone else
 		sendToEveryoneElseInRoom(socket, data.roomName, "on_player_left", data );
 	};
-
-
-	// todo: possibly change listPlayers to 'get room status'
-	// This might include the player list and the current state of the game.
 
 	/**
 	 * Return list of all players in the room with name roomName
@@ -113,7 +109,7 @@ module.exports = function (io, chatManager, gameLogic)
 	{
 		const players = chatManager.findPlayersInRoom( roomName );
 
-		const game = chatManager.findGameByName( roomName );
+		const game = gameManager.findGameByName( roomName );
 
 		let data =
 			{
@@ -138,12 +134,17 @@ module.exports = function (io, chatManager, gameLogic)
 	};
 
 
+	/**
+	 * Create and start a new game for the room specified by roomName.
+	 * All players will receive a message to start.
+	 * @param roomName
+	 */
 	ServerLogic.startGame = function( roomName )
 	{
 		const chatroom = chatManager.findRoomByName( roomName );
 
 		// create game object in game obj manager
-		const game = gameLogic.createGame( chatroom );
+		const game = gameManager.createGame( chatroom );
 
 		// save reference to game in chatroom
 
@@ -171,15 +172,6 @@ module.exports = function (io, chatManager, gameLogic)
 
 		sendToEveryoneInRoom( roomName, "on_player_left", data );
 	};
-
-
-	// ServerLogic.playerUpdateOptions = function( socket, playerOptions )
-	// {
-	// 	//console.log("player update options room> ", roomName, " options:", playerOptions );
-	//
-	// 	// Send everone
-	// 	sendToEveryoneElseInRoom( socket, roomName, "on_player_update_options", playerOptions );
-	// };
 
 
 
@@ -224,133 +216,9 @@ module.exports = function (io, chatManager, gameLogic)
 
 
 
-	/**
-	 * Create a new room with name and set player as the leader.  Also configure
-	 * first time socket subscriptions.
-	 */
-	function _createRoom( gameName, playerId )
-	{
-		// check if it already exists
-		let game = chatManager.findGameByName( gameName );
-
-		// if it doesn't, create it
-		if ( game == null )
-		{
-			// add game to list of known active games
-			game = chatManager.createGame( gameName, playerId );
-		}
-
-		return game;
-	}
 
 
 
-
-
-	// /**
-	//  * Create a new room with name and set player as the leader.  Also configure
-	//  * first time socket subscriptions.
-	//  */
-	// function _createRoom( gameName, playerObj, configureSocketSubscriptions )
-	// {
-	// 	// check if it already exists
-	// 	let game = gameManager.findGameByName( gameName );
-	// 	const isLeader = (game == null);
-	//
-	// 	// if it doesn't, create it
-	// 	if ( game == null )
-	// 	{
-	// 		// add game to list of known active games
-	// 		game = gameManager.createGame( gameName );
-	//
-	// 		// set up socket listeners for client actions
-	// 		configureSocketSubscriptions( game );
-	// 	}
-	//
-	// 	// // create and add ourself
-	// 	// const newPlayer = game.createPlayer( playerObj.name, isLeader );
-	// 	//
-	// 	// // return data to ourself
-	// 	// return {
-	// 	// 	"game"	: game,
-	// 	// 	"player" 		: newPlayer
-	// 	// };
-	// }
-
-	ServerLogic.choosePlayer = function( gameId, playerId, playerConfigJson )
-	{
-		const current_player = chatManager.findPlayerByGameId( gameId, playerId );
-
-		// // find the other players in the game
-        // let players = activeGames.findPlayersByGameId( gameId );
-        // let p = players.length;
-		// while ( p-- )
-		// {
-		// 	// skip checking the player in question
-		// 	if ( players[p].id === playerId )
-		// 	{
-		// 		current_player = players[p];
-		// 		continue;
-		// 	}
-        //
-		// 	// if they haven't chosen a color yet...
-		// 	if ( players[p].player_def === undefined )
-		// 		continue;
-		//
-		// 	// compare colors so we don't have 2 players with the same color
-		// 	if ( _playersAreTooSimilar( players[p].player_def, playerConfigJson ))
-		// 		return false;
-		// }
-		
-		// set server player property
-		current_player.player_def = playerConfigJson;
-		
-		let game = chatManager.findGameById( gameId );
-		
-		console.log('game name> %o', game.name);
-		
-		// send message to everybody that this player is now off the market
-		io.of( '/' + game.name ).emit('on_chosen_player', playerId, current_player.player_def );
-		
-		return true;
-	};
-
-
-
-	// /**
-	//  * Called when a player successfully joins a room.
-	//  * data.playerId
-	//  * data.roomName
-	//  */
-	// ServerLogic.playerHasJoined = function( playerId, roomName, socket )
-	// {
-	// 	console.log('playerHasJoined> %o', playerId );
-	//
-	// 	// TODO: We are currently not doing anything with the room name?
-	//
-	// 	const player = gameManager.findPlayerById( playerId );
-	//
-	// 	// find game associated with player
-	// 	const  game = gameManager.findGameByPlayerId( playerId );
-	// 	const serverPlayers = game.players;
-	//
-	// 	// notify other clients that a player has joined
-	// 	socket.broadcast.to(game.name).emit('on_player_joined', serverPlayers, player.name);
-	// };
-	//
-	//
-	// ServerLogic.playerAttributeUpdated = function( player, socket )
-	// {
-	// 	console.log('playerAttributeUpdated> %o', player );
-	//
-	// 	// find game associated with player
-	// 	let game = gameManager.findGameByPlayerId( player.id );
-	//
-	// 	// TODO: change player attribute
-	//
-	// 	console.log('server[player_attr_updated]> got data : ' + player.name);
-	// 	socket.broadcast.to(game.name).emit('on_player_attr_updated', game.players, player);
-	// };
 	
 	ServerLogic.playerIsReady = function( player, socket )
 	{

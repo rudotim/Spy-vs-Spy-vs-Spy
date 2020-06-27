@@ -88,10 +88,7 @@ const ChatController = function( frontEnd )
 		// Issue: _chatroom is created new each time. so it can't have the gameStarted flag.  boyoyoyng!
 
 		// todo: create game instance so that we can locally add players and stuff
-		_chatroom = {
-			name : newRoomName,
-			players : [ _player ]
-		};
+		_chatroom = addChatRoom( newRoomName, _player );
 
 		// list players to find out who is here
 		_toServer.getRoomStatus( newRoomName, _socket );
@@ -101,6 +98,38 @@ const ChatController = function( frontEnd )
 		return _socket;
 	};
 
+	// TODO: unit test this
+	function addChatRoom( roomName, player )
+	{
+		return {
+			name : roomName,
+			players : [ player ]
+		};
+	}
+
+	// TODO: unit test this
+	function addPlayer( playerId, playerName )
+	{
+		_chatroom.players.push(
+			{
+				name : playerName,
+				id : playerId
+			}
+		);
+
+		return _chatroom.players;
+	}
+
+	// TODO: unit test this
+	function removePlayer( chatroom, playerId )
+	{
+		const playerIndex = chatroom.players.findIndex( (player) => player.id === playerId );
+
+		if ( playerIndex !== -1 )
+			chatroom.players.splice(playerIndex, 1);
+
+		return chatroom;
+	}
 
 	/**
 	 * Called when a new player has joined the room we're in.
@@ -110,15 +139,10 @@ const ChatController = function( frontEnd )
 	 */
 	clientRequest.onPlayerJoinedChatRoom = function( playerId, playerName, chatRoomName )
 	{
-		// todo: wrap in logic to control creation and structure
-		_chatroom.players.push(
-			{
-				name : playerName,
-				id : playerId
-			}
-		);
+		// add player to local storage
+		const newPlayers = addPlayer( playerId, playerName );
 
-		frontEnd.updateRoomListUI( _chatroom.players );
+		frontEnd.updateRoomListUI( newPlayers );
 
 		if ( _gameControl )
 			_gameControl.onPlayerJoinedChatRoom( playerId, playerName, chatRoomName );
@@ -132,10 +156,12 @@ const ChatController = function( frontEnd )
 	 */
 	clientRequest.onPlayerLeftChatRoom = function( playerId, playerName, chatRoomName )
 	{
-		const playerIndex = _chatroom.players.findIndex( (player) => player.id === playerId );
+		// const playerIndex = _chatroom.players.findIndex( (player) => player.id === playerId );
+		//
+		// if ( playerIndex !== -1 )
+		// 	_chatroom.players.splice(playerIndex, 1);
 
-		if ( playerIndex !== -1 )
-			_chatroom.players.splice(playerIndex, 1);
+		_chatroom = removePlayer( _chatroom, playerId );
 
 		frontEnd.updateRoomListUI( _chatroom.players );
 
