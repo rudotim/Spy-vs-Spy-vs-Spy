@@ -39,6 +39,11 @@ let Game = function( chatroom )
 
 Game.prototype.constructor = Game;
 
+Game.prototype.addPlayer = function( player )
+{
+	// todo: add new player to this game
+};
+
 Game.prototype.setLeader = function( playerName )
 {
 	this.leaderName = playerName;

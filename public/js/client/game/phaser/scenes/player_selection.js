@@ -45,7 +45,7 @@ var PlayerSelection = new Phaser.Class({
 			Phaser.Scene.call(this, { key: 'player_selection' });
 
 			this.text1 = undefined;
-			this.text2 = undefined;
+			//this.text2 = undefined;
 			this.wheel = undefined;
 			this.wheelpos = undefined;
 			this.mycolor = undefined;
@@ -122,7 +122,6 @@ var PlayerSelection = new Phaser.Class({
 	create: function ()
 	{
 		this.text1 = this.add.text(10, 10, '', { fill: '#00ff00' });
-		this.text2 = this.add.text(500, 10, '', { fill: '#00ff00' });
 
 		this.input.mouse.disableContextMenu();
 
@@ -225,6 +224,10 @@ var PlayerSelection = new Phaser.Class({
 	{
 		console.log('onPlayerLeft> name: ', playerName, ' id: ', playerId );
 
+
+		// todo: review players in the const copy and remove the one that doens't belong
+
+
 		_this.drawPlayerStatus( _this.players );
 	},
 
@@ -233,16 +236,23 @@ var PlayerSelection = new Phaser.Class({
 		console.log('onListPlayers> ', players);
 	},
 
+	erasePlayers : function()
+	{
+		// todo: remove a player from the list
+	},
+
 	drawPlayerStatus : function( players )
 	{
 		let x = 560;
 		let y = 130;
 		let rowHeight = 50;
 
+		// todo: need to clear and redraw if someone has left or joined
+
 		// draw text
 		players.forEach( player =>
 		{
-			console.log("player> ", player);
+			console.log("drawing player> ", player);
 
 			if ( player.text === undefined )
 				player.text = this.add.text(x, y, player.name);
@@ -265,6 +275,7 @@ var PlayerSelection = new Phaser.Class({
 			y += rowHeight;
 		});
 	},
+
 
 
 
@@ -318,5 +329,6 @@ var PlayerSelection = new Phaser.Class({
 			'y: ' + pointer.worldY,
 			'isDown: ' + pointer.isDown
 		]);
+
 	},
 });
