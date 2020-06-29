@@ -4,7 +4,7 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	const clientRequest = {};
 
 	// the encapsulation of logic calls to receive data from the server
-	//const _fromGameServerSocket = fromGameServerSocket( socket, clientRequest );
+	const _fromGameServerSocket = fromGameServerSocket( socket, clientRequest );
 
 	// the encapsulation of logic calls to send data to the server
 	const _toServer = toGameServerSocket( socket );
