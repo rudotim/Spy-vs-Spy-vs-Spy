@@ -96,7 +96,7 @@ module.exports = function (io, router, gameManager)
 				console.log('disconnected player_id=' + socket.player);
 				
 				// remove from server list
-				serverLogic.playerHasLeft( socket.player, socket );
+				//serverLogic.playerHasLeft( socket.player, socket );
 			});
 	
 			// -------------------------------------------------------
@@ -104,7 +104,8 @@ module.exports = function (io, router, gameManager)
 			// -------------------------------------------------------
 
 			/**
-			 * Called when a client requests to create or join a room.
+			 * Received when a client requests to join a room.
+			 * If the room didn't exist, it will be created and the client will join.
 			 */
 			socket.on('join_room', function( data )
 			{
@@ -117,6 +118,11 @@ module.exports = function (io, router, gameManager)
 				serverLogic.joinRoom( data.playerId, data.roomName, socket );
 			});
 
+			/**
+			 * Received when a client requests to leave a room.
+			 *
+			 * todo: delete the room if the last user has left
+			 */
 			socket.on('leave_room', function( data )
 			{
 				console.log("player[%o] is leaving room [%o]", data.playerId, data.roomName);
@@ -128,9 +134,26 @@ module.exports = function (io, router, gameManager)
 				serverLogic.leaveRoom( data.playerId, data.roomName, socket );
 			});
 
+			/**
+			 * Received when a client requests a list of the people in a room.
+			 */
+			socket.on('list_players', function( data )
+			{
+				console.log("Request to list players in room[%o]", data.roomName);
+
+				serverLogic.listPlayers( data.roomName, socket );
+			});
+
+			socket.on('get_room_status', function( data )
+			{
+				console.log("Request for status in room[%o]", data.roomName);
+
+				serverLogic.getRoomStatus( data.roomName, socket );
+			});
 
 			/**
 			 * Received when a player successfully joins a room.
+			 *
 			 * data.playerId
 			 * data.roomName
 			 */
@@ -141,21 +164,37 @@ module.exports = function (io, router, gameManager)
 				//socket.player = player;
 				serverLogic.playerHasJoined( data.playerId, data.roomName, socket );
 			});
-			
+
+			/**
+			 * Received when a player leaves a chat room
+			 */
 			socket.on('player_left', function( player )
 			{
 				serverLogic.playerHasLeft( player, socket );
 			});
-			
-			socket.on('player_attr_updated', function( player )
+
+			/**
+			 * Received when a player sends a chat message in a chat room
+			 */
+			socket.on('on_chat', function(data)
 			{
-				serverLogic.playerAttributeUpdated( player, socket );
+				serverLogic.sendChat( data.roomName, data.message, socket );
 			});
-			
+
 			// -------------------------------------------------------
 			// Game Play Config
 			// -------------------------------------------------------			
-			
+
+			socket.on('player_update_options', function( playerOptions )
+			{
+				console.log("got update> ", playerOptions );
+				serverLogic.playerUpdateOptions( socket, playerOptions );
+			});
+
+
+
+
+
 			socket.on('player_is_ready', function( player )
 			{
 				serverLogic.playerIsReady( player, socket );		
@@ -171,10 +210,11 @@ module.exports = function (io, router, gameManager)
 				console.log('server received request to start the pre-game');				
 				chat.emit('on_start_pre_game', null );
 			});
-			
-			socket.on('start_game', function( game_id )
+
+			socket.on('start_game', function( data )
 			{
 				console.log('server received request to start the game');
+				serverLogic.startGame( data.roomName );
 			});
 			
 			// -------------------------------------------------------
@@ -187,15 +227,7 @@ module.exports = function (io, router, gameManager)
 			// 	socket.broadcast.to(gameInstance.name).emit('on_data', spyPos);
 			// });
 			//
-			socket.on('on_chat', function(data)
-			{
-				console.log("got yo chat! %o", data);
-				//io.of(data.roomName).emit("on_chat", data.msg );
-				io.sockets.in(data.roomName).emit("on_chat", data.msg );
 
-				//chat.emit("on_chat", data);
-				//socket.broadcast.to(gameInstance.name).emit('on_chat', data);
-			});
 			//
 			// socket.on('player_entered_room', function(player, teleports_to)
 			// {

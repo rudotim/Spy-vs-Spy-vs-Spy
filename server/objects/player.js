@@ -1,16 +1,20 @@
 
 
 const utils = require('../utils');
-//const uuidv1 = require('uuid/v1');
 
 let Player = function( name )
 {
+	// base properties
 	this.name = name;
 	this.id = utils.guid();
 
+	// player selection
+	this.color = undefined;
+	this.ready = undefined;
+
+	// game play
 	this.pos = { x : 0, y : 0 };
 	this.room = -1;
-	this.player_def = {};
 };
 
 Player.prototype.constructor = Player;

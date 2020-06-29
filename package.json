@@ -1,9 +1,9 @@
 {
-  "name": "caivscai",
+  "name": "SpyVsSpyVsSpy",
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/startServer"
   },
   "dependencies": {
     "body-parser": "^1.19.0",

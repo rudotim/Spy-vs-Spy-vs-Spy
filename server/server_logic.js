@@ -38,22 +38,10 @@ module.exports = function (io, gameManager)
 	{
 		const player = gameManager.findPlayerById( playerId );
 
-		const room = gameManager.findRoomByName( roomName );
+		const room = gameManager.getOrCreateRoomByName( roomName );
 
 		// associate player with room
-
-
-		// const game = gameManager.findGameByName( gameName );
-		//
-		// // create it if it didn't exist
-		// if ( game == null )
-		// {
-		// 	return _createRoom( gameName, playerId );
-		// }
-		// else
-		// {
-		// 	return game;
-		// }
+		gameManager.addPlayerToRoom( player, room );
 
 		let data =
 		{
@@ -62,28 +50,25 @@ module.exports = function (io, gameManager)
 			"roomName" : roomName
 		};
 
-		// join it
-		socket.emit( "on_player_joined", data);
+		// Send to everone else
+		sendToEveryoneElseInRoom(socket, data.roomName, "on_player_joined", data );
 	};
 
 
+	/**
+	 * Leave a room
+	 * @param playerId
+	 * @param roomName
+	 * @param socket
+	 */
 	ServerLogic.leaveRoom = function( playerId, roomName, socket )
 	{
 		const player = gameManager.findPlayerById( playerId );
 
-		// disassociate player with room
+		const room = gameManager.findRoomByName( roomName );
 
-		// const game = gameManager.findGameByName( gameName );
-		//
-		// // create it if it didn't exist
-		// if ( game == null )
-		// {
-		// 	return _createRoom( gameName, playerId );
-		// }
-		// else
-		// {
-		// 	return game;
-		// }
+		// disassociate player with room
+		gameManager.removePlayerFromRoom( player, room );
 
 		let data =
 			{
@@ -92,9 +77,129 @@ module.exports = function (io, gameManager)
 				"roomName" : roomName
 			};
 
-		// join it
-		socket.to(roomName).emit( "on_player_left", data);
+		// Send to everone else
+		sendToEveryoneElseInRoom(socket, data.roomName, "on_player_left", data );
 	};
+
+
+	// todo: possibly change listPlayers to 'get room status'
+	// This might include the player list and the current state of the game.
+
+	/**
+	 * Return list of all players in the room with name roomName
+	 * @param roomName name of chat room
+	 * @param socket socket connection to client
+	 */
+	ServerLogic.listPlayers = function( roomName, socket )
+	{
+		const players = gameManager.findPlayersInRoom( roomName );
+
+		let data =
+		{
+			"players" : players,
+		};
+
+		// send only to ourself
+		console.log("Sending player list to ourself in room %o", roomName );
+		sendToOurself( socket, "on_list_players", data );
+	};
+
+	/**
+	 * Return the current status of the room.
+	 * This includes a list of each player
+	 * and whether or not a game has been started
+	 * @param roomName
+	 * @param socket
+	 */
+	ServerLogic.getRoomStatus = function( roomName, socket )
+	{
+		const players = gameManager.findPlayersInRoom( roomName );
+
+		const game = gameManager.findGameByName( roomName );
+
+		let data =
+			{
+				"gameStarted" : game !== undefined,
+				"players" : players,
+			};
+
+		// send only to ourself
+		sendToOurself( socket, "on_room_status", data );
+	};
+
+	/**
+	 * Send this chat message to everyone else in the chat room
+	 * @param roomName name of chat room
+	 * @param message text content to send to the other users in the room
+	 * @param socket socket connection to client
+	 */
+	ServerLogic.sendChat = function( roomName, message, socket )
+	{
+		// Send to everone else
+		sendToEveryoneElseInRoom(socket, roomName, "on_chat", message );
+	};
+
+
+	ServerLogic.startGame = function( roomName, socket )
+	{
+		const chatroom = gameManager.findRoomByName( roomName );
+
+		_gameManager.createGame( chatroom );
+
+		// Send to everone else
+		sendToEveryoneInRoom( roomName, "on_start_game" );
+	};
+
+
+	ServerLogic.playerUpdateOptions = function( socket, playerOptions )
+	{
+		//console.log("player update options room> ", roomName, " options:", playerOptions );
+
+		// Send everone
+		sendToEveryoneElseInRoom( socket, roomName, "on_player_update_options", playerOptions );
+	};
+
+
+
+
+
+	/**
+	 * Send ONLY to the initial sender
+	 * @param socket
+	 * @param channel
+	 * @param data
+	 */
+	function sendToOurself( socket, channel, data )
+	{
+		io.to( socket.id ).emit(channel, data);
+	}
+
+	/**
+	 * Send to each member of the room EXCEPT the initial sender
+	 * @param socket
+	 * @param channel
+	 * @param roomName
+	 * @param data
+	 */
+	function sendToEveryoneElseInRoom( socket, roomName, channel, data )
+	{
+		socket.to(roomName).emit( channel, data);
+	}
+
+	/**
+	 * Send to each member of the room INCLUDING the initial sender
+	 * @param channel
+	 * @param roomName
+	 * @param data
+	 */
+	function sendToEveryoneInRoom( roomName, channel, data )
+	{
+		io.sockets.in(roomName).emit( channel, data);
+	}
+
+
+
+
 
 
 	/**
@@ -190,51 +295,51 @@ module.exports = function (io, gameManager)
 
 
 
-	/**
-	 * Called when a player successfully joins a room.
-	 * data.playerId
-	 * data.roomName
-	 */
-	ServerLogic.playerHasJoined = function( playerId, roomName, socket )
-	{
-		console.log('playerHasJoined> %o', playerId );
-
-		// TODO: We are currently not doing anything with the room name?
-
-		const player = gameManager.findPlayerById( playerId );
-
-		// find game associated with player
-		const  game = gameManager.findGameByPlayerId( playerId );
-		const serverPlayers = game.players;
-
-		// notify other clients that a player has joined
-		socket.broadcast.to(game.name).emit('on_player_joined', serverPlayers, player.name);
-	};
-	
-	ServerLogic.playerHasLeft = function( player, socket )
-	{
-		console.log('playerHasLeft> %o', player );
-	
-		// find game associated with player
-		//let game = gameManager.findGameByPlayerId( player.id );
-		
-		//game.removePlayerById( player.id );
-		
-		//socket.broadcast.to(game.name).emit('on_player_left', game.players, player);
-	};
-	
-	ServerLogic.playerAttributeUpdated = function( player, socket )
-	{
-		console.log('playerAttributeUpdated> %o', player );
-		
-		// find game associated with player
-		let game = gameManager.findGameByPlayerId( player.id );
-		
-		// TODO: change player attribute
-		
-		console.log('server[player_attr_updated]> got data : ' + player.name);
-		socket.broadcast.to(game.name).emit('on_player_attr_updated', game.players, player);
-	};
+	// /**
+	//  * Called when a player successfully joins a room.
+	//  * data.playerId
+	//  * data.roomName
+	//  */
+	// ServerLogic.playerHasJoined = function( playerId, roomName, socket )
+	// {
+	// 	console.log('playerHasJoined> %o', playerId );
+	//
+	// 	// TODO: We are currently not doing anything with the room name?
+	//
+	// 	const player = gameManager.findPlayerById( playerId );
+	//
+	// 	// find game associated with player
+	// 	const  game = gameManager.findGameByPlayerId( playerId );
+	// 	const serverPlayers = game.players;
+	//
+	// 	// notify other clients that a player has joined
+	// 	socket.broadcast.to(game.name).emit('on_player_joined', serverPlayers, player.name);
+	// };
+	//
+	// ServerLogic.playerHasLeft = function( player, socket )
+	// {
+	// 	console.log('playerHasLeft> %o', player );
+	//
+	// 	// find game associated with player
+	// 	//let game = gameManager.findGameByPlayerId( player.id );
+	//
+	// 	//game.removePlayerById( player.id );
+	//
+	// 	//socket.broadcast.to(game.name).emit('on_player_left', game.players, player);
+	// };
+	//
+	// ServerLogic.playerAttributeUpdated = function( player, socket )
+	// {
+	// 	console.log('playerAttributeUpdated> %o', player );
+	//
+	// 	// find game associated with player
+	// 	let game = gameManager.findGameByPlayerId( player.id );
+	//
+	// 	// TODO: change player attribute
+	//
+	// 	console.log('server[player_attr_updated]> got data : ' + player.name);
+	// 	socket.broadcast.to(game.name).emit('on_player_attr_updated', game.players, player);
+	// };
 	
 	ServerLogic.playerIsReady = function( player, socket )
 	{

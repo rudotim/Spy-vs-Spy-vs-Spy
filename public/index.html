@@ -8,33 +8,34 @@
 	<script src="/js/bootstrap.min.js"></script>
 
 	<script src="/js/socket.io-1.4.5.js"></script>
-	<script src="/js/phaser.2.7.0_ce.min.js"></script>
 
-	<script src="/js/client/modal.js"></script>
 	<!--
-	<script src="/js/phaser.min.js"></script>
-	<script src="/js/server/players.js"></script>
-	<script src="/js/server/game.js"></script>
-	 -->
+	<script src="/js/client/game/phaser/plugins/joystick.js"></script>
+	-->
+
+	<!-- Phaser -->
+	<script src="/js/client/game/phaser/phaser3.22.js"></script>
+	<script src="/js/client/game/phaser/scenes/player_selection.js"></script>
+	<script src="/js/client/game/phaser/scenes/game_loop.js"></script>
 
 	<script src="/js/client/objects/player.js"></script>
-
-	<script src="/js/client/game_logic.js"></script>
-	<script src="/js/client/front_end.js"></script>
-	<script src="/js/client/toServerHttp.js"></script>
-	<script src="/js/client/toServerSocket.js"></script>
-	<script src="/js/client/fromServerSocket.js"></script>
-	<script src="/js/client/gameController.js"></script>
-
-	<!--
-	<script src="/js/client/game_logic.js"></script>
-	<script src="/js/client/game_options.js"></script>
-	<script src="/js/client/game_control.js"></script>
-	-->
 	<script src="/js/client/objects/spy.js"></script>
 	<script src="/js/client/objects/room.js"></script>
 
-	<script src="/js/client/virtualjoystick.js"></script>
+	<script src="/js/client/front_end.js"></script>
+	<script src="/js/client/common/utils.js"></script>
+
+	<!-- Chat Room -->
+	<script src="/js/client/chatroom/toServerHttp.js"></script>
+	<script src="/js/client/chatroom/toChatServerSocket.js"></script>
+	<script src="/js/client/chatroom/fromChatServerSocket.js"></script>
+	<script src="/js/client/chatroom/chatController.js"></script>
+
+	<!-- Game -->
+	<script src="/js/client/game/game_logic.js"></script>
+	<script src="/js/client/game/fromGameServerSocket.js"></script>
+	<script src="/js/client/game/toGameServerSocket.js"></script>
+	<script src="/js/client/game/gameController.js"></script>
 
 	<link rel="stylesheet" href="/css/bootstrap.min.css">
 	<link rel="stylesheet" href="/css/svs.css">
@@ -45,24 +46,24 @@
 	<div id="container">
 		<div id="game_info">
 			<input type="text" class="form-control" id="player_name" placeholder="Your Name" value="testname"
-				onblur="gameControl.createPlayer(this.value);">
+				onblur="chatControl.createPlayer(this.value);">
 			<button class="form-control"
-				onClick="gameControl.joinRoom( 'sweetbonesgame' );">Create
+				onClick="chatControl.joinRoom( 'sweetbonesgame' );">Create
 				Server Room</button>
 			<button class="form-control"
-				onClick="gameControl.joinRoom( 'sweetbonesgame' );">Join</button>
+				onClick="chatControl.joinRoom( 'sweetbonesgame' );">Join</button>
 			<button class="form-control"
-				onClick="gameControl.leaveRoom( 'sweetbonesgame' );">Quit to Lobby</button>
+				onClick="chatControl.leaveRoom( 'sweetbonesgame' );">Quit to Lobby</button>
 
 			<span id="room_name">ybboL</span>
 			<div id="player_list">
 				<h5>Current Players:</h5>
-				<ul id="player_list" class="list-group">
+				<ul id="player_list_moo" class="list-group">
 				</ul>
 			</div>
 
 			<button class="form-control"
-				onClick="gameControl.triggerStartPreGame();">Trigger
+				onClick="chatControl.triggerStartGame();">Trigger
 				Start</button>
 		</div>
 
@@ -70,11 +71,11 @@
 
 		<div id="chat_div">
 			<input type="text" class="form-control" id="txtinp" value="test">
-			<button onClick="gameControl.sendChat( $('#txtinp').val() );">Send
+			<button onClick="chatControl.sendChat( $('#txtinp').val() );">Send
 				Chat Text</button>
 		</div>
 
-		<button onClick="gameControl.showGameOptions()">Show Game Options</button>
+		<button onClick="chatControl.showGameOptions()">Show Game Options</button>
 		
 	</div>
 
