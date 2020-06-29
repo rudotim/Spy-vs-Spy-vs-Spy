@@ -68,6 +68,13 @@ Can't win right now.  But if you've downloaded this and tried it to any degree, 
 - force landscape mode on mobile
 - scrolling support on player selection when num players overflows the viewable area
 
+## Current Topology:
+
+<a href="documentation/spy_topology_2020.06.28.png" target="_blank">
+<img src="documentation/spy_topology_2020.06.28.png" width="400">
+</a>
+
+
 ## Tools
 
 TexturePacker?
