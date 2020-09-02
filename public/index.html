@@ -24,6 +24,7 @@
 
 	<script src="/js/client/front_end.js"></script>
 	<script src="/js/client/common/utils.js"></script>
+	<script src="/js/client/common/nameModal.js"></script>
 
 	<!-- Chat Room -->
 	<script src="/js/client/chatroom/toServerHttp.js"></script>
@@ -39,6 +40,7 @@
 
 	<link rel="stylesheet" href="/css/bootstrap.min.css">
 	<link rel="stylesheet" href="/css/svs.css">
+	<link rel="stylesheet" href="/css/nameModal.css">
 </head>
 
 <body>
@@ -54,6 +56,8 @@
 				onClick="chatControl.joinRoom( 'sweetbonesgame' );">Join</button>
 			<button class="form-control"
 				onClick="chatControl.leaveRoom( 'sweetbonesgame' );">Quit to Lobby</button>
+			<button class="form-control"
+					onClick="joinLobby()">Enter Name</button>
 
 			<span id="room_name">ybboL</span>
 			<div id="player_list">
@@ -76,10 +80,29 @@
 		</div>
 
 		<button onClick="chatControl.showGameOptions()">Show Game Options</button>
-		
 	</div>
 
 
+	<div id="modalGetName" class="modal">
+		<div class="modal-content">
+			<div class="modal-header">
+				<span class="close" onClick="closeModal(document.getElementById('modalGetName'), true);">&times;</span>
+				<h2>Enter Your Name</h2>
+			</div>
+			<div class="modal-body">
+
+				<div class="Input">
+					<input type="text" id="playerName" class="Input-text" placeholder="Your first name, gamer handle, etc...">
+				</div>
+
+			</div>
+			<div class="modal-footer">
+				<button type="button"
+						onClick="closeModal(document.getElementById('modalGetName'))"
+				>Done</button>
+			</div>
+		</div>
+	</div>
 
 </body>
 

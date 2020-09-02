@@ -27,7 +27,7 @@ module.exports = function (io, router, chatLogic, chatManager, gameReceiver)
 		catch (err)
 		{
 			console.log('err> %o', err);
-			res.status( err ).send({ error: 'You are already in a room, dummy' });
+			res.status( 400 ).send({ error: err });
 		}
 	});
 
