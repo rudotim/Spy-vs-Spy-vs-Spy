@@ -14,6 +14,11 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 	 */
 	ServerLogic.createPlayer = function( playerName )
 	{
+		if ( chatManager.findPlayerByName(playerName) )
+		{
+			throw('Username already exists');
+		}
+
 		// create and add ourself
 		const newPlayer = chatManager.createPlayer( playerName );
 

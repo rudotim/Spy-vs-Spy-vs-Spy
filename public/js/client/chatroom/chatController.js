@@ -36,7 +36,7 @@ const ChatController = function( frontEnd )
 	 */
 	clientRequest.createPlayer = function( newPlayerName )
 	{
-		_toServerHttp.createPlayer( newPlayerName )
+		return _toServerHttp.createPlayer( newPlayerName )
 			.then(data =>
 			{
 				console.log("Created player [" + newPlayerName + "] with id: %o", data.playerId);
@@ -50,8 +50,13 @@ const ChatController = function( frontEnd )
 
 				this.joinRoom( LOBBY );
 			})
-			.catch(error => {
-				console.log("Bzzp - error adding player: " + error);
+			.catch(error =>
+			{
+				const errText = error.responseJSON['error'];
+
+				console.log("Bzzp - error: %o", errText);
+
+				throw( errText );
 			});
 	};
 

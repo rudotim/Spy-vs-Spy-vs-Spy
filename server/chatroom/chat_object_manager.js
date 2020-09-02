@@ -157,5 +157,20 @@ module.exports = function ()
 		return allPlayers[ playerId ];
 	};
 
+	/**
+	 * Find a player object by the corresponding player name
+	 * @param playerName
+	 * @returns {*} the player object
+	 */
+	GameManager.findPlayerByName = function( playerName )
+	{
+		for (var key in allPlayers)
+		{
+			if ( allPlayers[key].name === playerName )
+				return allPlayers[key];
+		}
+		return undefined;
+	};
+
 	return GameManager;
 }();
