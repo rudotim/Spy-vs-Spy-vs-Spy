@@ -186,8 +186,23 @@ const ChatController = function( frontEnd )
 
 		_chatroom.players = players;
 
-		frontEnd.updateRoomListUI( players );
+		frontEnd.updatePlayerListUI( players );
 	};
+
+
+	/**
+	 * Called when a person list the available chat rooms
+	 * @param roomList
+	 */
+	clientRequest.onListRooms = function( roomList )
+	{
+		console.log("onListRooms> %o", roomList );
+
+		//_chatroom.players = players;
+
+		frontEnd.updateRoomListUI( roomList );
+	};
+
 
 	/**
 	 * Called when a new person has just joined a room.  This callback gives the new
@@ -227,7 +242,7 @@ const ChatController = function( frontEnd )
 	 */
 	clientRequest.listGames = function()
 	{
-		console.error('listing games has not yet been implemented');
+		_toServer.listChatRooms( _socket );
 	};
 
 	// -------------------------------------------------------

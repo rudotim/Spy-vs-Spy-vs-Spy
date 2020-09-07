@@ -103,6 +103,18 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 		sendToOurself( socket, "on_list_players", data );
 	};
 
+
+	/**
+	 * Return list of all chat rooms
+	 * @param socket socket connection to client
+	 */
+	ServerLogic.listRooms = function( socket )
+	{
+		// send only to ourself
+		console.log("Sending room list to ourself" );
+		sendToOurself( socket, "on_list_rooms", chatManager.getAllRooms() );
+	};
+
 	/**
 	 * Return the current status of the room.
 	 * This includes a list of each player

@@ -33,6 +33,13 @@ const toChatServerSocket = function( socket )
 		socketRoom.emit( 'leave_room', data );
 	};
 
+	clientRequest.listChatRooms = function( socketRoom )
+	{
+		console.log('Listing chat rooms...' );
+
+		socketRoom.emit( 'list_rooms' );
+	};
+
 	clientRequest.listPlayersInRoom = function( roomName, socketRoom )
 	{
 		console.log('Listing players in room %o', roomName );

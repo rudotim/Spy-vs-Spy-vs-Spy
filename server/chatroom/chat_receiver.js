@@ -98,6 +98,16 @@ module.exports = function (io, router, chatLogic, chatManager, gameReceiver)
 			});
 
 			/**
+			 * Received when a client requests a list of all the chat rooms.
+			 */
+			socket.on('list_rooms', function()
+			{
+				console.log("Request to list all rooms");
+
+				chatLogic.listRooms( socket );
+			});
+
+			/**
 			 * Received when a client requests a list of the people in a room.
 			 */
 			socket.on('list_players', function( data )
