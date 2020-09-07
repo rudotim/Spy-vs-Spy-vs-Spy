@@ -2,9 +2,14 @@
 
 <head>
 
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
+	<!--
 	<meta name="viewport" content="user-scalable=no,  initial-scale=1,  maximum-scale=1,  width=device-width" />
+	-->
 
 	<script src="/js/jquery-2.2.3.min.js"></script>
+	<script src="/js/jquery.cookie.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
 
 	<script src="/js/socket.io-1.4.5.js"></script>
@@ -24,7 +29,7 @@
 
 	<script src="/js/client/front_end.js"></script>
 	<script src="/js/client/common/utils.js"></script>
-	<script src="/js/client/common/nameModal.js"></script>
+	<script src="/js/client/common/nameLogic.js"></script>
 
 	<!-- Chat Room -->
 	<script src="/js/client/chatroom/toServerHttp.js"></script>
@@ -40,15 +45,51 @@
 
 	<link rel="stylesheet" href="/css/bootstrap.min.css">
 	<link rel="stylesheet" href="/css/svs.css">
-	<link rel="stylesheet" href="/css/nameModal.css">
 </head>
 
-<body>
+<body onLoad="loadCachedUser()">
 
-	<div id="container">
+	<div id="intro-div">
+		<h1>Welcome To Spy vs Spy vs Spy!</h1>
+		<h3>Enter Your Name To Continue</h3>
+
+			<input type="text" class="Input-text" id="playerName" placeholder="Your Name" value="testname">
+
+			<div class="modal-footer">
+				<button type="button"
+						onClick="createPlayer()"
+				>Done</button>
+			</div>
+	</div>
+
+	<div class="cover" onclick="toggleSidenav();"></div>
+	<div class="hamburger" id="hamburger" onclick="toggleSidenav();">
+		<div></div>
+		<div></div>
+		<div></div>
+	</div>
+	<nav>
+		<div class="logo">
+			<img src="img/spy_logo.png"/>
+		</div>
+		<div class="links">
+			<a class="active" href="">Home</a>
+			<a href="#">Create Game</a>
+			<a href="#">Join Game</a>
+			<a href="#">Chat</a>
+		</div>
+		<footer>
+			<p>w00t!</p>
+		</footer>
+	</nav>
+
+
+	<div class="header">
+		<p>Spy vs Spy vs Spy</p>
+	</div>
+
+	<div id="user-ui-div">
 		<div id="game_info">
-			<input type="text" class="form-control" id="player_name" placeholder="Your Name" value="testname"
-				onblur="chatControl.createPlayer(this.value);">
 			<button class="form-control"
 				onClick="chatControl.joinRoom( 'sweetbonesgame' );">Create
 				Server Room</button>
@@ -56,8 +97,6 @@
 				onClick="chatControl.joinRoom( 'sweetbonesgame' );">Join</button>
 			<button class="form-control"
 				onClick="chatControl.leaveRoom( 'sweetbonesgame' );">Quit to Lobby</button>
-			<button class="form-control"
-					onClick="joinLobby()">Enter Name</button>
 
 			<span id="room_name">ybboL</span>
 			<div id="player_list">
@@ -77,30 +116,6 @@
 			<input type="text" class="form-control" id="txtinp" value="test">
 			<button onClick="chatControl.sendChat( $('#txtinp').val() );">Send
 				Chat Text</button>
-		</div>
-
-		<button onClick="chatControl.showGameOptions()">Show Game Options</button>
-	</div>
-
-
-	<div id="modalGetName" class="modal">
-		<div class="modal-content">
-			<div class="modal-header">
-				<span class="close" onClick="closeModal(document.getElementById('modalGetName'), true);">&times;</span>
-				<h2>Enter Your Name</h2>
-			</div>
-			<div class="modal-body">
-
-				<div class="Input">
-					<input type="text" id="playerName" class="Input-text" placeholder="Your first name, gamer handle, etc...">
-				</div>
-
-			</div>
-			<div class="modal-footer">
-				<button type="button"
-						onClick="closeModal(document.getElementById('modalGetName'))"
-				>Done</button>
-			</div>
 		</div>
 	</div>
 
