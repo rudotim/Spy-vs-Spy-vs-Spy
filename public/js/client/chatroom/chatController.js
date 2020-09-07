@@ -103,6 +103,12 @@ const ChatController = function( frontEnd )
 		return _socket;
 	};
 
+
+	clientRequest.verifyPlayerConnection = function()
+	{
+		return ( _player !== undefined && _toServer !== undefined );
+	};
+
 	// TODO: unit test this
 	function addChatRoom( roomName, player )
 	{
