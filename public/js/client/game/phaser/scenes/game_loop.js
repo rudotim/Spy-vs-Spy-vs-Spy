@@ -99,9 +99,9 @@ let GameLoop = new Phaser.Class({
 
 		this.add.sprite(0, 0, "room").setOrigin(0, 0);
 
-		this.add.image(150, 100, 'redSpies', 1); // 'wspy_rrun');
+		this.add.image(150, 100, 'redSpies', 'wspy_lrun');
 
-		this.mySpy = this.add.sprite(350, 230, 'spies');
+		this.mySpy = this.add.sprite(350, 230, 'redSpies');
 
 
 		this.joyStick = this.plugins.get('rexvirtualjoystickplugin').add(this, {
@@ -140,55 +140,20 @@ let GameLoop = new Phaser.Class({
 	{
 		players.forEach( player =>
 		{
-			console.log('player> %o', player );
 			let newAtlasName = player.id + "_";
 			newAtlasName = "redSpies";
 
 			// get all frame data coordinates
-			//let frameData = this.cache.getFrameData( "spies" );
-			//let frameData = this.textures.getFrame("spies");
 			let frameData = this.textures.list.spies;
 
 			let copiedFrameData = this.copyTextureFromImage( frameData, 'redSpies2' );
-			// create red player bitmap data, resize it from the 'spies' atlas
-			//let redbmd = this.make.bitmapData();
-			//redbmd.load( "spies" );
-
-			// color it to reflect our new player's choice
-			//redbmd.replaceRGB(255, 255, 255, 255, playerConfig.color.r, playerConfig.color.g, playerConfig.color.b, 255);
-			//redbmd.replaceRGB(255, 255, 255, 255, 255, 0, 0, 255);
 
 			let redbmd = this.updateTextureColor( copiedFrameData, 0xFFFFFF, player.color );
-			//let redbmd = copiedFrameData;
-
-			// // create a new texture atlas using our new player's color
-			// let atlasRedFrames = [];
-			//
-			// let currFrame;
-			// frameData.frames.forEach( currFrame =>
-			// //for ( let key in frameData.frames )
-			// {
-			// 	//currFrame = frameData.frames[key];
-			// 	atlasRedFrames.push(
-			// 		{
-			// 			"filename" :  currFrame.name,
-			// 			"frame" :
-			// 				{
-			// 					x: currFrame.x, y: currFrame.y, w: currFrame.width, h: currFrame.height
-			// 				}
-			// 		});
-			// });
-			//
-			// let atlasRed = { frames: atlasRedFrames };
-			//
-			// console.log( "new json> %o", atlasRed );
 
 			let jsonData = this.cache.json.get('spies');
-			console.log( "jsonData> %o", jsonData );
 			//this.cache.addTextureAtlas(newAtlasName, '', redbmd, atlasRed, Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
-			this.textures.addAtlasJSONHash(newAtlasName, redbmd.canvas, jsonData );
-			//this.load.atlas(newAtlasName, redbmd.canvas, data);
-
+			//this.textures.addAtlasJSONHash(newAtlasName, redbmd.canvas, jsonData );
+			this.textures.addAtlas(newAtlasName, redbmd.canvas, jsonData);
 		});
 
 	},
