@@ -47,61 +47,11 @@ let GameLoop = new Phaser.Class({
 
 	create: function ()
 	{
-		// define our frames for the running aniimations
-		const data = {
-			"anims": [
-				{
-					"key": "run_right",
-					"type": "frame",
-					"frameRate" : 12,
-					"repeat" : -1,
-					"frames": [
-						{
-							"key": "spies",
-							"frame": "wspy_rstand",
-							"duration": 0,
-							"visible": false
-						},
-						{
-							"key": "spies",
-							"frame": "wspy_rrun",
-							"duration": 0,
-							"visible": false
-						},
-					]
-				},
-				{
-					"key": "run_left",
-					"type": "frame",
-					"frameRate" : 12,
-					"repeat" : -1,
-					"frames": [
-						{
-							"key": "spies",
-							"frame": "wspy_lstand",
-							"duration": 0,
-							"visible": false
-						},
-						{
-							"key": "spies",
-							"frame": "wspy_lrun",
-							"duration": 0,
-							"visible": false
-						},
-					]
-				},
-			]
-		};
-
-		this.anims.fromJSON(data);
-
-		this.colorPlayerSpriteSheets( this.players );
+		this.processPlayers( this.players );
 
 		this.add.sprite(0, 0, "room").setOrigin(0, 0);
 
-		this.add.image(150, 100, 'redSpies', 'wspy_lrun');
-
-		this.mySpy = this.add.sprite(350, 230, 'redSpies');
+		this.mySpy = this.add.sprite(350, 230, this.getPlayerAtlastName( this.players[0].id ));
 
 
 		this.joyStick = this.plugins.get('rexvirtualjoystickplugin').add(this, {
@@ -132,32 +82,110 @@ let GameLoop = new Phaser.Class({
 		}
 	},
 
+
+	getPlayerAtlastName : function( playerId )
+	{
+		return "player_" + playerId + "_atlas";
+	},
+
 	/**
-	 * Create sprite sheets with the correct player colors
-	 * @param players - all players participating in this game session
+	 * Process each player to prep their image data for specific colorization and animation.
+	 * @param players - a list of all the players in this game
 	 */
-	colorPlayerSpriteSheets : function( players )
+	processPlayers : function( players )
 	{
 		players.forEach( player =>
 		{
-			let newAtlasName = player.id + "_";
-			newAtlasName = "redSpies";
+			console.log('player> %o', player );
 
-			// get all frame data coordinates
-			let frameData = this.textures.list.spies;
+			const newAtlasName = this.getPlayerAtlastName( player.id );
 
-			let copiedFrameData = this.copyTextureFromImage( frameData, 'redSpies2' );
+			this.colorPlayerSpriteSheets( newAtlasName, player );
 
-			let redbmd = this.updateTextureColor( copiedFrameData, 0xFFFFFF, player.color );
-
-			let jsonData = this.cache.json.get('spies');
-			//this.cache.addTextureAtlas(newAtlasName, '', redbmd, atlasRed, Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
-			//this.textures.addAtlasJSONHash(newAtlasName, redbmd.canvas, jsonData );
-			this.textures.addAtlas(newAtlasName, redbmd.canvas, jsonData);
+			this.addAnimationsToSpriteSheets( newAtlasName );
 		});
-
 	},
 
+	/**
+	 * Create sprite sheets with the correct player color
+	 * @param atlasName - the name of the atlas which will contain the new texture copies
+	 * @param player - a single participating player
+	 */
+	colorPlayerSpriteSheets : function( atlasName, player )
+	{
+		// start with the same texture frames as our default model
+		let frameData = this.textures.list.spies;
+
+		// duplicate the defualt model onto a new canvas with a new name
+		let copiedFrameData = this.copyTextureFromImage( frameData, atlasName + "_canvas" );
+
+		// perform a color swap on the new canvas to color the textures the way we need them
+		let redbmd = this.updateTextureColor( copiedFrameData, 0xFFFFFF, player.color );
+
+		// add our new colored textures to a new atlas
+		this.textures.addAtlas(atlasName, redbmd.canvas, this.cache.json.get('spies'));
+	},
+
+	/**
+	 * Add animation specific to the textures from the specified atlas
+	 * @param atlasName - the name of the atlas containing the textures to be animated
+	 */
+	addAnimationsToSpriteSheets : function( atlasName )
+	{
+		const data = {
+			"anims": [
+				{
+					"key": "run_right",
+					"type": "frame",
+					"frameRate" : 12,
+					"repeat" : -1,
+					"frames": [
+						{
+							"key": atlasName,
+							"frame": "wspy_rstand",
+							"duration": 0,
+							"visible": false
+						},
+						{
+							"key": atlasName,
+							"frame": "wspy_rrun",
+							"duration": 0,
+							"visible": false
+						},
+					]
+				},
+				{
+					"key": "run_left",
+					"type": "frame",
+					"frameRate" : 12,
+					"repeat" : -1,
+					"frames": [
+						{
+							"key": atlasName,
+							"frame": "wspy_lstand",
+							"duration": 0,
+							"visible": false
+						},
+						{
+							"key": atlasName,
+							"frame": "wspy_lrun",
+							"duration": 0,
+							"visible": false
+						},
+					]
+				},
+			]
+		};
+
+		this.anims.fromJSON(data);
+	},
+
+	/**
+	 * Copy the texture from an image onto a new canvas
+	 * @param srcTextureKey - the text identifier of the source image
+	 * @param destTextureKey - the text identifier of the new destination imigae
+	 * @returns the newly created canvas containing a copy of the source texture
+	 */
 	copyTextureFromImage : function( srcTextureKey, destTextureKey )
 	{
 		let spySrc = this.textures.get(srcTextureKey).getSourceImage();
