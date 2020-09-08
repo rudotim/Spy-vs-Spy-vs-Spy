@@ -55,7 +55,7 @@
 
 			<input type="text" class="Input-text" id="playerName" placeholder="Your Name" value="testname">
 
-			<div class="modal-footer">
+			<div id="intro-footer">
 				<button type="button"
 						onClick="createPlayer()"
 				>Done</button>
@@ -84,11 +84,12 @@
 	</nav>
 
 
-	<div class="header">
-		<p>Spy vs Spy vs Spy</p>
-	</div>
-
 	<div id="user-ui-div">
+
+		<div class="header">
+			<p>Spy vs Spy vs Spy</p>
+		</div>
+
 		<div id="game_info">
 			<button class="form-control"
 				onClick="chatControl.joinRoom( 'sweetbonesgame' );">Create
