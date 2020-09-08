@@ -527,7 +527,7 @@ let GameLogic = function( gameControl, player )
 		phaserGame = new Phaser.Game(config);
 
 		phaserGame.scene.add('player_selection', PlayerSelection, true, {"gameControl": _gameControl});
-		phaserGame.scene.add('game_loop', GameLoop, false, {"boogy" : "woogy"});
+		phaserGame.scene.add('game_loop', GameLoop, false, {"gameControl": _gameControl});
 
 		gameHasStarted = true;
 	};

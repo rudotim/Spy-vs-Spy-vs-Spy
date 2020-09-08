@@ -17,10 +17,26 @@ let GameLoop = new Phaser.Class({
 			this.moving = NO_MOVEMENT;
 		},
 
+
+	init: function (data)
+	{
+		console.log('game_loop init', data);
+
+		this.gameControl = data.gameControl;
+
+		this.players = this.gameControl.players;
+
+		//this.prepPlayers( this.players );
+	},
+
 	preload: function ()
 	{
 		// load all spy sprite data
 		this.load.atlas('spies', 'img/spritesheet.png', 'img/sprites.json');
+
+		// load the json only
+		this.load.json('spySprite', 'img/sprites.json');
+
 
 
 		this.load.image("room","img/demoroom.png");
@@ -78,10 +94,12 @@ let GameLoop = new Phaser.Class({
 		};
 
 		this.anims.fromJSON(data);
+
+		this.colorPlayerSpriteSheets( this.players );
+
 		this.add.sprite(0, 0, "room").setOrigin(0, 0);
 
-		this.add.image(150, 100, 'spies', 'wspy_stand');
-
+		this.add.image(150, 100, 'redSpies', 1); // 'wspy_rrun');
 
 		this.mySpy = this.add.sprite(350, 230, 'spies');
 
@@ -112,7 +130,102 @@ let GameLoop = new Phaser.Class({
 		{
 			this.mySpy.x -= 2;
 		}
+	},
 
+	/**
+	 * Create sprite sheets with the correct player colors
+	 * @param players - all players participating in this game session
+	 */
+	colorPlayerSpriteSheets : function( players )
+	{
+		players.forEach( player =>
+		{
+			console.log('player> %o', player );
+			let newAtlasName = player.id + "_";
+			newAtlasName = "redSpies";
+
+			// get all frame data coordinates
+			//let frameData = this.cache.getFrameData( "spies" );
+			//let frameData = this.textures.getFrame("spies");
+			let frameData = this.textures.list.spies;
+
+			let copiedFrameData = this.copyTextureFromImage( frameData, 'redSpies2' );
+			// create red player bitmap data, resize it from the 'spies' atlas
+			//let redbmd = this.make.bitmapData();
+			//redbmd.load( "spies" );
+
+			// color it to reflect our new player's choice
+			//redbmd.replaceRGB(255, 255, 255, 255, playerConfig.color.r, playerConfig.color.g, playerConfig.color.b, 255);
+			//redbmd.replaceRGB(255, 255, 255, 255, 255, 0, 0, 255);
+
+			let redbmd = this.updateTextureColor( copiedFrameData, 0xFFFFFF, player.color );
+			//let redbmd = copiedFrameData;
+
+			// // create a new texture atlas using our new player's color
+			// let atlasRedFrames = [];
+			//
+			// let currFrame;
+			// frameData.frames.forEach( currFrame =>
+			// //for ( let key in frameData.frames )
+			// {
+			// 	//currFrame = frameData.frames[key];
+			// 	atlasRedFrames.push(
+			// 		{
+			// 			"filename" :  currFrame.name,
+			// 			"frame" :
+			// 				{
+			// 					x: currFrame.x, y: currFrame.y, w: currFrame.width, h: currFrame.height
+			// 				}
+			// 		});
+			// });
+			//
+			// let atlasRed = { frames: atlasRedFrames };
+			//
+			// console.log( "new json> %o", atlasRed );
+
+			let jsonData = this.cache.json.get('spies');
+			console.log( "jsonData> %o", jsonData );
+			//this.cache.addTextureAtlas(newAtlasName, '', redbmd, atlasRed, Phaser.Loader.TEXTURE_ATLAS_JSON_HASH);
+			this.textures.addAtlasJSONHash(newAtlasName, redbmd.canvas, jsonData );
+			//this.load.atlas(newAtlasName, redbmd.canvas, data);
+
+		});
+
+	},
+
+	copyTextureFromImage : function( srcTextureKey, destTextureKey )
+	{
+		let spySrc = this.textures.get(srcTextureKey).getSourceImage();
+
+		return this.textures.createCanvas(destTextureKey, spySrc.width, spySrc.height).draw(0, 0, spySrc);
+	},
+
+	/**
+	 * Replace all occurances of the color 'replaceColor' within 'texture' with the color 'newColor'
+	 * @param texture the texture containing white pixels
+	 * @param replaceColor the color being replaced
+	 * @param newColor the new color being added
+	 */
+	updateTextureColor : function( texture, replaceColor, newColor )
+	{
+		let pixels = texture.getPixels( 0, 0, texture.width, texture.height );
+
+		let pixel;
+		for ( let row = 0; row < pixels.length; row++ )
+		{
+			for ( let col = 0; col < pixels[row].length; col++ )
+			{
+				pixel = pixels[row][col];
+
+				// look for white
+				if ( pixel.color === replaceColor )
+				{
+					texture.setPixel( pixel.x, pixel.y, newColor.r, newColor.g, newColor.b );
+				}
+			}
+		}
+
+		return texture.refresh();
 	},
 
 	dumpJoyStickState: function ()
