@@ -113,6 +113,42 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 		eventCenter.emit('on_player_left', playerId, playerName );
 	};
 
+
+
+	/**
+	 * Called when a player moves or changes state
+	 * @param id
+	 * @param x
+	 * @param y
+	 * @param moving
+	 */
+	clientRequest.sendPlayerStateUpdate = function( id, x, y, moving )
+	{
+		//console.log('sendPlayerUpdateState> ', player);
+
+		const playerStateData =
+		{
+			id : id,
+			x : x,
+			y : y,
+			moving : moving
+		};
+
+		const data = {
+			roomName : game.chatroom.name,
+			playerStateData : playerStateData
+		};
+
+		_toServer.sendPlayerStateUpdate( socket, data );
+	};
+
+	clientRequest.onPlayerStateUpdate = function( playerStateData )
+	{
+		eventCenter.emit('on_player_state_update', playerStateData );
+	};
+
+
+
 	//
 	// /**
 	//  * Called when a new person has just joined a room.  They will have no idea who

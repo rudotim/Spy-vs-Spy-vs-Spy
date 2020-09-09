@@ -19,12 +19,33 @@ let GameLoop = new Phaser.Class({
 
 	init: function (data)
 	{
-		this.eventCenter = new Phaser.Events.EventEmitter();
+		this.eventCenter = EventDispatcher.getInstance();
+		this.addListeners();
+
 
 		this.gameControl = data.gameControl;
 
 		this.players = this.gameControl.players;
-		//this.mySpy = this.gameControl.player;
+		this.player = this.gameControl.player;
+	},
+
+	destroy : function()
+	{
+		console.log("Destroying game loop plugin");
+		this.removeListeners();
+	},
+
+	addListeners : function()
+	{
+		// clear out any previous listeners
+		this.removeListeners();
+
+		this.eventCenter.on('on_player_state_update', this.onUpdatePlayerPos, this);
+	},
+
+	removeListeners : function()
+	{
+		this.eventCenter.removeListener('on_player_update_options');
 	},
 
 	preload: function ()
@@ -38,22 +59,14 @@ let GameLoop = new Phaser.Class({
 		this.load.plugin('rexvirtualjoystickplugin', url, true);
 	},
 
-	updateCount : function( count )
-	{
-		console.log("Update Count> %o", count );
-	},
-
 	create: function ()
 	{
-		this.eventCenter.on('update-count', this.updateCount, this);
+		this.add.sprite(0, 0, "room").setOrigin(0, 0);
 
 		// make copies of our default model for each player.
 		// color the models and configure the animation frames.
+		console.log("players> %o", this.players );
 		this.processPlayers( this.players );
-
-		this.add.sprite(0, 0, "room").setOrigin(0, 0);
-
-		//this.mySpy = this.add.sprite(350, 230, this.getPlayerAtlastName( this.players[0].id ));
 
 		this.joyStick = this.plugins.get('rexvirtualjoystickplugin').add(this, {
 			x: 200,
@@ -73,6 +86,7 @@ let GameLoop = new Phaser.Class({
 
 	update: function()
 	{
+		let update = true;
 		if (this.moving === RUN_RIGHT)
 		{
 			this.mySpy.x += 2;
@@ -89,6 +103,11 @@ let GameLoop = new Phaser.Class({
 		{
 			this.mySpy.y += 2;
 		}
+		else
+			update = false;
+
+		if ( update === true )
+			this.updatePlayerPos( this.mySpy.x, this.mySpy.y, this.moving );
 	},
 
 
@@ -126,14 +145,32 @@ let GameLoop = new Phaser.Class({
 
 		// todo: need to associate spy sprites with player objects
 
-		//this.players[ player.id ].spy = spy;
-		//if ( player.id === this.player.id )
-		//	this.mySpy = spy;
+		player.spy = spy;
+
+		if ( player.id === this.player.id )
+		{
+			console.log("Our player has been placed");
+			this.mySpy = spy;
+		}
 	},
 
-	updatePlayerPos : function()
+	onUpdatePlayerPos : function( playerUpdateData )
 	{
-		// todo: update the position of the specific player
+		const player = this.players.find( p => p.id === playerUpdateData.id );
+
+		if ( player !== undefined )
+		{
+			player.spy.x = playerUpdateData.x;
+			player.spy.y = playerUpdateData.y;
+		}
+	},
+
+	updatePlayerPos : function( x, y, moving )
+	{
+		this.gameControl.player.x = x;
+		this.gameControl.player.y = y;
+		this.gameControl.player.moving = moving;
+		this.gameControl.sendPlayerStateUpdate( this.gameControl.player.id, x, y, moving );
 	},
 
 	/**

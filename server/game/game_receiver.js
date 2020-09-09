@@ -28,6 +28,14 @@ module.exports = function (io, gameLogic, gameManager)
 		});
 
 		/**
+		 * Received when a player chooses pre-game options like character color.
+		 */
+		socket.on('player_state_update', function( playerStateData )
+		{
+			gameLogic.playerStateUpdate( socket, playerStateData );
+		});
+
+		/**
 		 * Received when a player has indicated they are done choosing
 		 * options and are ready to start.
 		 */

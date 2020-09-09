@@ -75,6 +75,21 @@ const toGameServerSocket = function( socket )
 		socket.emit('player_left_room', player, roomId );
 	};
 
+	clientRequest.sendPlayerStateUpdate = function( socket, playerStateData )
+	{
+		//if ( spy === undefined )
+		//	return;
+
+		socket.emit('player_state_update', playerStateData );
+	};
+
+
+
+
+
+
+
+
 	clientRequest.sendPosUpdate = function( spy )
 	{
 		if ( spy === undefined )

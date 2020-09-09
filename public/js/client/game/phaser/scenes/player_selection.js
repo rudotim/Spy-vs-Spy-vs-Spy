@@ -72,7 +72,17 @@ var PlayerSelection = new Phaser.Class({
 		this.prepPlayers( this.players );
 	},
 
+	stop : function()
+	{
+		this.cleanup();
+	},
+
 	destroy : function()
+	{
+		this.cleanup();
+	},
+
+	cleanup : function()
 	{
 		console.log("Destroying player selection plugin");
 		this.removeListeners();
@@ -182,7 +192,12 @@ var PlayerSelection = new Phaser.Class({
 			}
 		});
 
-		const actionOnClick = () => {
+		const actionOnClick = () =>
+		{
+			// todo: better way to transition between scenes?
+			this.cleanup();
+			this.scene.stop('player_selection');
+
 			// exit out of this scene with our new color
 			this.scene.start('game_loop');
 		};

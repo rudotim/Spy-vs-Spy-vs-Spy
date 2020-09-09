@@ -34,6 +34,12 @@ module.exports = function (io, gameManager)
 	};
 
 
+	ServerLogic.playerStateUpdate = function( socket, data )
+	{
+		sendToEveryoneElseInRoom( socket, data.roomName, "on_player_state_update", data.playerStateData );
+	};
+
+
 	ServerLogic.leaveRoom = function( playerId, roomName )
 	{
 		//const player = chatManager.findPlayerById( playerId );

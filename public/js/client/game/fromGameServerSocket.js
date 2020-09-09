@@ -7,6 +7,11 @@ const fromGameServerSocket = function( socket, gameController )
 	    gameController.onPlayerUpdateOptions( playerOptions );
     });
 
+	socket.on('on_player_state_update', function( playerStateData )
+	{
+		gameController.onPlayerStateUpdate( playerStateData );
+	});
+
     socket.on( 'on_player_is_ready', function( player_id )
     {
         console.log('on_player_ready');
