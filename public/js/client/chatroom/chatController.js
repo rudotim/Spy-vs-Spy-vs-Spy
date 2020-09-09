@@ -269,8 +269,11 @@ const ChatController = function( frontEnd )
 	 */
 	clientRequest.onStartGame = function( game )
 	{
-		_gameControl = GameController( _socket, frontEnd, _chatroom, game, _player );
-		_gameControl.onStartGame();
+		if ( _gameControl === undefined )
+		{
+			_gameControl = GameController(_socket, frontEnd, _chatroom, game, _player);
+			_gameControl.onStartGame();
+		}
 	};
 
 	return clientRequest;
