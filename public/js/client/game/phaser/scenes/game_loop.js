@@ -20,24 +20,15 @@ let GameLoop = new Phaser.Class({
 
 	init: function (data)
 	{
-		console.log('game_loop init', data);
-
 		this.gameControl = data.gameControl;
 
 		this.players = this.gameControl.players;
-
-		//this.prepPlayers( this.players );
 	},
 
 	preload: function ()
 	{
-		// load all spy sprite data
+		// load all spy sprite data for our default model
 		this.load.atlas('spies', 'img/spritesheet.png', 'img/sprites.json');
-
-		// load the json only
-		this.load.json('spySprite', 'img/sprites.json');
-
-
 
 		this.load.image("room","img/demoroom.png");
 
@@ -47,12 +38,13 @@ let GameLoop = new Phaser.Class({
 
 	create: function ()
 	{
+		// make copies of our default model for each player.
+		// color the models and configure the animation frames.
 		this.processPlayers( this.players );
 
 		this.add.sprite(0, 0, "room").setOrigin(0, 0);
 
 		this.mySpy = this.add.sprite(350, 230, this.getPlayerAtlastName( this.players[0].id ));
-
 
 		this.joyStick = this.plugins.get('rexvirtualjoystickplugin').add(this, {
 			x: 200,
