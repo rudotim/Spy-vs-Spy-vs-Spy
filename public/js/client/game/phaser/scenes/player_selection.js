@@ -62,35 +62,39 @@ var PlayerSelection = new Phaser.Class({
 
 		this.gameControl = data.gameControl;
 
-		console.log("callback this> ", this);
-		const listenerConfig = [
-			{
-				channel : "on_player_joined",
-				callback : this.onPlayerJoined,
-				_this : this
-			},
-			{
-				channel : "on_player_left",
-				callback : this.onPlayerLeft,
-				_this : this
-			},
-			{
-				channel : "on_list_players",
-				callback : this.onListPlayers,
-				_this : this
-			},
-			{
-				channel : "on_player_update_options",
-				callback : this.onPlayerUpdateOptions,
-				_this : this
-			}
-		];
+		console.log("configuring event callback> ");
 
-		this.gameControl.addListener( listenerConfig );
+		this.eventCenter = EventDispatcher.getInstance();
+		this.addListeners();
 
 		this.players = this.gameControl.players;
 
 		this.prepPlayers( this.players );
+	},
+
+	destroy : function()
+	{
+		console.log("Destroying player selection plugin");
+		this.removeListeners();
+	},
+
+	addListeners : function()
+	{
+		// clear out any previous listeners
+		this.removeListeners();
+
+		this.eventCenter.on('on_player_joined', this.onPlayerJoined, this);
+		this.eventCenter.on('on_player_left', this.onPlayerLeft, this);
+		this.eventCenter.on('on_list_players', this.onListPlayers, this);
+		this.eventCenter.on('on_player_update_options', this.onPlayerUpdateOptions, this);
+	},
+
+	removeListeners : function()
+	{
+		this.eventCenter.removeListener('on_player_joined');
+		this.eventCenter.removeListener('on_player_left');
+		this.eventCenter.removeListener('on_list_players');
+		this.eventCenter.removeListener('on_player_update_options');
 	},
 
 
@@ -199,10 +203,10 @@ var PlayerSelection = new Phaser.Class({
 		this.gameControl.sendPlayerUpdateOptions( this.gameControl.player );
 	},
 
-	onPlayerUpdateOptions : function( _this, playerOptions )
+	onPlayerUpdateOptions : function( playerOptions )
 	{
 		// find player with 'id', change spy color to 'color'
-		const player = _this.players.find( p => p.id === playerOptions.id );
+		const player = this.players.find( p => p.id === playerOptions.id );
 
 		if ( player )
 		{
@@ -210,28 +214,25 @@ var PlayerSelection = new Phaser.Class({
 			player.ready = playerOptions.ready;
 		}
 
-		_this.drawPlayerStatus( _this.players );
+		this.drawPlayerStatus( this.players );
 	},
 
-	onPlayerJoined : function( _this, playerId, playerName )
+	onPlayerJoined : function( playerId, playerName )
 	{
 		console.log('onPlayerJoined> name: ', playerName, ' id: ', playerId );
 
-		_this.drawPlayerStatus( _this.players );
+		this.drawPlayerStatus( this.players );
 	},
 
-	onPlayerLeft : function( _this, playerId, playerName )
+	onPlayerLeft : function( playerId, playerName )
 	{
 		console.log('onPlayerLeft> name: ', playerName, ' id: ', playerId );
 
-
 		// todo: review players in the const copy and remove the one that doens't belong
-
-
-		_this.drawPlayerStatus( _this.players );
+		this.drawPlayerStatus( this.players );
 	},
 
-	onListPlayers : function( _this, players )
+	onListPlayers : function( players )
 	{
 		console.log('onListPlayers> ', players);
 	},
@@ -249,10 +250,13 @@ var PlayerSelection = new Phaser.Class({
 
 		// todo: need to clear and redraw if someone has left or joined
 
+		//console.log("drawing " + players.len() + " players...");
+
 		// draw text
+		let playerCount=0;
 		players.forEach( player =>
 		{
-			console.log("drawing player> ", player);
+			console.log("drawing player(%o)> %o", (playerCount++), player);
 
 			if ( player.text === undefined )
 				player.text = this.add.text(x, y, player.name);

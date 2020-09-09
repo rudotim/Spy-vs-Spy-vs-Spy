@@ -10,19 +10,21 @@ let GameLoop = new Phaser.Class({
 
 		function GameLoop ()
 		{
-
 			Phaser.Scene.call(this, { key: 'game_loop' });
 
-			this.mySpy = undefined;
+			// the status of our movement
 			this.moving = NO_MOVEMENT;
 		},
 
 
 	init: function (data)
 	{
+		this.eventCenter = new Phaser.Events.EventEmitter();
+
 		this.gameControl = data.gameControl;
 
 		this.players = this.gameControl.players;
+		//this.mySpy = this.gameControl.player;
 	},
 
 	preload: function ()
@@ -36,15 +38,22 @@ let GameLoop = new Phaser.Class({
 		this.load.plugin('rexvirtualjoystickplugin', url, true);
 	},
 
+	updateCount : function( count )
+	{
+		console.log("Update Count> %o", count );
+	},
+
 	create: function ()
 	{
+		this.eventCenter.on('update-count', this.updateCount, this);
+
 		// make copies of our default model for each player.
 		// color the models and configure the animation frames.
 		this.processPlayers( this.players );
 
 		this.add.sprite(0, 0, "room").setOrigin(0, 0);
 
-		this.mySpy = this.add.sprite(350, 230, this.getPlayerAtlastName( this.players[0].id ));
+		//this.mySpy = this.add.sprite(350, 230, this.getPlayerAtlastName( this.players[0].id ));
 
 		this.joyStick = this.plugins.get('rexvirtualjoystickplugin').add(this, {
 			x: 200,
@@ -72,6 +81,14 @@ let GameLoop = new Phaser.Class({
 		{
 			this.mySpy.x -= 2;
 		}
+		else if (this.moving === RUN_UP )
+		{
+			this.mySpy.y -= 2;
+		}
+		else if (this.moving === RUN_DOWN )
+		{
+			this.mySpy.y += 2;
+		}
 	},
 
 
@@ -95,7 +112,28 @@ let GameLoop = new Phaser.Class({
 			this.colorPlayerSpriteSheets( newAtlasName, player );
 
 			this.addAnimationsToSpriteSheets( newAtlasName );
+
+			this.placePlayerStartingLocation( player );
 		});
+	},
+
+	placePlayerStartingLocation : function( player )
+	{
+		// todo: add logic to move players to new locations/rooms
+
+		// draw players in their starting locations.
+		let spy = this.add.sprite(350, 230, this.getPlayerAtlastName( player.id ));
+
+		// todo: need to associate spy sprites with player objects
+
+		//this.players[ player.id ].spy = spy;
+		//if ( player.id === this.player.id )
+		//	this.mySpy = spy;
+	},
+
+	updatePlayerPos : function()
+	{
+		// todo: update the position of the specific player
 	},
 
 	/**

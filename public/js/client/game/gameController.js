@@ -1,6 +1,8 @@
 
 const GameController = function( socket, frontEnd, chatroom, game, player )
 {
+	const eventCenter = EventDispatcher.getInstance();
+
 	const clientRequest = {};
 
 	// the encapsulation of logic calls to receive data from the server
@@ -79,68 +81,38 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	 */
 	clientRequest.onPlayerUpdateOptions = function( player )
 	{
-		// call any interested listeners
-		listeners.forEach( listener =>
-		{
-			listener.config.forEach( cfg =>
-			{
-				if ( cfg.channel === "on_player_update_options" )
-				{
-					cfg.callback(cfg._this, player);
-				}
-			});
-		});
+		eventCenter.emit('on_player_update_options', player );
 	};
 
 
-	// /**
-	//  * Called when a new player has joined the room we're in.
-	//  * @param playerId
-	//  * @param playerName
-	//  * @param chatRoomName
-	//  */
-	// clientRequest.onPlayerJoinedChatRoom = function( playerId, playerName, chatRoomName )
-	// {
-	// 	// call any interested listeners
-	// 	listeners.forEach( listener =>
-	// 	{
-	// 		listener.config.forEach( cfg =>
-	// 		{
-	// 			if ( cfg.channel === "on_player_joined" )
-	// 			{
-	// 				cfg.callback(cfg._this, playerId, playerName);
-	// 			}
-	// 		});
-	// 	});
-	// };
-	//
-	// /**
-	//  * Called when some other player in our room has left.
-	//  * @param playerId
-	//  * @param playerName
-	//  * @param chatRoomName
-	//  */
-	// clientRequest.onPlayerLeftChatRoom = function( playerId, playerName, chatRoomName )
-	// {
-	// 	console.log("chatroom players> ", chatroom.players );
-	//
-	// 	// for ( let p=0; p < chatroom.players.length; p++ )
-	// 	// {
-	// 	// 	console.log("chatroom player> ", chatroom.players[p] );
-	// 	// }
-	//
-	// 	// call any interested listeners
-	// 	listeners.forEach( listener =>
-	// 	{
-	// 		listener.config.forEach( cfg =>
-	// 		{
-	// 			if ( cfg.channel === "on_player_left" )
-	// 			{
-	// 				cfg.callback(cfg._this, playerId, playerName);
-	// 			}
-	// 		});
-	// 	});
-	// };
+	/**
+	 * Called when a new player has joined the room we're in.
+	 * @param playerId
+	 * @param playerName
+	 * @param chatRoomName
+	 */
+	clientRequest.onPlayerJoinedChatRoom = function( playerId, playerName, chatRoomName )
+	{
+		eventCenter.emit('on_player_joined', playerId, playerName );
+	};
+
+	/**
+	 * Called when some other player in our room has left.
+	 * @param playerId
+	 * @param playerName
+	 * @param chatRoomName
+	 */
+	clientRequest.onPlayerLeftChatRoom = function( playerId, playerName, chatRoomName )
+	{
+		console.log("chatroom players> ", chatroom.players );
+
+		// for ( let p=0; p < chatroom.players.length; p++ )
+		// {
+		// 	console.log("chatroom player> ", chatroom.players[p] );
+		// }
+		eventCenter.emit('on_player_left', playerId, playerName );
+	};
+
 	//
 	// /**
 	//  * Called when a new person has just joined a room.  They will have no idea who
