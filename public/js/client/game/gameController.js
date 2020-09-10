@@ -17,9 +17,6 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	// your player object
 	const _player = player;
 
-	// local copy of game data
-	//let _gameInstance = null;
-
 	let listeners = [];
 
 	// Property exports:
@@ -37,26 +34,26 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	};
 
 
-	clientRequest.addListener = function( listenerConfigRequest )
-	{
-		const listenerConfig = {
-			config : listenerConfigRequest,
-			id : uuid()
-		};
-
-		listeners.push( listenerConfig );
-
-		return listenerConfig.id;
-	};
-
-	clientRequest.removeListener = function( listenerConfigId )
-	{
-		listeners = listeners.filter(
-			function(value, index, arr)
-			{
-				return value.id !== listenerConfigId;
-			});
-	};
+	// clientRequest.addListener = function( listenerConfigRequest )
+	// {
+	// 	const listenerConfig = {
+	// 		config : listenerConfigRequest,
+	// 		id : uuid()
+	// 	};
+	//
+	// 	listeners.push( listenerConfig );
+	//
+	// 	return listenerConfig.id;
+	// };
+	//
+	// clientRequest.removeListener = function( listenerConfigId )
+	// {
+	// 	listeners = listeners.filter(
+	// 		function(value, index, arr)
+	// 		{
+	// 			return value.id !== listenerConfigId;
+	// 		});
+	// };
 
 
 	/**
@@ -104,12 +101,8 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	 */
 	clientRequest.onPlayerLeftChatRoom = function( playerId, playerName, chatRoomName )
 	{
-		console.log("chatroom players> ", chatroom.players );
+		console.log("player left chatroom> %o %o", playerName, playerId );
 
-		// for ( let p=0; p < chatroom.players.length; p++ )
-		// {
-		// 	console.log("chatroom player> ", chatroom.players[p] );
-		// }
 		eventCenter.emit('on_player_left', playerId, playerName );
 	};
 
@@ -124,8 +117,6 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	 */
 	clientRequest.sendPlayerStateUpdate = function( id, x, y, moving )
 	{
-		//console.log('sendPlayerUpdateState> ', player);
-
 		const playerStateData =
 		{
 			id : id,
@@ -195,13 +186,13 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 		_socket.emit('player_left_room', player, roomId );
 	};
 
-	clientRequest.sendPosUpdate = function( spy )
-	{
-		if ( spy === undefined )
-			return;
-		
-		_socket.emit('on_data', spy.getPos() );
-	};
+	// clientRequest.sendPosUpdate = function( spy )
+	// {
+	// 	if ( spy === undefined )
+	// 		return;
+	//
+	// 	_socket.emit('on_data', spy.getPos() );
+	// };
 
 	clientRequest.sendStopUpdate = function( spy )
 	{

@@ -33,7 +33,12 @@ module.exports = function (io, gameManager)
 		sendToEveryoneInRoom( roomName, "on_player_update_options", playerOptions );
 	};
 
-
+	/**
+	 * Called when a player has moved position or changed state.
+	 * This will be sent from one player to everyone else in the room.
+	 * @param socket
+	 * @param data
+	 */
 	ServerLogic.playerStateUpdate = function( socket, data )
 	{
 		sendToEveryoneElseInRoom( socket, data.roomName, "on_player_state_update", data.playerStateData );

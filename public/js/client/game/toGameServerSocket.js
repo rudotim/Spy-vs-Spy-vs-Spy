@@ -17,6 +17,18 @@ const toGameServerSocket = function( socket )
 		socket.emit( 'player_is_ready', player );
 	};
 
+	clientRequest.sendPlayerStateUpdate = function( socket, playerStateData )
+	{
+		//if ( spy === undefined )
+		//	return;
+
+		socket.emit('player_state_update', playerStateData );
+	};
+
+	// -------------------------------------------------------
+	// todo: Still need these to fix due to refactoring
+	// -------------------------------------------------------
+
 	clientRequest.triggerPlayerLoadedMap = function( player )
 	{
 		socket.emit( 'player_has_loaded_map', player );
@@ -32,39 +44,6 @@ const toGameServerSocket = function( socket )
 		socket.emit( 'start_game', _gameInstance.game_id );
 	};
 
-	// clientRequest.choosePlayer = function( player, playerIndex, playerConfig, playerChosenCallback )
-	// {
-	// 	const clientData = {
-	// 			player : player,
-	// 			playerConfig : playerConfig,
-	// 			gameId : _gameInstance.game_id
-	// 	};
-	//
-	// 	$.ajax({
-	// 		type : 'post',
-	// 		url : '/player/choose/',
-	// 		data : JSON.stringify(clientData),
-	// 		contentType : "application/json",
-	// 		success : function(data) {
-	//
-	// 			console.log(data);
-	// 			playerChosenCallback( playerIndex, playerConfig, data.success );
-	// 		},
-	// 		error : function(err) {
-	// 			console.error('ERROR! ' + err.responseText);
-	// 			console.error(err);
-	//
-	// 			//playerChosenCallback( playerIndex, false );
-	// 		}
-	// 	});
-	// };
-
-
-
-	// -------------------------------------------------------
-	// Game Play
-	// -------------------------------------------------------
-
 	clientRequest.sendPlayerEnteredRoom = function( player, teleports_to )
 	{
 		socket.emit('player_entered_room', player, teleports_to );
@@ -73,29 +52,6 @@ const toGameServerSocket = function( socket )
 	clientRequest.sendPlayerLeftRoom = function( player, roomId )
 	{
 		socket.emit('player_left_room', player, roomId );
-	};
-
-	clientRequest.sendPlayerStateUpdate = function( socket, playerStateData )
-	{
-		//if ( spy === undefined )
-		//	return;
-
-		socket.emit('player_state_update', playerStateData );
-	};
-
-
-
-
-
-
-
-
-	clientRequest.sendPosUpdate = function( spy )
-	{
-		if ( spy === undefined )
-			return;
-
-		socket.emit('on_data', spy.getPos() );
 	};
 
 	clientRequest.sendStopUpdate = function( spy )

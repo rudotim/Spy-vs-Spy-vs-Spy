@@ -45,7 +45,6 @@ var PlayerSelection = new Phaser.Class({
 			Phaser.Scene.call(this, { key: 'player_selection' });
 
 			this.text1 = undefined;
-			//this.text2 = undefined;
 			this.wheel = undefined;
 			this.wheelpos = undefined;
 			this.mycolor = undefined;
@@ -275,8 +274,6 @@ var PlayerSelection = new Phaser.Class({
 
 			if ( player.text === undefined )
 				player.text = this.add.text(x, y, player.name);
-
-			// todo: update player color
 
 			if ( player.image === undefined )
 			{

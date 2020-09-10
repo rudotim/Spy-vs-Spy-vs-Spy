@@ -40,7 +40,7 @@ let GameLoop = new Phaser.Class({
 		// clear out any previous listeners
 		this.removeListeners();
 
-		this.eventCenter.on('on_player_state_update', this.onUpdatePlayerPos, this);
+		this.eventCenter.on('on_player_state_update', this.onUpdatePlayerState, this);
 	},
 
 	removeListeners : function()
@@ -107,7 +107,7 @@ let GameLoop = new Phaser.Class({
 			update = false;
 
 		if ( update === true )
-			this.updatePlayerPos( this.mySpy.x, this.mySpy.y, this.moving );
+			this.updatePlayerState( this.mySpy.x, this.mySpy.y, this.moving );
 	},
 
 
@@ -143,18 +143,21 @@ let GameLoop = new Phaser.Class({
 		// draw players in their starting locations.
 		let spy = this.add.sprite(350, 230, this.getPlayerAtlastName( player.id ));
 
-		// todo: need to associate spy sprites with player objects
-
 		player.spy = spy;
 
+		// associate the player objects with their game sprites.
+		// keep a simple reference to our own sprite.
 		if ( player.id === this.player.id )
 		{
-			console.log("Our player has been placed");
 			this.mySpy = spy;
 		}
 	},
 
-	onUpdatePlayerPos : function( playerUpdateData )
+	/**
+	 * Called when any other player has updated their position or state
+	 * @param playerUpdateData
+	 */
+	onUpdatePlayerState : function( playerUpdateData )
 	{
 		const player = this.players.find( p => p.id === playerUpdateData.id );
 
@@ -165,7 +168,13 @@ let GameLoop = new Phaser.Class({
 		}
 	},
 
-	updatePlayerPos : function( x, y, moving )
+	/**
+	 * Update our player's position or state and send that data to the other players
+	 * @param x
+	 * @param y
+	 * @param moving
+	 */
+	updatePlayerState : function( x, y, moving )
 	{
 		this.gameControl.player.x = x;
 		this.gameControl.player.y = y;
