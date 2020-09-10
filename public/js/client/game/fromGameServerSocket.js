@@ -2,7 +2,11 @@
 
 const fromGameServerSocket = function( socket, gameController )
 {
-    socket.on('on_player_update_options', function( playerOptions )
+	// -------------------------------------------------------
+	// Game Prep
+	// -------------------------------------------------------
+
+	socket.on('on_player_update_options', function( playerOptions )
     {
 	    gameController.onPlayerUpdateOptions( playerOptions );
     });
@@ -29,11 +33,10 @@ const fromGameServerSocket = function( socket, gameController )
     // Game Play
     // -------------------------------------------------------
 
-    socket.on( 'on_data', function( spyPos )
-    {
-        // update spy with data
-	    gameController.updatePlayerPos( spyPos );
-    });
+	socket.on('on_player_state_update', function( playerStateData )
+	{
+		gameController.onPlayerStateUpdate( playerStateData );
+	});
 
     socket.on( 'on_player_entered_room', function( player, room )
     {

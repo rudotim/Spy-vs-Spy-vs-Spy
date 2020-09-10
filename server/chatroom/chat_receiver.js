@@ -27,7 +27,7 @@ module.exports = function (io, router, chatLogic, chatManager, gameReceiver)
 		catch (err)
 		{
 			console.log('err> %o', err);
-			res.status( err ).send({ error: 'You are already in a room, dummy' });
+			res.status( 400 ).send({ error: err });
 		}
 	});
 
@@ -95,6 +95,16 @@ module.exports = function (io, router, chatLogic, chatManager, gameReceiver)
 
 				// returns a game but we dont' do anything with it?
 				chatLogic.leaveRoom( data.playerId, data.roomName, socket );
+			});
+
+			/**
+			 * Received when a client requests a list of all the chat rooms.
+			 */
+			socket.on('list_rooms', function()
+			{
+				console.log("Request to list all rooms");
+
+				chatLogic.listRooms( socket );
 			});
 
 			/**

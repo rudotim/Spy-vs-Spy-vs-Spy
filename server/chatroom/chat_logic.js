@@ -14,6 +14,11 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 	 */
 	ServerLogic.createPlayer = function( playerName )
 	{
+		if ( chatManager.findPlayerByName(playerName) )
+		{
+			throw('Username already exists');
+		}
+
 		// create and add ourself
 		const newPlayer = chatManager.createPlayer( playerName );
 
@@ -96,6 +101,18 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 		// send only to ourself
 		console.log("Sending player list to ourself in room %o", roomName );
 		sendToOurself( socket, "on_list_players", data );
+	};
+
+
+	/**
+	 * Return list of all chat rooms
+	 * @param socket socket connection to client
+	 */
+	ServerLogic.listRooms = function( socket )
+	{
+		// send only to ourself
+		console.log("Sending room list to ourself" );
+		sendToOurself( socket, "on_list_rooms", chatManager.getAllRooms() );
 	};
 
 	/**

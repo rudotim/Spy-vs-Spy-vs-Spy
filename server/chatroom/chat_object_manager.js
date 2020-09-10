@@ -35,6 +35,29 @@ module.exports = function ()
 		return room;
 	};
 
+
+	/**
+	 * Retrieve all the chat rooms currently available on the server
+	 * @returns {*} return an array of room objects
+	 */
+	GameManager.getAllRooms = function()
+	{
+		const rooms = [];
+		let roomData;
+		for ( let k = 0; k < roomIds.length; k++ )
+		{
+			roomData =
+				{
+					"name" : allRooms[ roomIds[k] ].name,
+					"created_by" : "bob"
+				};
+
+			rooms.push( roomData );
+		}
+
+		return rooms;
+	};
+
 	/**
 	 * Retrieve the room object associated with roomName.
 	 * @param roomName
@@ -155,6 +178,21 @@ module.exports = function ()
 	GameManager.findPlayerById = function( playerId )
 	{
 		return allPlayers[ playerId ];
+	};
+
+	/**
+	 * Find a player object by the corresponding player name
+	 * @param playerName
+	 * @returns {*} the player object
+	 */
+	GameManager.findPlayerByName = function( playerName )
+	{
+		for (var key in allPlayers)
+		{
+			if ( allPlayers[key].name === playerName )
+				return allPlayers[key];
+		}
+		return undefined;
 	};
 
 	return GameManager;

@@ -2,9 +2,14 @@
 
 <head>
 
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
+	<!--
 	<meta name="viewport" content="user-scalable=no,  initial-scale=1,  maximum-scale=1,  width=device-width" />
+	-->
 
 	<script src="/js/jquery-2.2.3.min.js"></script>
+	<script src="/js/jquery.cookie.js"></script>
 	<script src="/js/bootstrap.min.js"></script>
 
 	<script src="/js/socket.io-1.4.5.js"></script>
@@ -19,11 +24,12 @@
 	<script src="/js/client/game/phaser/scenes/game_loop.js"></script>
 
 	<script src="/js/client/objects/player.js"></script>
-	<script src="/js/client/objects/spy.js"></script>
 	<script src="/js/client/objects/room.js"></script>
 
 	<script src="/js/client/front_end.js"></script>
 	<script src="/js/client/common/utils.js"></script>
+	<script src="/js/client/common/nameLogic.js"></script>
+	<script src="/js/client/common/eventCenter.js"></script>
 
 	<!-- Chat Room -->
 	<script src="/js/client/chatroom/toServerHttp.js"></script>
@@ -41,12 +47,50 @@
 	<link rel="stylesheet" href="/css/svs.css">
 </head>
 
-<body>
+<body onLoad="loadCachedUser()">
 
-	<div id="container">
+	<div id="intro-div">
+		<h1>Welcome To Spy vs Spy vs Spy!</h1>
+		<h3>Enter Your Name To Continue</h3>
+
+			<input type="text" class="Input-text" id="playerName" placeholder="Your Name" value="testname">
+
+			<div id="intro-footer">
+				<button type="button"
+						onClick="createPlayer()"
+				>Done</button>
+			</div>
+	</div>
+
+	<div class="cover" onclick="toggleSidenav();"></div>
+	<div class="hamburger" id="hamburger" onclick="toggleSidenav();">
+		<div></div>
+		<div></div>
+		<div></div>
+	</div>
+	<nav>
+		<div class="logo">
+			<img src="img/spy_logo.png"/>
+		</div>
+		<div class="links">
+			<a class="active" href="">Home</a>
+			<a href="#">Create Game</a>
+			<a href="#">Join Game</a>
+			<a href="#">Chat</a>
+		</div>
+		<footer>
+			<p>w00t!</p>
+		</footer>
+	</nav>
+
+
+	<div id="user-ui-div">
+
+		<div class="header">
+			<p>Spy vs Spy vs Spy</p>
+		</div>
+
 		<div id="game_info">
-			<input type="text" class="form-control" id="player_name" placeholder="Your Name" value="testname"
-				onblur="chatControl.createPlayer(this.value);">
 			<button class="form-control"
 				onClick="chatControl.joinRoom( 'sweetbonesgame' );">Create
 				Server Room</button>
@@ -74,12 +118,7 @@
 			<button onClick="chatControl.sendChat( $('#txtinp').val() );">Send
 				Chat Text</button>
 		</div>
-
-		<button onClick="chatControl.showGameOptions()">Show Game Options</button>
-		
 	</div>
-
-
 
 </body>
 

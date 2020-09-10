@@ -36,7 +36,7 @@ const ChatController = function( frontEnd )
 	 */
 	clientRequest.createPlayer = function( newPlayerName )
 	{
-		_toServerHttp.createPlayer( newPlayerName )
+		return _toServerHttp.createPlayer( newPlayerName )
 			.then(data =>
 			{
 				console.log("Created player [" + newPlayerName + "] with id: %o", data.playerId);
@@ -50,8 +50,13 @@ const ChatController = function( frontEnd )
 
 				this.joinRoom( LOBBY );
 			})
-			.catch(error => {
-				console.log("Bzzp - error adding player: " + error);
+			.catch(error =>
+			{
+				const errText = error.responseJSON['error'];
+
+				console.log("Bzzp - error: %o", errText);
+
+				throw( errText );
 			});
 	};
 
@@ -96,6 +101,12 @@ const ChatController = function( frontEnd )
 		currentRoomName = newRoomName;
 
 		return _socket;
+	};
+
+
+	clientRequest.verifyPlayerConnection = function()
+	{
+		return ( _player !== undefined && _toServer !== undefined );
 	};
 
 	// TODO: unit test this
@@ -181,8 +192,23 @@ const ChatController = function( frontEnd )
 
 		_chatroom.players = players;
 
-		frontEnd.updateRoomListUI( players );
+		frontEnd.updatePlayerListUI( players );
 	};
+
+
+	/**
+	 * Called when a person list the available chat rooms
+	 * @param roomList
+	 */
+	clientRequest.onListRooms = function( roomList )
+	{
+		console.log("onListRooms> %o", roomList );
+
+		//_chatroom.players = players;
+
+		frontEnd.updateRoomListUI( roomList );
+	};
+
 
 	/**
 	 * Called when a new person has just joined a room.  This callback gives the new
@@ -222,7 +248,7 @@ const ChatController = function( frontEnd )
 	 */
 	clientRequest.listGames = function()
 	{
-		console.error('listing games has not yet been implemented');
+		_toServer.listChatRooms( _socket );
 	};
 
 	// -------------------------------------------------------
@@ -243,8 +269,11 @@ const ChatController = function( frontEnd )
 	 */
 	clientRequest.onStartGame = function( game )
 	{
-		_gameControl = GameController( _socket, frontEnd, _chatroom, game, _player );
-		_gameControl.onStartGame();
+		if ( _gameControl === undefined )
+		{
+			_gameControl = GameController(_socket, frontEnd, _chatroom, game, _player);
+			_gameControl.onStartGame();
+		}
 	};
 
 	return clientRequest;

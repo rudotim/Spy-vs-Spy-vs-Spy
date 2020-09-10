@@ -1,6 +1,8 @@
 
 const GameController = function( socket, frontEnd, chatroom, game, player )
 {
+	const eventCenter = EventDispatcher.getInstance();
+
 	const clientRequest = {};
 
 	// the encapsulation of logic calls to receive data from the server
@@ -14,9 +16,6 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 
 	// your player object
 	const _player = player;
-
-	// local copy of game data
-	//let _gameInstance = null;
 
 	let listeners = [];
 
@@ -35,26 +34,26 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	};
 
 
-	clientRequest.addListener = function( listenerConfigRequest )
-	{
-		const listenerConfig = {
-			config : listenerConfigRequest,
-			id : uuid()
-		};
-
-		listeners.push( listenerConfig );
-
-		return listenerConfig.id;
-	};
-
-	clientRequest.removeListener = function( listenerConfigId )
-	{
-		listeners = listeners.filter(
-			function(value, index, arr)
-			{
-				return value.id !== listenerConfigId;
-			});
-	};
+	// clientRequest.addListener = function( listenerConfigRequest )
+	// {
+	// 	const listenerConfig = {
+	// 		config : listenerConfigRequest,
+	// 		id : uuid()
+	// 	};
+	//
+	// 	listeners.push( listenerConfig );
+	//
+	// 	return listenerConfig.id;
+	// };
+	//
+	// clientRequest.removeListener = function( listenerConfigId )
+	// {
+	// 	listeners = listeners.filter(
+	// 		function(value, index, arr)
+	// 		{
+	// 			return value.id !== listenerConfigId;
+	// 		});
+	// };
 
 
 	/**
@@ -79,68 +78,68 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	 */
 	clientRequest.onPlayerUpdateOptions = function( player )
 	{
-		// call any interested listeners
-		listeners.forEach( listener =>
-		{
-			listener.config.forEach( cfg =>
-			{
-				if ( cfg.channel === "on_player_update_options" )
-				{
-					cfg.callback(cfg._this, player);
-				}
-			});
-		});
+		eventCenter.emit('on_player_update_options', player );
 	};
 
 
-	// /**
-	//  * Called when a new player has joined the room we're in.
-	//  * @param playerId
-	//  * @param playerName
-	//  * @param chatRoomName
-	//  */
-	// clientRequest.onPlayerJoinedChatRoom = function( playerId, playerName, chatRoomName )
-	// {
-	// 	// call any interested listeners
-	// 	listeners.forEach( listener =>
-	// 	{
-	// 		listener.config.forEach( cfg =>
-	// 		{
-	// 			if ( cfg.channel === "on_player_joined" )
-	// 			{
-	// 				cfg.callback(cfg._this, playerId, playerName);
-	// 			}
-	// 		});
-	// 	});
-	// };
-	//
-	// /**
-	//  * Called when some other player in our room has left.
-	//  * @param playerId
-	//  * @param playerName
-	//  * @param chatRoomName
-	//  */
-	// clientRequest.onPlayerLeftChatRoom = function( playerId, playerName, chatRoomName )
-	// {
-	// 	console.log("chatroom players> ", chatroom.players );
-	//
-	// 	// for ( let p=0; p < chatroom.players.length; p++ )
-	// 	// {
-	// 	// 	console.log("chatroom player> ", chatroom.players[p] );
-	// 	// }
-	//
-	// 	// call any interested listeners
-	// 	listeners.forEach( listener =>
-	// 	{
-	// 		listener.config.forEach( cfg =>
-	// 		{
-	// 			if ( cfg.channel === "on_player_left" )
-	// 			{
-	// 				cfg.callback(cfg._this, playerId, playerName);
-	// 			}
-	// 		});
-	// 	});
-	// };
+	/**
+	 * Called when a new player has joined the room we're in.
+	 * @param playerId
+	 * @param playerName
+	 * @param chatRoomName
+	 */
+	clientRequest.onPlayerJoinedChatRoom = function( playerId, playerName, chatRoomName )
+	{
+		eventCenter.emit('on_player_joined', playerId, playerName );
+	};
+
+	/**
+	 * Called when some other player in our room has left.
+	 * @param playerId
+	 * @param playerName
+	 * @param chatRoomName
+	 */
+	clientRequest.onPlayerLeftChatRoom = function( playerId, playerName, chatRoomName )
+	{
+		console.log("player left chatroom> %o %o", playerName, playerId );
+
+		eventCenter.emit('on_player_left', playerId, playerName );
+	};
+
+
+
+	/**
+	 * Called when a player moves or changes state
+	 * @param id
+	 * @param x
+	 * @param y
+	 * @param moving
+	 */
+	clientRequest.sendPlayerStateUpdate = function( id, x, y, moving )
+	{
+		const playerStateData =
+		{
+			id : id,
+			x : x,
+			y : y,
+			moving : moving
+		};
+
+		const data = {
+			roomName : game.chatroom.name,
+			playerStateData : playerStateData
+		};
+
+		_toServer.sendPlayerStateUpdate( socket, data );
+	};
+
+	clientRequest.onPlayerStateUpdate = function( playerStateData )
+	{
+		eventCenter.emit('on_player_state_update', playerStateData );
+	};
+
+
+
 	//
 	// /**
 	//  * Called when a new person has just joined a room.  They will have no idea who
@@ -187,13 +186,13 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 		_socket.emit('player_left_room', player, roomId );
 	};
 
-	clientRequest.sendPosUpdate = function( spy )
-	{
-		if ( spy === undefined )
-			return;
-		
-		_socket.emit('on_data', spy.getPos() );
-	};
+	// clientRequest.sendPosUpdate = function( spy )
+	// {
+	// 	if ( spy === undefined )
+	// 		return;
+	//
+	// 	_socket.emit('on_data', spy.getPos() );
+	// };
 
 	clientRequest.sendStopUpdate = function( spy )
 	{

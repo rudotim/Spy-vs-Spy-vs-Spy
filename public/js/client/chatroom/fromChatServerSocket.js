@@ -46,6 +46,16 @@ const fromChatServerSocket = function( socket, chatController )
 		chatController.onListPlayers( data.players );
 	});
 
+	/**
+	 * Received when a request is made to list the available chat rooms
+	 */
+	socket.on('on_list_rooms', function( data )
+	{
+		console.log('listing rooms> %o', data );
+
+		chatController.onListRooms( data );
+	});
+
 	socket.on('on_room_status', function( data )
 	{
 		console.log('received status for room> %o', data );
