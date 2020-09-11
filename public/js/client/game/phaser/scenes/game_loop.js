@@ -26,7 +26,8 @@ let GameLoop = new Phaser.Class({
 		this.gameControl = data.gameControl;
 
 		this.players = this.gameControl.players;
-		this.player = this.gameControl.player;
+		this.myPlayer = this.players.find( p => p.id === this.gameControl.player.id );
+		//this.myPlayer = this.gameControl.player;
 	},
 
 	destroy : function()
@@ -89,31 +90,41 @@ let GameLoop = new Phaser.Class({
 		let update = true;
 		if (this.moving === RUN_RIGHT)
 		{
-			this.mySpy.x += 2;
+			this.myPlayer.spy.x += 2;
 		}
 		else if (this.moving === RUN_LEFT )
 		{
-			this.mySpy.x -= 2;
+			this.myPlayer.spy.x -= 2;
 		}
 		else if (this.moving === RUN_UP )
 		{
-			this.mySpy.y -= 2;
+			this.myPlayer.spy.y -= 2;
 		}
 		else if (this.moving === RUN_DOWN )
 		{
-			this.mySpy.y += 2;
+			this.myPlayer.spy.y += 2;
 		}
 		else
 			update = false;
 
 		if ( update === true )
-			this.updatePlayerState( this.mySpy.x, this.mySpy.y, this.moving );
+			this.updatePlayerState( this.myPlayer.spy.x, this.myPlayer.spy.y, this.moving, "run_right" );
 	},
 
 
 	getPlayerAtlastName : function( playerId )
 	{
-		return "player_" + playerId + "_atlas";
+		return "pAtlas_" + playerId;
+	},
+
+	getPlayerTextureName : function ( playerId )
+	{
+		return "pTex_" + playerId;
+	},
+
+	getPlayerAnimationKey : function ( playerId, animationName )
+	{
+		return "pAnim_" + playerId + animationName;
 	},
 
 	/**
@@ -126,11 +137,9 @@ let GameLoop = new Phaser.Class({
 		{
 			console.log('player> %o', player );
 
-			const newAtlasName = this.getPlayerAtlastName( player.id );
+			this.colorPlayerSpriteSheets( player.id, player );
 
-			this.colorPlayerSpriteSheets( newAtlasName, player );
-
-			this.addAnimationsToSpriteSheets( newAtlasName );
+			this.addAnimationsToSpriteSheets( player.id );
 
 			this.placePlayerStartingLocation( player );
 		});
@@ -145,11 +154,12 @@ let GameLoop = new Phaser.Class({
 
 		player.spy = spy;
 
-		// associate the player objects with their game sprites.
-		// keep a simple reference to our own sprite.
-		if ( player.id === this.player.id )
+		// // associate the player objects with their game sprites.
+		// // keep a simple reference to our own sprite.
+		if ( player.id === this.myPlayer.id )
 		{
-			this.mySpy = spy;
+			//this.myPlayer.spy = spy;
+			console.log('my spy> %o', this.myPlayer );
 		}
 	},
 
@@ -163,8 +173,29 @@ let GameLoop = new Phaser.Class({
 
 		if ( player !== undefined )
 		{
+			//console.log( "onUpdatePlayer> %o", playerUpdateData );
 			player.spy.x = playerUpdateData.x;
 			player.spy.y = playerUpdateData.y;
+			player.spy.endFrame = playerUpdateData.endFrame;
+
+			// if moving, play left/right/up/down animation
+			if ( player.spy.moving !== RUN_LEFT && playerUpdateData.moving === RUN_LEFT )
+			{
+				player.spy.play( this.getPlayerAnimationKey( player.id, "run_left") );
+			}
+			else if ( player.spy.moving !== RUN_RIGHT && playerUpdateData.moving === RUN_RIGHT )
+			{
+				player.spy.play( this.getPlayerAnimationKey( player.id, "run_right") );
+			}
+			else if ( playerUpdateData.moving === NO_MOVEMENT )
+			{
+				// if not moving, show still frame
+				player.spy.anims.stop(null, true);
+				console.log("done moving, showing frame: %o", player.spy.endFrame );
+				player.spy.setFrame( player.spy.endFrame );
+			}
+
+			player.spy.moving = playerUpdateData.moving;
 		}
 	},
 
@@ -173,45 +204,49 @@ let GameLoop = new Phaser.Class({
 	 * @param x
 	 * @param y
 	 * @param moving
+	 * @param frame
 	 */
-	updatePlayerState : function( x, y, moving )
+	updatePlayerState : function( x, y, moving, frame )
 	{
 		this.gameControl.player.x = x;
 		this.gameControl.player.y = y;
 		this.gameControl.player.moving = moving;
-		this.gameControl.sendPlayerStateUpdate( this.gameControl.player.id, x, y, moving );
+		this.gameControl.player.endFrame = frame;
+		this.gameControl.sendPlayerStateUpdate( this.gameControl.player.id, x, y, moving, frame );
 	},
 
 	/**
 	 * Create sprite sheets with the correct player color
-	 * @param atlasName - the name of the atlas which will contain the new texture copies
+	 * @param playerId - the id of the current player for whom we're creating sprite sheets
 	 * @param player - a single participating player
 	 */
-	colorPlayerSpriteSheets : function( atlasName, player )
+	colorPlayerSpriteSheets : function( playerId, player )
 	{
 		// start with the same texture frames as our default model
 		let frameData = this.textures.list.spies;
 
 		// duplicate the defualt model onto a new canvas with a new name
-		let copiedFrameData = this.copyTextureFromImage( frameData, atlasName + "_canvas" );
+		let copiedFrameData = this.copyTextureFromImage( frameData, this.getPlayerTextureName(playerId) );
 
 		// perform a color swap on the new canvas to color the textures the way we need them
 		let redbmd = this.updateTextureColor( copiedFrameData, 0xFFFFFF, player.color );
 
 		// add our new colored textures to a new atlas
-		this.textures.addAtlas(atlasName, redbmd.canvas, this.cache.json.get('spies'));
+		this.textures.addAtlas( this.getPlayerAtlastName(playerId), redbmd.canvas, this.cache.json.get('spies'));
 	},
 
 	/**
 	 * Add animation specific to the textures from the specified atlas
-	 * @param atlasName - the name of the atlas containing the textures to be animated
+	 * @param playerId - the id of the current player for whom we're creating animations
 	 */
-	addAnimationsToSpriteSheets : function( atlasName )
+	addAnimationsToSpriteSheets : function( playerId )
 	{
+		const atlasName = this.getPlayerAtlastName( playerId );
+
 		const data = {
 			"anims": [
 				{
-					"key": "run_right",
+					"key": this.getPlayerAnimationKey( playerId, "run_right" ),
 					"type": "frame",
 					"frameRate" : 12,
 					"repeat" : -1,
@@ -231,7 +266,7 @@ let GameLoop = new Phaser.Class({
 					]
 				},
 				{
-					"key": "run_left",
+					"key": this.getPlayerAnimationKey( playerId, "run_left" ),
 					"type": "frame",
 					"frameRate" : 12,
 					"repeat" : -1,
@@ -310,14 +345,14 @@ let GameLoop = new Phaser.Class({
 				if ( name === "right" )
 				{
 					if ( this.moving !== RUN_RIGHT )
-						this.mySpy.play( "run_right" );
+						this.myPlayer.spy.play( this.getPlayerAnimationKey( this.myPlayer.id, "run_right") );
 
 					this.moving = RUN_RIGHT;
 				}
 				else if ( name === "left" )
 				{
 					if ( this.moving !== RUN_LEFT )
-						this.mySpy.play( "run_left" );
+						this.myPlayer.spy.play( this.getPlayerAnimationKey( this.myPlayer.id, "run_left") );
 
 					this.moving = RUN_LEFT;
 				}
@@ -328,18 +363,20 @@ let GameLoop = new Phaser.Class({
 				{
 					if (this.moving === RUN_RIGHT)
 					{
-						this.mySpy.setFrame( "wspy_rstand" );
-						this.mySpy.anims.stop(null, true);
+						this.myPlayer.spy.anims.stop(null, true);
+						this.myPlayer.spy.setFrame( "wspy_rstand" );
 						this.moving = NO_MOVEMENT;
+						this.updatePlayerState( this.myPlayer.spy.x, this.myPlayer.spy.y, this.moving, "wspy_rstand" );
 					}
 				}
 				else if ( name === "left")
 				{
 					if (this.moving === RUN_LEFT)
 					{
+						this.myPlayer.spy.anims.stop(null, true);
+						this.myPlayer.spy.setFrame( "wspy_lstand" );
 						this.moving = NO_MOVEMENT;
-						this.mySpy.anims.stop(null, true);
-						this.mySpy.setFrame( "wspy_lstand" );
+						this.updatePlayerState( this.myPlayer.spy.x, this.myPlayer.spy.y, this.moving, "wspy_lstand" );
 					}
 				}
 			}

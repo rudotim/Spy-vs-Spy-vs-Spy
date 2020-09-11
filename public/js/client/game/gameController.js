@@ -114,15 +114,17 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	 * @param x
 	 * @param y
 	 * @param moving
+	 * @param endFrame
 	 */
-	clientRequest.sendPlayerStateUpdate = function( id, x, y, moving )
+	clientRequest.sendPlayerStateUpdate = function( id, x, y, moving, endFrame )
 	{
 		const playerStateData =
 		{
 			id : id,
 			x : x,
 			y : y,
-			moving : moving
+			moving : moving,
+			endFrame : endFrame
 		};
 
 		const data = {
