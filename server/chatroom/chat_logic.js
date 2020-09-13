@@ -28,6 +28,11 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 		}
 	};
 
+	ServerLogic.deletePlayer = function( playerId )
+	{
+		chatManager.deletePlayer( playerId );
+	};
+
 	/**
 	 * Join a room.  This will create the room and add you to it if it did not exist.
 	 * If the room did not exist, you will be marked as the leader of the room.
@@ -71,7 +76,7 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 		// disassociate player with room
 		chatManager.removePlayerFromRoom( player, room );
 
-		gameLogic.leaveRoom( playerId, roomName );
+		//gameLogic.leaveRoom( playerId, roomName );
 
 		let data =
 			{
@@ -102,7 +107,6 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 		console.log("Sending player list to ourself in room %o", roomName );
 		sendToOurself( socket, "on_list_players", data );
 	};
-
 
 	/**
 	 * Return list of all chat rooms
@@ -150,7 +154,6 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 		sendToEveryoneElseInRoom(socket, roomName, "on_chat", message );
 	};
 
-
 	/**
 	 * Create and start a new game for the room specified by roomName.
 	 * All players will receive a message to start.
@@ -169,25 +172,6 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 
 		// Send to everone else
 		sendToEveryoneInRoom( roomName, "on_start_game", game );
-	};
-
-	/**
-	 * Inform everyone in the game that a player has left
-	 * @param socket
-	 * @param roomName
-	 * @param playerId
-	 */
-	ServerLogic.playerHasLeft = function( socket, roomName, playerId )
-	{
-		console.log('playerHasLeft> ', roomName, playerId );
-
-		const data = {
-			playerId : playerId,
-			playerName : "nobody",
-			roomName : roomName
-		};
-
-		sendToEveryoneInRoom( roomName, "on_player_left", data );
 	};
 
 

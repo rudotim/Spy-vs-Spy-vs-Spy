@@ -10,22 +10,22 @@ module.exports = function ()
 	const roomIds = [];
 	const allRooms = {};
 
-    const GameManager = function()
+    const ChatManager = function()
     {
-    	console.log('game manager constructor');
+    	console.log('Chat manager constructor');
 
     	// Create the default lobby chat room
 	    createChatRoom( "/" );
     };
 
-	GameManager.prototype.constructor = GameManager;
+	ChatManager.prototype.constructor = ChatManager;
 
 	/**
 	 * Retrieve the room object associated with roomName.
 	 * @param roomName
 	 * @returns {*} return the room object. If one did not exist, create it and return it.
 	 */
-	GameManager.getOrCreateRoomByName = function( roomName )
+	ChatManager.getOrCreateRoomByName = function( roomName )
 	{
 		let room = this.findRoomByName( roomName );
 
@@ -40,7 +40,7 @@ module.exports = function ()
 	 * Retrieve all the chat rooms currently available on the server
 	 * @returns {*} return an array of room objects
 	 */
-	GameManager.getAllRooms = function()
+	ChatManager.getAllRooms = function()
 	{
 		const rooms = [];
 		let roomData;
@@ -63,7 +63,7 @@ module.exports = function ()
 	 * @param roomName
 	 * @returns {*} return the room object. If one did not exist, return undefined.
 	 */
-	GameManager.findRoomByName = function( roomName )
+	ChatManager.findRoomByName = function( roomName )
 	{
 		for ( let k = 0; k < roomIds.length; k++ )
 		{
@@ -79,7 +79,7 @@ module.exports = function ()
 	 * @param newPlayerName
 	 * @returns {*}
 	 */
-	GameManager.createPlayer = function( newPlayerName )
+	ChatManager.createPlayer = function( newPlayerName )
 	{
 		const player = new Player( newPlayerName );
 
@@ -87,11 +87,27 @@ module.exports = function ()
 	};
 
 	/**
+	 * Permanently remove all tracers of a player from the game server
+	 * @param playerId - the id of the player beingi removed
+	 */
+	ChatManager.deletePlayer = function( playerId )
+	{
+		const playerIndex = playerIds.findIndex( i => i.id === playerId );
+
+		if ( playerIndex !== undefined )
+			playerIds.splice(playerIndex, 1);
+		else
+			console.error("Unable to find player with id %o to remove", playerId );
+
+		allPlayers[ playerId ] = undefined;
+	};
+
+	/**
 	 * Add a player to a room.
 	 * @param player
 	 * @param room
 	 */
-	GameManager.addPlayerToRoom = function( player, room )
+	ChatManager.addPlayerToRoom = function( player, room )
 	{
 		const playerIndex = room.players.findIndex( i => i.id === player.id );
 
@@ -106,7 +122,7 @@ module.exports = function ()
 	 * @param player
 	 * @param room
 	 */
-	GameManager.removePlayerFromRoom = function( player, room )
+	ChatManager.removePlayerFromRoom = function( player, room )
 	{
 		// create new array that does not include our target player
 		room.players = room.players.filter(
@@ -121,7 +137,7 @@ module.exports = function ()
 	 * @param roomName name of room for which we're requesting a player list
 	 * @returns {Array} list of players
 	 */
-	GameManager.findPlayersInRoom = function( roomName )
+	ChatManager.findPlayersInRoom = function( roomName )
 	{
 		const room = this.findRoomByName( roomName );
 
@@ -175,7 +191,7 @@ module.exports = function ()
 	 * @param playerId
 	 * @returns {*} the player object
 	 */
-	GameManager.findPlayerById = function( playerId )
+	ChatManager.findPlayerById = function( playerId )
 	{
 		return allPlayers[ playerId ];
 	};
@@ -185,15 +201,15 @@ module.exports = function ()
 	 * @param playerName
 	 * @returns {*} the player object
 	 */
-	GameManager.findPlayerByName = function( playerName )
+	ChatManager.findPlayerByName = function( playerName )
 	{
-		for (var key in allPlayers)
+		for (let key in allPlayers)
 		{
-			if ( allPlayers[key].name === playerName )
+			if ( allPlayers[key] && allPlayers[key].name === playerName )
 				return allPlayers[key];
 		}
 		return undefined;
 	};
 
-	return GameManager;
+	return ChatManager;
 }();

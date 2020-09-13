@@ -56,7 +56,11 @@ module.exports = function (io, router, chatLogic, chatManager, gameReceiver)
 				console.log('disconnected socket: ', currentSocket.playerId);
 				
 				// remove from server list
-				chatLogic.playerHasLeft( socket, currentSocket.roomName, currentSocket.playerId );
+				//chatLogic.playerHasLeft( socket, currentSocket.roomName, currentSocket.playerId );
+				chatLogic.leaveRoom( currentSocket.playerId, currentSocket.roomName, socket );
+
+				// remove player from game database
+				chatLogic.deletePlayer( currentSocket.playerId );
 			});
 	
 			// -------------------------------------------------------

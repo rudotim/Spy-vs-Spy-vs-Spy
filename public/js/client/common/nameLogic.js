@@ -14,13 +14,13 @@ function verifyName( newName )
 
 function loadCachedUser()
 {
-	let cachedPlayerName = $.cookie("playerName");
+	let cachedPlayerData = $.cookie("playerData");
 
-	console.log("found cached playername> " + cachedPlayerName);
-	if ( cachedPlayerName !== undefined )
+	console.log("found cached player data> " + cachedPlayerData);
+	if ( cachedPlayerData !== undefined )
 	{
 		// todo: pass player id to reconnect
-		if ( chatControl.verifyPlayerConnection() )
+		if ( chatControl.verifyPlayerConnection( cachedPlayerData.id ) )
 			proceedToLobby();
 		else
 		{
@@ -54,10 +54,10 @@ function createPlayerFromName( newName )
 	// if name is present, send it to back end to be verified and created
 	if ( verifyName( newName ) )
 	{
-		chatControl.createPlayer(newName).then( () =>
+		chatControl.createPlayer(newName).then( (data) =>
 		{
 			// save name in cookie
-			$.cookie('playerName', newName);
+			$.cookie('playerData', data);
 
 			// proceed to main game screen
 			proceedToLobby();
