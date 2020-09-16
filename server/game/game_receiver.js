@@ -11,12 +11,26 @@ module.exports = function (io, gameLogic, gameManager)
 		// Game Prep
 		// -------------------------------------------------------
 
+		socket.on('player_joined_game', function( data )
+		{
+			console.log('player has joined the game');
+			//gameLogic.playerUpdateOptions( socket, data.roomName, data.player );
+		});
+
+		socket.on('player_left_game', function( data )
+		{
+			console.log('player has left the game');
+			//gameLogic.playerUpdateOptions( socket, data.roomName, data.player );
+		});
+
+
+
 		/**
 		 * Received when a player chooses pre-game options like character color.
 		 */
 		socket.on('player_update_options', function( data )
 		{
-			gameLogic.playerUpdateOptions( socket, data.roomName, data.player );
+			gameLogic.playerUpdateOptions( socket, data.gameId, data.data );
 		});
 
 		/**

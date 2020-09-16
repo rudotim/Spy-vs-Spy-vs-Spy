@@ -53,6 +53,7 @@ var PlayerSelection = new Phaser.Class({
 
 			// keep track of player names, color, status
 			this.players = [];
+			this.playerSprites = [];
 		},
 
 	init: function (data)
@@ -68,7 +69,25 @@ var PlayerSelection = new Phaser.Class({
 
 		this.players = this.gameControl.players;
 
-		this.prepPlayers( this.players );
+		// create local sprite copy of each player
+		this.players.forEach( player =>
+		{
+			this.playerSprites.push( this.copyPlayer(player.id, player.name, player.color) );
+		});
+
+		//this.prepPlayers( this.players );
+		this.prepPlayers( this.playerSprites );
+	},
+
+	copyPlayer : function( srcPlayerId, srcPlayerName, srcPlayerColor )
+	{
+		const destPlayer = {};
+
+		destPlayer.id = srcPlayerId;
+		destPlayer.name = srcPlayerName;
+		destPlayer.color = srcPlayerColor;
+
+		return destPlayer;
 	},
 
 	stop : function()
@@ -106,7 +125,6 @@ var PlayerSelection = new Phaser.Class({
 		this.eventCenter.removeListener('on_player_update_options');
 	},
 
-
 	/**
 	 * Initialize all player data to defaults
 	 * @param players
@@ -115,7 +133,11 @@ var PlayerSelection = new Phaser.Class({
 	{
 		players.forEach( player =>
 		{
-			player.color = Phaser.Display.Color.HexStringToColor( "0xFFFFFF" );
+			console.log("prep player> %o", player );
+
+			if ( player.color === undefined )
+				player.color = Phaser.Display.Color.HexStringToColor( "0xFFFFFF" );
+
 			player.ready = false;
 			player.text = undefined;
 
@@ -161,7 +183,7 @@ var PlayerSelection = new Phaser.Class({
 
 		let _this = this;
 
-		this.drawPlayerStatus( this.players );
+		this.drawPlayerStatus( this.playerSprites );
 
 		this.input.on('pointermove', function (pointer) {
 
@@ -212,38 +234,92 @@ var PlayerSelection = new Phaser.Class({
 
 	sendPlayerUpdateOptions : function( color, ready )
 	{
-		this.gameControl.player.color = color;
-		this.gameControl.player.ready = ready;
-		this.gameControl.sendPlayerUpdateOptions( this.gameControl.player );
+		const myPlayer = this.gameControl.players.find( p => p.id === this.gameControl.player.id );
+
+		// issue: when a player refreshes on the selection screen, the previiously
+		// selected players show up as default white because the color is not
+		// stored on the server.  Need to save the color property (playerUpdateOption) and return them
+		// when a game is joined (getRoomStatus?)
+
+		myPlayer.color = color;
+		myPlayer.ready = ready;
+		this.gameControl.sendPlayerUpdateOptions( myPlayer );
 	},
 
 	onPlayerUpdateOptions : function( playerOptions )
 	{
 		// find player with 'id', change spy color to 'color'
-		const player = this.players.find( p => p.id === playerOptions.id );
+		const playerSprite = this.playerSprites.find( p => p.id === playerOptions.player.id );
 
-		if ( player )
+		if ( playerSprite )
 		{
-			player.color = playerOptions.color;
-			player.ready = playerOptions.ready;
+			playerSprite.color = playerOptions.player.color;
+			playerSprite.ready = playerOptions.player.ready;
 		}
 
-		this.drawPlayerStatus( this.players );
+		this.drawPlayerStatus( this.playerSprites );
 	},
 
 	onPlayerJoined : function( playerId, playerName )
 	{
 		console.log('onPlayerJoined> name: ', playerName, ' id: ', playerId );
 
-		this.drawPlayerStatus( this.players );
+		// add new playerSprite and draw everything
+		let newPlayer = this.copyPlayer(playerId, playerName);
+		this.playerSprites.push( newPlayer );
+		this.prepPlayers( [newPlayer] );
+
+		this.drawPlayerStatus( this.playerSprites );
+	},
+
+	/**
+	 * Remove the player with id from our local players array
+	 * because they are no longer in the game
+	 * @param playerId
+	 */
+	removePlayerSprite : function( playerId )
+	{
+		const playerSpriteIndex = this.playerSprites.findIndex( p => p.id === playerId );
+
+		if ( playerSpriteIndex !== -1 )
+		{
+			// finally, remove the playerSprite from the collection
+			this.playerSprites.splice(playerSpriteIndex, 1);
+		}
+		else
+			console.error("Unable to find playerSpriteIndex for playerId %o", playerId );
+	},
+
+	/**
+	 * Destroy the text and sprite for each player so they disappear from the screen
+	 * @param players
+	 */
+	resetPlayerSprites : function( players )
+	{
+		players.forEach( player =>
+		{
+			// remove text
+			player.text.destroy();
+
+			// remove image
+			player.image.destroy();
+
+			player.image = undefined;
+			player.text = undefined;
+		});
 	},
 
 	onPlayerLeft : function( playerId, playerName )
 	{
 		console.log('onPlayerLeft> name: ', playerName, ' id: ', playerId );
 
-		// todo: review players in the const copy and remove the one that doens't belong
-		this.drawPlayerStatus( this.players );
+		this.resetPlayerSprites( this.playerSprites );
+
+		// compare player sprites to players and remove the one that doens't belong
+		this.removePlayerSprite( playerId );
+
+		// redraw the player sprites with the one that left filtered out
+		this.drawPlayerStatus( this.playerSprites );
 	},
 
 	onListPlayers : function( players )
@@ -251,20 +327,11 @@ var PlayerSelection = new Phaser.Class({
 		console.log('onListPlayers> ', players);
 	},
 
-	erasePlayers : function()
-	{
-		// todo: remove a player from the list
-	},
-
 	drawPlayerStatus : function( players )
 	{
 		let x = 560;
 		let y = 130;
 		let rowHeight = 50;
-
-		// todo: need to clear and redraw if someone has left or joined
-
-		//console.log("drawing " + players.len() + " players...");
 
 		// draw text
 		let playerCount=0;
@@ -278,10 +345,13 @@ var PlayerSelection = new Phaser.Class({
 			if ( player.image === undefined )
 			{
 				// copy texture from 'spyWhite' to a new one 'spyDynamic'
-				player.texture = this.copyTextureFromImage( 'spyWhite', 'spy_' + player.id );
+				if ( player.texture === undefined )
+					player.texture = this.copyTextureFromImage( 'spyWhite', 'spy_' + player.id );
 
 				player.image = this.add.image( x - 35, y, 'spy_' + player.id );
 				player.image.setScale( 1.5 );
+
+				this.updateTextureColor( player.texture, 0xFFFFFF, player.color );
 			}
 			else
 			{

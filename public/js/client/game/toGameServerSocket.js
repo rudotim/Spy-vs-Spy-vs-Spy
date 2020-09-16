@@ -3,13 +3,23 @@ const toGameServerSocket = function( socket )
 {
 	let clientRequest = {};
 
+	clientRequest.setGame = function( game )
+	{
+		this.game = game;
+	};
+
 	// -------------------------------------------------------
 	// Game Play Setup
 	// -------------------------------------------------------
 
-	clientRequest.sendPlayerUpdateOptions = function( socket, data )
+	clientRequest.sendPlayerUpdateOptions = function( socket, playerUpdateData )
 	{
-		socket.emit( 'player_update_options', data );
+		let dataWrapper = {
+			gameId : this.game.id,
+			data : playerUpdateData
+		};
+
+		socket.emit( 'player_update_options', dataWrapper );
 	};
 
 	clientRequest.triggerPlayerIsReady = function( player )
@@ -19,10 +29,12 @@ const toGameServerSocket = function( socket )
 
 	clientRequest.sendPlayerStateUpdate = function( socket, playerStateData )
 	{
-		//if ( spy === undefined )
-		//	return;
+		let dataWrapper = {
+			gameId : this.game.id,
+			data : playerStateData
+		};
 
-		socket.emit('player_state_update', playerStateData );
+		socket.emit('player_state_update', dataWrapper );
 	};
 
 	// -------------------------------------------------------

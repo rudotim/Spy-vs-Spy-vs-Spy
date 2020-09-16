@@ -30,6 +30,8 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	 */
 	clientRequest.onStartGame = function()
 	{
+		_toServer.setGame( game );
+
 		_gameLogic.onStartGame();
 	};
 
@@ -64,21 +66,20 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	{
 		console.log('sendPlayerUpdateOptions***> ', player);
 
-		const data = {
-			roomName : game.chatroom.name,
+		const playerUpdateOptions = {
 			player : player
 		};
 
-		_toServer.sendPlayerUpdateOptions( socket, data );
+		_toServer.sendPlayerUpdateOptions( socket, playerUpdateOptions );
 	};
 
 	/**
 	 * Called when a remote player has updated a property. (name, color, etc...)
 	 * @param player Remote Player object
 	 */
-	clientRequest.onPlayerUpdateOptions = function( player )
+	clientRequest.onPlayerUpdateOptions = function( playerUpdateOptions )
 	{
-		eventCenter.emit('on_player_update_options', player );
+		eventCenter.emit('on_player_update_options', playerUpdateOptions );
 	};
 
 
