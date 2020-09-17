@@ -4,9 +4,10 @@
 
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0, minimum-scale=1.0">
-	<!--
-	<meta name="viewport" content="user-scalable=no,  initial-scale=1,  maximum-scale=1,  width=device-width" />
-	-->
+	<head profile="http://www.w3.org/2005/10/profile">
+		<link rel="icon"
+			  type="image/png"
+			  href="/img/spy0.png">
 
 	<script src="/js/jquery-2.2.3.min.js"></script>
 	<script src="/js/jquery.cookie.js"></script>
@@ -28,7 +29,6 @@
 
 	<script src="/js/client/front_end.js"></script>
 	<script src="/js/client/common/utils.js"></script>
-	<script src="/js/client/common/nameLogic.js"></script>
 	<script src="/js/client/common/eventCenter.js"></script>
 
 	<!-- Chat Room -->
@@ -47,23 +47,24 @@
 	<link rel="stylesheet" href="/css/svs.css">
 </head>
 
-<body onLoad="loadCachedUser()">
+<body onLoad="toFrontEnd.loadThingsUp()">
 
 	<div id="intro-div">
 		<h1>Welcome To Spy vs Spy vs Spy!</h1>
 		<h3>Enter Your Name To Continue</h3>
 
+			<div id="playerNameLabel"></div>
 			<input type="text" class="Input-text" id="playerName" placeholder="Your Name" value="testname">
 
 			<div id="intro-footer">
 				<button type="button"
-						onClick="createPlayer()"
+						onClick="toFrontEnd.createPlayer()"
 				>Done</button>
 			</div>
 	</div>
 
-	<div class="cover" onclick="toggleSidenav();"></div>
-	<div class="hamburger" id="hamburger" onclick="toggleSidenav();">
+	<div class="cover" onclick="toFrontEnd.toggleSidenav();"></div>
+	<div class="hamburger" id="hamburger" onclick="toFrontEnd.toggleSidenav();">
 		<div></div>
 		<div></div>
 		<div></div>

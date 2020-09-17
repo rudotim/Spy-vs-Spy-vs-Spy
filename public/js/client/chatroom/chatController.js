@@ -283,4 +283,4 @@ const ChatController = function( frontEnd )
 	return clientRequest;
 };
 
-const chatControl = ChatController( toFrontEnd() );
+const chatControl = ChatController( toFrontEnd );
