@@ -267,7 +267,8 @@ const ChatController = function( frontEnd )
 	clientRequest.triggerStartGame = function()
 	{
 		let gameOptions = {
-			defaultPlayerColor : Phaser.Display.Color.HexStringToColor( "0xFF0000" )
+			defaultPlayerColor : Phaser.Display.Color.HexStringToColor( "0xFF0000" ),
+			gameMap : "level1"
 		};
 
 		_toServer.startGame( currentRoomName, gameOptions, _socket );
