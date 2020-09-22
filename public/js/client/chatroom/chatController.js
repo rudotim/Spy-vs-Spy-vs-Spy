@@ -37,20 +37,21 @@ const ChatController = function( frontEnd )
 	clientRequest.createPlayer = function( newPlayerName )
 	{
 		return _toServerHttp.createPlayer( newPlayerName )
-			.then(data =>
+			.then(newPlayer =>
 			{
-				console.log("Created player [" + newPlayerName + "] with id: %o", data.playerId);
+				console.log("Created player [" + newPlayer.name + "] with id: %o", newPlayer.id);
 
 				// upon sucessful creation of a new player, save a reference
 				// to the player id and dump the player into the default room (lobby)
-				_player = {
-					name : newPlayerName,
-					id : data.playerId
-				};
+				// _player = {
+				// 	name : newPlayerName,
+				// 	id : data.playerId
+				// };
+				_player = newPlayer;
 
 				this.joinRoom( LOBBY );
 
-				return _player;
+				return newPlayer;
 			})
 			.catch(error =>
 			{
@@ -265,7 +266,11 @@ const ChatController = function( frontEnd )
 	 */
 	clientRequest.triggerStartGame = function()
 	{
-		_toServer.startGame( currentRoomName, _socket );
+		let gameOptions = {
+			defaultPlayerColor : Phaser.Display.Color.HexStringToColor( "0xFF0000" )
+		};
+
+		_toServer.startGame( currentRoomName, gameOptions, _socket );
 	};
 
 	/**
@@ -275,9 +280,11 @@ const ChatController = function( frontEnd )
 	{
 		if ( _gameControl === undefined )
 		{
-			_gameControl = GameController(_socket, frontEnd, _chatroom, game, _player);
+			_gameControl = GameController(_socket, frontEnd, game, _player);
 			_gameControl.onStartGame();
 		}
+		else
+			console.log("GAME CONTROL WAS ALREADY DEFINED - NOT REDEFINING");
 	};
 
 	return clientRequest;

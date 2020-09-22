@@ -11,10 +11,10 @@ module.exports = function (io, gameLogic, gameManager)
 		// Game Prep
 		// -------------------------------------------------------
 
-		socket.on('player_joined_game', function( data )
+		socket.on('player_joined_game', function( dataWrapper )
 		{
-			console.log('player has joined the game');
-			//gameLogic.playerUpdateOptions( socket, data.roomName, data.player );
+			console.log('player has joined the game> %o', dataWrapper);
+			gameLogic.playerHasJoinedGame( socket, dataWrapper.gameId, dataWrapper.data );
 		});
 
 		socket.on('player_left_game', function( data )
@@ -28,9 +28,9 @@ module.exports = function (io, gameLogic, gameManager)
 		/**
 		 * Received when a player chooses pre-game options like character color.
 		 */
-		socket.on('player_update_options', function( data )
+		socket.on('player_update_options', function( dataWrapper )
 		{
-			gameLogic.playerUpdateOptions( socket, data.gameId, data.data );
+			gameLogic.playerUpdateOptions( socket, dataWrapper.gameId, dataWrapper.data );
 		});
 
 		/**
@@ -55,9 +55,9 @@ module.exports = function (io, gameLogic, gameManager)
 		/**
 		 * Received when a player moves their character or changes state
 		 */
-		socket.on('player_state_update', function( playerStateData )
+		socket.on('player_state_update', function( dataWrapper )
 		{
-			gameLogic.playerStateUpdate( socket, playerStateData );
+			gameLogic.playerStateUpdate( socket, dataWrapper.gameId, dataWrapper.data );
 		});
 
 		// socket.on('player_entered_room', function(player, teleports_to)

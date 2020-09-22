@@ -12,11 +12,11 @@ const toGameServerSocket = function( socket )
 	// Game Play Setup
 	// -------------------------------------------------------
 
-	clientRequest.sendPlayerUpdateOptions = function( socket, playerUpdateData )
+	clientRequest.sendPlayerUpdateOptions = function( socket, playerUpdateOptions )
 	{
 		let dataWrapper = {
 			gameId : this.game.id,
-			data : playerUpdateData
+			data : playerUpdateOptions
 		};
 
 		socket.emit( 'player_update_options', dataWrapper );
@@ -35,6 +35,16 @@ const toGameServerSocket = function( socket )
 		};
 
 		socket.emit('player_state_update', dataWrapper );
+	};
+
+	clientRequest.sendPlayerJoinedGame = function( socket, joinData )
+	{
+		let dataWrapper = {
+			gameId : this.game.id,
+			data : joinData
+		};
+
+		socket.emit( 'player_joined_game', dataWrapper );
 	};
 
 	// -------------------------------------------------------

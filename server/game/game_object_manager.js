@@ -22,9 +22,9 @@ module.exports = function ()
 	// Game Objects
 	// -------------------------------------------------------
 
-	GameManager.createGame = function( chatroom )
+	GameManager.createGame = function( chatroom, options )
 	{
-		const game = new Game( chatroom );
+		const game = new Game( chatroom, options );
 
 		// todo: associate new game with chatroom
 
@@ -70,7 +70,7 @@ module.exports = function ()
 			console.log('checking for player_id[' + player_id + ']');
 			p = game.getPlayerById( player_id );
 
-			if ( p != 'undefined' && p != null )
+			if ( p !== undefined && p != null )
 			{
 				console.log('found player');
 				console.log( p );
@@ -80,7 +80,7 @@ module.exports = function ()
 		}
 
 		console.error('found nothing');
-		return null;
+		return undefined;
 	};
 
 	GameManager.getAllGames = function()

@@ -39,7 +39,7 @@ const toChatServerSocket = function( socket )
 
 		socketRoom.emit( 'list_rooms' );
 	};
-	
+
 	clientRequest.getRoomStatus = function( roomName, socketRoom )
 	{
 		console.log('Requesting status for room %o', roomName );
@@ -71,11 +71,12 @@ const toChatServerSocket = function( socket )
 	};
 
 
-	clientRequest.startGame = function( roomName, socketRoom )
+	clientRequest.startGame = function( roomName, gameOptions, socketRoom )
 	{
 		const data =
 			{
 				"roomName" : roomName,
+				"gameOptions" : gameOptions
 			};
 
 		socketRoom.emit('start_game', data);

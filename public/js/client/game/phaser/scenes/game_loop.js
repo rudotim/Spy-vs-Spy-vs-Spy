@@ -229,7 +229,7 @@ let GameLoop = new Phaser.Class({
 		let copiedFrameData = this.copyTextureFromImage( frameData, this.getPlayerTextureName(playerId) );
 
 		// perform a color swap on the new canvas to color the textures the way we need them
-		let redbmd = this.updateTextureColor( copiedFrameData, 0xFFFFFF, player.color );
+		let redbmd = this.updateTextureColor( copiedFrameData, 0xFFFFFF, player.game.color );
 
 		// add our new colored textures to a new atlas
 		this.textures.addAtlas( this.getPlayerAtlastName(playerId), redbmd.canvas, this.cache.json.get('spies'));

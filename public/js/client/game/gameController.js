@@ -1,5 +1,5 @@
 
-const GameController = function( socket, frontEnd, chatroom, game, player )
+const GameController = function( socket, frontEnd, game, player )
 {
 	const eventCenter = EventDispatcher.getInstance();
 
@@ -15,14 +15,15 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	const _gameLogic = GameLogic( clientRequest );
 
 	// your player object
-	const _player = player;
+	//const _player = player;
 
 	let listeners = [];
 
 	// Property exports:
 
-	clientRequest.player = _player;
-	clientRequest.players = chatroom.players;
+	clientRequest.game = game;
+	clientRequest.player = player;
+	clientRequest.players = game.chatroom.players;
 
 
 	/**
@@ -32,50 +33,42 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	{
 		_toServer.setGame( game );
 
+		console.log("ON START GAME> %o", game );
+
+		console.log("players> %o", this.players );
+
+		this.sendPlayerJoinedGame( this.player.id );
+
 		_gameLogic.onStartGame();
 	};
 
-
-	// clientRequest.addListener = function( listenerConfigRequest )
-	// {
-	// 	const listenerConfig = {
-	// 		config : listenerConfigRequest,
-	// 		id : uuid()
-	// 	};
-	//
-	// 	listeners.push( listenerConfig );
-	//
-	// 	return listenerConfig.id;
-	// };
-	//
-	// clientRequest.removeListener = function( listenerConfigId )
-	// {
-	// 	listeners = listeners.filter(
-	// 		function(value, index, arr)
-	// 		{
-	// 			return value.id !== listenerConfigId;
-	// 		});
-	// };
-
+	clientRequest.getOptions = function()
+	{
+		return game.options;
+	};
 
 	/**
 	 * Called when a player updates a property. (name, color, etc...)
-	 * @param player Player object
+	 * @param playerId
+	 * @param color
+	 * @param ready
 	 */
-	clientRequest.sendPlayerUpdateOptions = function( player )
+	clientRequest.sendPlayerUpdateOptions = function( playerId, color, ready )
 	{
-		console.log('sendPlayerUpdateOptions***> ', player);
-
 		const playerUpdateOptions = {
-			player : player
+			id : playerId,
+			color : color,
+			ready : ready
 		};
+
+		console.log('sendPlayerUpdateOptions> ', playerUpdateOptions);
 
 		_toServer.sendPlayerUpdateOptions( socket, playerUpdateOptions );
 	};
 
 	/**
 	 * Called when a remote player has updated a property. (name, color, etc...)
-	 * @param player Remote Player object
+	 * @param playerUpdateOptions Remote Player object
 	 */
 	clientRequest.onPlayerUpdateOptions = function( playerUpdateOptions )
 	{
@@ -108,6 +101,42 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 	};
 
 
+	clientRequest.sendPlayerJoinedGame = function( playerId )
+	{
+		const joinData = {
+			playerId : playerId
+		};
+
+		console.log('sendPlayerJoinedGame> ', joinData);
+
+		_toServer.sendPlayerJoinedGame( socket, joinData );
+	};
+
+	clientRequest.onPlayerJoinedGame = function( player )
+	{
+		console.log("onPlayerJoinedGame> %o", player );
+
+		this.addLocalPlayer( player );
+
+		eventCenter.emit('on_player_joined_game', player );
+	};
+
+	clientRequest.addLocalPlayer = function( newPlayer )
+	{
+		this.players.push( newPlayer );
+	};
+	// clientRequest.updateLocalPlayer = function( newPlayer )
+	// {
+	// 	const player = this.players.find( p => p.id === newPlayer.id );
+	//
+	// 	if ( player !== undefined )
+	// 	{
+	// 		player.game = newPlayer.game;
+	// 	}
+	// 	else
+	// 		console.error("Failed to update local player> %o", newPlayer );
+	// };
+
 
 	/**
 	 * Called when a player moves or changes state
@@ -128,12 +157,12 @@ const GameController = function( socket, frontEnd, chatroom, game, player )
 			endFrame : endFrame
 		};
 
-		const data = {
-			roomName : game.chatroom.name,
-			playerStateData : playerStateData
-		};
+		// const data = {
+		// 	roomName : game.chatroom.name,
+		// 	playerStateData : playerStateData
+		// };
 
-		_toServer.sendPlayerStateUpdate( socket, data );
+		_toServer.sendPlayerStateUpdate( socket, playerStateData );
 	};
 
 	clientRequest.onPlayerStateUpdate = function( playerStateData )

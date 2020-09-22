@@ -34,7 +34,7 @@ class Button extends Phaser.GameObjects.Sprite {
 }
 
 
-var PlayerSelection = new Phaser.Class({
+let PlayerSelection = new Phaser.Class({
 
 	Extends: Phaser.Scene,
 
@@ -47,6 +47,7 @@ var PlayerSelection = new Phaser.Class({
 			this.text1 = undefined;
 			this.wheel = undefined;
 			this.wheelpos = undefined;
+			this.pointerColor = undefined;
 			this.mycolor = undefined;
 
 			this.gameControl = undefined;
@@ -56,11 +57,15 @@ var PlayerSelection = new Phaser.Class({
 			this.playerSprites = [];
 		},
 
+	// still issue connecting 2nd client.
+	// also, first client doesn't get the color right when the game starts anymore.
+
 	init: function (data)
 	{
 		console.log('player_selection init', data);
 
 		this.gameControl = data.gameControl;
+		//this.mycolor = this.gameControl.getOptions().defaultPlayerColor; //Phaser.Display.Color.HexStringToColor( "0xFFFFFF" );
 
 		console.log("configuring event callback> ");
 
@@ -72,10 +77,18 @@ var PlayerSelection = new Phaser.Class({
 		// create local sprite copy of each player
 		this.players.forEach( player =>
 		{
-			this.playerSprites.push( this.copyPlayer(player.id, player.name, player.color) );
+			if ( player.game )
+			{
+				console.log("player color> %o", player);
+				this.playerSprites.push(this.copyPlayer(player.id, player.name, player.game.color));
+
+				if ( player.id === this.gameControl.player.id )
+					this.mycolor = player.game.color;
+			}
+			else
+				console.log("Missing game object on %o", player.name );
 		});
 
-		//this.prepPlayers( this.players );
 		this.prepPlayers( this.playerSprites );
 	},
 
@@ -111,16 +124,16 @@ var PlayerSelection = new Phaser.Class({
 		// clear out any previous listeners
 		this.removeListeners();
 
-		this.eventCenter.on('on_player_joined', this.onPlayerJoined, this);
-		this.eventCenter.on('on_player_left', this.onPlayerLeft, this);
+		this.eventCenter.on('on_player_joined_game', this.onPlayerJoinedGame, this);
+		this.eventCenter.on('on_player_left_game', this.onPlayerLeftGame, this);
 		this.eventCenter.on('on_list_players', this.onListPlayers, this);
 		this.eventCenter.on('on_player_update_options', this.onPlayerUpdateOptions, this);
 	},
 
 	removeListeners : function()
 	{
-		this.eventCenter.removeListener('on_player_joined');
-		this.eventCenter.removeListener('on_player_left');
+		this.eventCenter.removeListener('on_player_joined_game');
+		this.eventCenter.removeListener('on_player_left_game');
 		this.eventCenter.removeListener('on_list_players');
 		this.eventCenter.removeListener('on_player_update_options');
 	},
@@ -133,15 +146,15 @@ var PlayerSelection = new Phaser.Class({
 	{
 		players.forEach( player =>
 		{
-			console.log("prep player> %o", player );
+			//console.log("prep playerSprite> %o", player );
 
-			if ( player.color === undefined )
-				player.color = Phaser.Display.Color.HexStringToColor( "0xFFFFFF" );
+			//if ( player.color === undefined )
+			//	player.color = this.mycolor;//Phaser.Display.Color.HexStringToColor( "0xFFFFFF" );
 
-			player.ready = false;
-			player.text = undefined;
+			//player.ready = false;
+			//player.text = undefined;
 
-			console.log("player prepped> ", player );
+			//console.log("player prepped> ", player );
 		});
 	},
 
@@ -187,24 +200,26 @@ var PlayerSelection = new Phaser.Class({
 
 		this.input.on('pointermove', function (pointer) {
 
-			_this.mycolor = _this.textures.getPixel((pointer.x - _this.wheelpos.x1) / wheelScale, (pointer.y - _this.wheelpos.y1) / wheelScale, 'wheel');
+			_this.pointerColor = _this.textures.getPixel((pointer.x - _this.wheelpos.x1) / wheelScale, (pointer.y - _this.wheelpos.y1) / wheelScale, 'wheel');
 
 			graphics.clear();
 
-			if (_this.mycolor)
+			if (_this.pointerColor)
 			{
 				graphics.lineStyle(1, 0x000000, 1);
 				graphics.strokeRect(pointer.x - 1, pointer.y - 1, 34, 34);
 
-				graphics.fillStyle(_this.mycolor.color, 1);
+				graphics.fillStyle(_this.pointerColor.color, 1);
 				graphics.fillRect(pointer.x, pointer.y, 32, 32);
 			}
 		});
 
 		this.input.on('pointerup', function(pointer)
 		{
-			if (_this.mycolor)
+			if (_this.pointerColor)
 			{
+				_this.mycolor = _this.pointerColor;
+
 				// replace all white pixels on our spy with the color chosen by the user
 				_this.updateTextureColor( texture, 0xFFFFFF, _this.mycolor );
 
@@ -213,8 +228,14 @@ var PlayerSelection = new Phaser.Class({
 			}
 		});
 
+		// issue with default color when one player starts the game before another.
+
 		const actionOnClick = () =>
 		{
+			// one final options update to set our 'ready' status to true and also officially
+			// color our spy white in case the user never chose a color.
+			this.sendPlayerUpdateOptions( this.mycolor, true );
+
 			// todo: better way to transition between scenes?
 			this.cleanup();
 			this.scene.stop('player_selection');
@@ -234,40 +255,60 @@ var PlayerSelection = new Phaser.Class({
 
 	sendPlayerUpdateOptions : function( color, ready )
 	{
-		const myPlayer = this.gameControl.players.find( p => p.id === this.gameControl.player.id );
+		//const myPlayer = this.gameControl.players.find( p => p.id === this.gameControl.player.id );
 
-		// issue: when a player refreshes on the selection screen, the previiously
-		// selected players show up as default white because the color is not
-		// stored on the server.  Need to save the color property (playerUpdateOption) and return them
-		// when a game is joined (getRoomStatus?)
+		//myPlayer.color = color;
+		//myPlayer.ready = ready;
 
-		myPlayer.color = color;
-		myPlayer.ready = ready;
-		this.gameControl.sendPlayerUpdateOptions( myPlayer );
+		this.gameControl.sendPlayerUpdateOptions( this.gameControl.player.id, color, ready );
 	},
 
 	onPlayerUpdateOptions : function( playerOptions )
 	{
-		// find player with 'id', change spy color to 'color'
-		const playerSprite = this.playerSprites.find( p => p.id === playerOptions.player.id );
+		const player = this.players.find( p => p.id === playerOptions.id );
 
-		if ( playerSprite )
-		{
-			playerSprite.color = playerOptions.player.color;
-			playerSprite.ready = playerOptions.player.ready;
-		}
+		if ( ! player.game )
+			player.game = {};
+
+		// update both our local player sprites and our local player collection
+		this.updatePlayerOption( player.game, playerOptions );
+
+		const playerSprite = this.playerSprites.find( p => p.id === playerOptions.id );
+		this.updatePlayerOption( playerSprite, playerOptions );
 
 		this.drawPlayerStatus( this.playerSprites );
 	},
 
-	onPlayerJoined : function( playerId, playerName )
+	updatePlayerOption : function( player, playerOptions )
 	{
-		console.log('onPlayerJoined> name: ', playerName, ' id: ', playerId );
+		if ( ! player )
+			return;
+
+		player.color = playerOptions.color;
+		player.ready = playerOptions.ready;
+	},
+
+	updateOption : function( playerCollection, playerOptions )
+	{
+		const playerFound = playerCollection.find( p => p.id === playerOptions.id );
+
+		if ( playerFound )
+		{
+			playerFound.color = playerOptions.color;
+			playerFound.ready = playerOptions.ready;
+		}
+		else
+			console.error("Error updating options for player> %o, %o", playerCollection, playerOptions);
+	},
+
+	onPlayerJoinedGame : function( newPlayer )
+	{
+		console.log('onPlayerJoinedGame> name: %o, id: %o', newPlayer.name, newPlayer.id );
 
 		// add new playerSprite and draw everything
-		let newPlayer = this.copyPlayer(playerId, playerName);
-		this.playerSprites.push( newPlayer );
-		this.prepPlayers( [newPlayer] );
+		let newPlayerCopy = this.copyPlayer(newPlayer.id, newPlayer.name, newPlayer.game.color);
+		this.playerSprites.push( newPlayerCopy );
+		this.prepPlayers( [newPlayerCopy] );
 
 		this.drawPlayerStatus( this.playerSprites );
 	},
@@ -299,19 +340,21 @@ var PlayerSelection = new Phaser.Class({
 		players.forEach( player =>
 		{
 			// remove text
-			player.text.destroy();
+			if ( player.text )
+				player.text.destroy();
 
 			// remove image
-			player.image.destroy();
+			if ( player.image )
+				player.image.destroy();
 
 			player.image = undefined;
 			player.text = undefined;
 		});
 	},
 
-	onPlayerLeft : function( playerId, playerName )
+	onPlayerLeftGame : function( playerId, playerName )
 	{
-		console.log('onPlayerLeft> name: ', playerName, ' id: ', playerId );
+		console.log('onPlayerLeftGame> name: ', playerName, ' id: ', playerId );
 
 		this.resetPlayerSprites( this.playerSprites );
 

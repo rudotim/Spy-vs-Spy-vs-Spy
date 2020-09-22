@@ -27,7 +27,7 @@ const toFrontEnd = (function()
 			let keycode = (event.keyCode ? event.keyCode : event.which);
 			if ( keycode === 13 )
 			{
-				createPlayer();
+				frontEnd.createPlayer();
 			}
 		});
 	}

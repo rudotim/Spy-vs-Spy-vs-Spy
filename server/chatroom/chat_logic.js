@@ -23,9 +23,10 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 		const newPlayer = chatManager.createPlayer( playerName );
 
 		// return data to ourself
-		return {
-			"playerId" : newPlayer.id
-		}
+		return newPlayer;
+		// return {
+		// 	"playerId" : newPlayer.id
+		// }
 	};
 
 	ChatServerLogic.deletePlayer = function( playerId )
@@ -159,22 +160,23 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 	 * Create and start a new game for the room specified by roomName.
 	 * All players will receive a message to start.
 	 * @param roomName
+	 * @param options
 	 */
-	ChatServerLogic.startGame = function( roomName )
+	ChatServerLogic.startGame = function( roomName, options )
 	{
 		const chatroom = chatManager.findRoomByName( roomName );
 
-		let game = gameManager.findGameByName(chatroom);
+		let game = gameManager.findGameByName( chatroom.name );
 
 		// create game object in game obj manager
 		if ( game === null )
-			game = gameManager.createGame( chatroom );
+			game = gameManager.createGame( chatroom, options );
 
-		// save reference to game in chatroom
+		game.initializePlayers();
 
-		// save reference to chatroom in game
+		// todo: save reference to game in chatroom?
 
-		// Send to everone else
+		// Send to everone which will start up the phaser engine
 		sendToEveryoneInRoom( roomName, "on_start_game", game );
 	};
 

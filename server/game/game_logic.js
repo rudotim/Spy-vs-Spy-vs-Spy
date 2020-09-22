@@ -12,15 +12,37 @@ module.exports = function (io, gameManager)
 		console.log('server logic constructor');
 	};
 
-	/**
-	 * Create a new game.
-	 * @param chatroom the chatroom object containing the player starting the game
-	 * @returns {*}
-	 */
-	GameServerLogic.createGame = function( chatroom )
+	// /**
+	//  * Create a new game.
+	//  * @param chatroom the chatroom object containing the player starting the game
+	//  * @returns {*}
+	//  */
+	// GameServerLogic.createGame = function( chatroom )
+	// {
+	// 	console.log('CREATING THE BLOODY GAME');
+	// 	return gameManager.createGame( chatroom );
+	// };
+
+	GameServerLogic.playerHasJoinedGame = function( socket, gameId, playerDataWrapper )
 	{
-		return gameManager.createGame( chatroom );
+		const game = gameManager.findGameById( gameId );
+
+		const player = game.chatroom.players.find( p => p.id === playerDataWrapper.playerId );
+
+		// configure player defaults (color, readyState, etc...)
+		game.initializePlayer( player, game.options );
+
+		// const data = {
+		// 	playerId : playerDataWrapper.playerId,
+		// 	playerName : player.name
+		// };
+		// playerDataWrapper = data;
+
+		// todo: fix this to agree with onPlayerJoinedGame(...) in game_receiever.js
+
+		sendToEveryoneElseInRoom(socket, game.chatroom.name, "on_player_joined_game", player );
 	};
+
 
 	/**
 	 * Update player options like choosing colors.
@@ -32,10 +54,10 @@ module.exports = function (io, gameManager)
 	{
 		const game = gameManager.findGameById( gameId );
 
-		const player = game.chatroom.players.find( p => p.id === playerOptions.player.id );
+		const player = game.chatroom.players.find( p => p.id === playerOptions.id );
 
-		player.color = playerOptions.player.color;
-		player.ready = playerOptions.player.ready;
+		player.game.color = playerOptions.color;
+		player.game.ready = playerOptions.ready;
 
 		sendToEveryoneInRoom( game.chatroom.name, "on_player_update_options", playerOptions );
 	};
@@ -44,11 +66,24 @@ module.exports = function (io, gameManager)
 	 * Called when a player has moved position or changed state.
 	 * This will be sent from one player to everyone else in the room.
 	 * @param socket
-	 * @param data
+	 * @param gameId
+	 * @param playerStateData
 	 */
-	GameServerLogic.playerStateUpdate = function( socket, data )
+	GameServerLogic.playerStateUpdate = function( socket, gameId, playerStateData )
 	{
-		sendToEveryoneElseInRoom( socket, data.roomName, "on_player_state_update", data.playerStateData );
+		const game = gameManager.findGameById( gameId );
+
+		if ( game !== undefined )
+		{
+			const player = game.chatroom.players.find(p => p.id === playerStateData.id);
+
+			player.game.x = playerStateData.x;
+			player.game.y = playerStateData.y;
+			player.game.moving = playerStateData.moving;
+			player.game.endFrame = playerStateData.endFrame;
+
+			sendToEveryoneElseInRoom(socket, game.chatroom.name, "on_player_state_update", playerStateData);
+		}
 	};
 
 

@@ -11,6 +11,12 @@ const fromGameServerSocket = function( socket, gameController )
 	    gameController.onPlayerUpdateOptions( playerOptions );
     });
 
+	socket.on('on_player_joined_game', function( data )
+	{
+		console.log('on_player_joined_game> %o', data);
+		gameController.onPlayerJoinedGame( data );
+	});
+
     socket.on( 'on_player_is_ready', function( player_id )
     {
         console.log('on_player_ready');
