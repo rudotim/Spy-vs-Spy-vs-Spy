@@ -71,7 +71,7 @@ const fromChatServerSocket = function( socket, chatController )
 	//moved to fromGameServer - delete this when working
 	socket.on( 'on_start_game', function( game )
 	{
-		console.log('SERVER IS STARTING GAME!');
+		console.log('SERVER IS STARTING GAME> %o', game);
 		chatController.onStartGame( game );
 	});
 };
