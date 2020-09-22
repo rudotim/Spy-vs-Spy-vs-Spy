@@ -57,17 +57,9 @@ let PlayerSelection = new Phaser.Class({
 			this.playerSprites = [];
 		},
 
-	// still issue connecting 2nd client.
-	// also, first client doesn't get the color right when the game starts anymore.
-
 	init: function (data)
 	{
-		console.log('player_selection init', data);
-
 		this.gameControl = data.gameControl;
-		//this.mycolor = this.gameControl.getOptions().defaultPlayerColor; //Phaser.Display.Color.HexStringToColor( "0xFFFFFF" );
-
-		console.log("configuring event callback> ");
 
 		this.eventCenter = EventDispatcher.getInstance();
 		this.addListeners();
@@ -255,11 +247,6 @@ let PlayerSelection = new Phaser.Class({
 
 	sendPlayerUpdateOptions : function( color, ready )
 	{
-		//const myPlayer = this.gameControl.players.find( p => p.id === this.gameControl.player.id );
-
-		//myPlayer.color = color;
-		//myPlayer.ready = ready;
-
 		this.gameControl.sendPlayerUpdateOptions( this.gameControl.player.id, color, ready );
 	},
 

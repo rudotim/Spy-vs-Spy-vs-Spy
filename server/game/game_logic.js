@@ -12,17 +12,6 @@ module.exports = function (io, gameManager)
 		console.log('server logic constructor');
 	};
 
-	// /**
-	//  * Create a new game.
-	//  * @param chatroom the chatroom object containing the player starting the game
-	//  * @returns {*}
-	//  */
-	// GameServerLogic.createGame = function( chatroom )
-	// {
-	// 	console.log('CREATING THE BLOODY GAME');
-	// 	return gameManager.createGame( chatroom );
-	// };
-
 	GameServerLogic.playerHasJoinedGame = function( socket, gameId, playerDataWrapper )
 	{
 		const game = gameManager.findGameById( gameId );
@@ -31,14 +20,6 @@ module.exports = function (io, gameManager)
 
 		// configure player defaults (color, readyState, etc...)
 		game.initializePlayer( player, game.options );
-
-		// const data = {
-		// 	playerId : playerDataWrapper.playerId,
-		// 	playerName : player.name
-		// };
-		// playerDataWrapper = data;
-
-		// todo: fix this to agree with onPlayerJoinedGame(...) in game_receiever.js
 
 		sendToEveryoneElseInRoom(socket, game.chatroom.name, "on_player_joined_game", player );
 	};

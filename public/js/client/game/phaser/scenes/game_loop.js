@@ -22,12 +22,10 @@ let GameLoop = new Phaser.Class({
 		this.eventCenter = EventDispatcher.getInstance();
 		this.addListeners();
 
-
 		this.gameControl = data.gameControl;
 
 		this.players = this.gameControl.players;
 		this.myPlayer = this.players.find( p => p.id === this.gameControl.player.id );
-		//this.myPlayer = this.gameControl.player;
 	},
 
 	destroy : function()
@@ -62,11 +60,13 @@ let GameLoop = new Phaser.Class({
 
 	create: function ()
 	{
+		// todo: load level data according to game options
+		//console.log("game map> %o", this.gameControl.game.options.gameMap );
+
 		this.add.sprite(0, 0, "room").setOrigin(0, 0);
 
 		// make copies of our default model for each player.
 		// color the models and configure the animation frames.
-		console.log("players> %o", this.players );
 		this.processPlayers( this.players );
 
 		this.joyStick = this.plugins.get('rexvirtualjoystickplugin').add(this, {

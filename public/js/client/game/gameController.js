@@ -14,11 +14,6 @@ const GameController = function( socket, frontEnd, game, player )
 	// the core game logic
 	const _gameLogic = GameLogic( clientRequest );
 
-	// your player object
-	//const _player = player;
-
-	let listeners = [];
-
 	// Property exports:
 
 	clientRequest.game = game;
@@ -156,11 +151,6 @@ const GameController = function( socket, frontEnd, game, player )
 			moving : moving,
 			endFrame : endFrame
 		};
-
-		// const data = {
-		// 	roomName : game.chatroom.name,
-		// 	playerStateData : playerStateData
-		// };
 
 		_toServer.sendPlayerStateUpdate( socket, playerStateData );
 	};
