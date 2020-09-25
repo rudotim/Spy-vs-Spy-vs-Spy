@@ -12,7 +12,7 @@ module.exports = function (io, gameManager)
 		console.log('server logic constructor');
 	};
 
-	GameServerLogic.playerHasJoinedGame = function( socket, gameId, playerDataWrapper )
+	GameServerLogic.playerHasJoinedPreGame = function( socket, gameId, playerDataWrapper )
 	{
 		const game = gameManager.findGameById( gameId );
 
@@ -21,7 +21,8 @@ module.exports = function (io, gameManager)
 		// configure player defaults (color, readyState, etc...)
 		game.initializePlayer( player, game.options );
 
-		sendToEveryoneElseInRoom(socket, game.chatroom.name, "on_player_joined_game", player );
+		//sendToEveryoneElseInRoom(socket, game.chatroom.name, "on_player_joined_pre_game", player );
+		sendToEveryoneInRoom( game.chatroom.name, "on_player_joined_pre_game", player );
 	};
 
 

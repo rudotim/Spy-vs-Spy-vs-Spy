@@ -11,10 +11,10 @@ module.exports = function (io, gameLogic, gameManager)
 		// Game Prep
 		// -------------------------------------------------------
 
-		socket.on('player_joined_game', function( dataWrapper )
+		socket.on('player_joined_pre_game', function( dataWrapper )
 		{
-			console.log('player has joined the game> %o', dataWrapper);
-			gameLogic.playerHasJoinedGame( socket, dataWrapper.gameId, dataWrapper.data );
+			console.log('player has joined the pre game> %o', dataWrapper);
+			gameLogic.playerHasJoinedPreGame( socket, dataWrapper.gameId, dataWrapper.data );
 		});
 
 		socket.on('player_left_game', function( data )

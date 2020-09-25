@@ -66,22 +66,8 @@ let PlayerSelection = new Phaser.Class({
 
 		this.players = this.gameControl.players;
 
-		// create local sprite copy of each player
-		this.players.forEach( player =>
-		{
-			if ( player.game )
-			{
-				console.log("player color> %o", player);
-				this.playerSprites.push(this.copyPlayer(player.id, player.name, player.game.color));
 
-				if ( player.id === this.gameControl.player.id )
-					this.mycolor = player.game.color;
-			}
-			else
-				console.log("Missing game object on %o", player.name );
-		});
-
-		this.prepPlayers( this.playerSprites );
+		this.prepPlayers( this.players, this.playerSprites );
 	},
 
 	copyPlayer : function( srcPlayerId, srcPlayerName, srcPlayerColor )
@@ -116,7 +102,7 @@ let PlayerSelection = new Phaser.Class({
 		// clear out any previous listeners
 		this.removeListeners();
 
-		this.eventCenter.on('on_player_joined_game', this.onPlayerJoinedGame, this);
+		this.eventCenter.on('on_player_joined_pre_game', this.onPlayerJoinedPreGame, this);
 		this.eventCenter.on('on_player_left_game', this.onPlayerLeftGame, this);
 		this.eventCenter.on('on_list_players', this.onListPlayers, this);
 		this.eventCenter.on('on_player_update_options', this.onPlayerUpdateOptions, this);
@@ -124,7 +110,7 @@ let PlayerSelection = new Phaser.Class({
 
 	removeListeners : function()
 	{
-		this.eventCenter.removeListener('on_player_joined_game');
+		this.eventCenter.removeListener('on_player_joined_pre_game');
 		this.eventCenter.removeListener('on_player_left_game');
 		this.eventCenter.removeListener('on_list_players');
 		this.eventCenter.removeListener('on_player_update_options');
@@ -133,20 +119,23 @@ let PlayerSelection = new Phaser.Class({
 	/**
 	 * Initialize all player data to defaults
 	 * @param players
+	 * @param playerSprites
 	 */
-	prepPlayers: function( players )
+	prepPlayers: function( players, playerSprites )
 	{
+		// create local sprite copy of each player
 		players.forEach( player =>
 		{
-			//console.log("prep playerSprite> %o", player );
+			if ( player.game )
+			{
+				console.log("player color> %o", player);
+				playerSprites.push(this.copyPlayer(player.id, player.name, player.game.color));
 
-			//if ( player.color === undefined )
-			//	player.color = this.mycolor;//Phaser.Display.Color.HexStringToColor( "0xFFFFFF" );
-
-			//player.ready = false;
-			//player.text = undefined;
-
-			//console.log("player prepped> ", player );
+				if ( player.id === this.gameControl.player.id )
+					this.mycolor = player.game.color;
+			}
+			else
+				console.log("Missing 'game' object on %o", player.name );
 		});
 	},
 
@@ -254,6 +243,12 @@ let PlayerSelection = new Phaser.Class({
 	{
 		const player = this.players.find( p => p.id === playerOptions.id );
 
+		if ( ! player )
+		{
+			console.error("No player found with id %o", playerOptions.id );
+			return;
+		}
+
 		if ( ! player.game )
 			player.game = {};
 
@@ -275,22 +270,29 @@ let PlayerSelection = new Phaser.Class({
 		player.ready = playerOptions.ready;
 	},
 
-	updateOption : function( playerCollection, playerOptions )
-	{
-		const playerFound = playerCollection.find( p => p.id === playerOptions.id );
+	// updateOption : function( playerCollection, playerOptions )
+	// {
+	// 	const playerFound = playerCollection.find( p => p.id === playerOptions.id );
+	//
+	// 	if ( playerFound )
+	// 	{
+	// 		playerFound.color = playerOptions.color;
+	// 		playerFound.ready = playerOptions.ready;
+	// 	}
+	// 	else
+	// 		console.error("Error updating options for player> %o, %o", playerCollection, playerOptions);
+	// },
 
-		if ( playerFound )
-		{
-			playerFound.color = playerOptions.color;
-			playerFound.ready = playerOptions.ready;
-		}
-		else
-			console.error("Error updating options for player> %o, %o", playerCollection, playerOptions);
-	},
-
-	onPlayerJoinedGame : function( newPlayer )
+	onPlayerJoinedPreGame : function( newPlayer )
 	{
-		console.log('onPlayerJoinedGame> name: %o, id: %o', newPlayer.name, newPlayer.id );
+		console.log('onPlayerJoinedPreGame> name: %o, id: %o', newPlayer.name, newPlayer.id );
+
+		// don't do anything if our sprite already existed
+		if ( this.playerSprites.find( p => p.id === newPlayer.id ) )
+			return;
+
+		if ( newPlayer.id === this.gameControl.player.id )
+			this.mycolor = newPlayer.game.color;
 
 		// add new playerSprite and draw everything
 		let newPlayerCopy = this.copyPlayer(newPlayer.id, newPlayer.name, newPlayer.game.color);

@@ -32,8 +32,6 @@ const GameController = function( socket, frontEnd, game, player )
 
 		console.log("players> %o", this.players );
 
-		this.sendPlayerJoinedGame( this.player.id );
-
 		_gameLogic.onStartGame();
 	};
 
@@ -96,42 +94,34 @@ const GameController = function( socket, frontEnd, game, player )
 	};
 
 
-	clientRequest.sendPlayerJoinedGame = function( playerId )
+	clientRequest.sendPlayerJoinedPreGame = function( playerId )
 	{
 		const joinData = {
 			playerId : playerId
 		};
 
-		console.log('sendPlayerJoinedGame> ', joinData);
+		console.log('sendPlayerJoinedPreGame> ', joinData);
 
-		_toServer.sendPlayerJoinedGame( socket, joinData );
+		_toServer.sendPlayerJoinedPreGame( socket, joinData );
 	};
 
-	clientRequest.onPlayerJoinedGame = function( player )
+	clientRequest.onPlayerJoinedPreGame = function( player )
 	{
-		console.log("onPlayerJoinedGame> %o", player );
+		console.log("onPlayerJoinedPreGame> %o", player );
 
 		this.addLocalPlayer( player );
 
-		eventCenter.emit('on_player_joined_game', player );
+		eventCenter.emit('on_player_joined_pre_game', player );
 	};
 
 	clientRequest.addLocalPlayer = function( newPlayer )
 	{
+		// don't do anything if our player already existed
+		if ( this.players.find( p => p.id === newPlayer.id ) )
+			return;
+
 		this.players.push( newPlayer );
 	};
-	// clientRequest.updateLocalPlayer = function( newPlayer )
-	// {
-	// 	const player = this.players.find( p => p.id === newPlayer.id );
-	//
-	// 	if ( player !== undefined )
-	// 	{
-	// 		player.game = newPlayer.game;
-	// 	}
-	// 	else
-	// 		console.error("Failed to update local player> %o", newPlayer );
-	// };
-
 
 	/**
 	 * Called when a player moves or changes state

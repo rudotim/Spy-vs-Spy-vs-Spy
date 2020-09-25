@@ -37,14 +37,14 @@ const toGameServerSocket = function( socket )
 		socket.emit('player_state_update', dataWrapper );
 	};
 
-	clientRequest.sendPlayerJoinedGame = function( socket, joinData )
+	clientRequest.sendPlayerJoinedPreGame = function( socket, joinData )
 	{
 		let dataWrapper = {
 			gameId : this.game.id,
 			data : joinData
 		};
 
-		socket.emit( 'player_joined_game', dataWrapper );
+		socket.emit( 'player_joined_pre_game', dataWrapper );
 	};
 
 	// -------------------------------------------------------
