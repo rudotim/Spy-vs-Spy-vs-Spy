@@ -24,8 +24,9 @@ module.exports = function (io, gameManager)
 
 		// return data to ourself
 		return {
-			"playerId" : newPlayer.id
-		}
+			"name" : playerName,
+			"id" : newPlayer.id
+		};
 	};
 
 	/**

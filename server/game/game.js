@@ -2,23 +2,24 @@
  * New node file
  */
 
+const utils = require('../utils');
+
 var Player = require('./player.js');
 
-let Game = function( chatroom )
+let Game = function( chatroom, options )
 {
 	// unique identifier
-	//this.id = utils.guid();
+	this.id = utils.guid();
 
-	// all players in the game
-	//this.players = [];
+	this.options = options;
 
 	// the chatroom this game is playing in.  we will use the chatroom
 	// to access our player list and the name of the game.
-	// chatroom.name
-	// chatroom.id
 	this.chatroom = chatroom;
 
+	this.name = chatroom.name;
 
+	//this.initializePlayers( this.chatroom.players, this.options );
 
 	this.players_loaded = 0;
 	this.players_loaded_map = {};
@@ -27,22 +28,36 @@ let Game = function( chatroom )
 	
 	this.nextPlayerId = 1;
 	
-	this.jsonMapData;
+	this.jsonMapData = undefined;
 	
-	this.options = {};
-
-	this.leaderName;
+	this.leaderName = undefined;
 
 	// used to simplify testing
 	this.once = false;
 };
 
-Game.prototype.constructor = Game;
-
-Game.prototype.addPlayer = function( player )
+Game.prototype.initializePlayers = function()
 {
-	// todo: add new player to this game
+	this.chatroom.players.forEach( player =>
+	{
+		this.initializePlayer( player, this.options );
+	});
 };
+
+Game.prototype.initializePlayer = function( player, options )
+{
+	if ( ! player.game )
+	{
+		player.game = {};
+		player.game.color = options.defaultPlayerColor;
+		player.game.ready = false;
+		player.game.text = undefined;
+
+		console.log("initialized player> %o", player);
+	}
+};
+
+Game.prototype.constructor = Game;
 
 Game.prototype.setLeader = function( playerName )
 {
@@ -79,26 +94,6 @@ Game.prototype.setOptions = function(newOptions )
 	this.options = newOptions;
 };
 
-//-----------------------------------------------------
-// Players
-//-----------------------------------------------------
-
-// Game.prototype.createPlayer = function(player_name, isLeader )
-// {
-// 	const player = new Player();
-//
-// 	player.name = player_name;
-// 	player.id = this.nextPlayerId++;
-// 	player.pos = { x : 0, y: 0 };
-// 	player.room = 0;
-// 	player.isLeader = isLeader;
-// 	player.player_def = null;
-//
-// 	this.players.push( player );
-//
-// 	return player;
-// };
-
 Game.prototype.verifyMapsLoaded = function(player )
 {
 	this.players_loaded_map[player.id] = player.id;
@@ -109,46 +104,6 @@ Game.prototype.verifyMapsLoaded = function(player )
 	
 	return ( keys.length === this.players.length );
 }
-
-// Game.prototype.getPlayerById = function(id )
-// {
-// 	var p = this.players.length;
-// 	while ( p-- )
-// 	{
-// 		if ( this.players[p].id == id )
-// 			return this.players[p];
-// 	}
-//
-// 	return -1;
-// };
-//
-// Game.prototype.getAllPlayerNames = function()
-// {
-// 	var names = [];
-//
-// 	var k = this.players.length;
-// 	while( k-- )
-// 		names.push( this.players[k].name );
-//
-// 	return names;
-// };
-//
-// Game.prototype.removePlayerById = function(id )
-// {
-//
-// 	/*
-// 	this.player_data[ id ] = null;
-// 	var k = ids.length;
-// 	while( k-- )
-// 	{
-// 		if ( this.ids[k] == id )
-// 		{
-// 			this.ids.splice(k, 1);
-// 			return;
-// 		}
-// 	}
-// 	*/
-// };
 
 //-----------------------------------------------------
 // Utils

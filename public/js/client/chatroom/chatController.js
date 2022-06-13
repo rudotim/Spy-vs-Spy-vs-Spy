@@ -1,4 +1,6 @@
 
+//import * as frontEnd from '../front_end.js';
+
 const ChatController = function( frontEnd )
 {
 	const clientRequest = {};
@@ -37,18 +39,21 @@ const ChatController = function( frontEnd )
 	clientRequest.createPlayer = function( newPlayerName )
 	{
 		return _toServerHttp.createPlayer( newPlayerName )
-			.then(data =>
+			.then(newPlayer =>
 			{
-				console.log("Created player [" + newPlayerName + "] with id: %o", data.playerId);
+				console.log("Created player [" + newPlayer.name + "] with id: %o", newPlayer.id);
 
 				// upon sucessful creation of a new player, save a reference
 				// to the player id and dump the player into the default room (lobby)
-				_player = {
-					name : newPlayerName,
-					id : data.playerId
-				};
+				// _player = {
+				// 	name : newPlayerName,
+				// 	id : data.playerId
+				// };
+				_player = newPlayer;
 
 				this.joinRoom( LOBBY );
+
+				return newPlayer;
 			})
 			.catch(error =>
 			{
@@ -104,8 +109,10 @@ const ChatController = function( frontEnd )
 	};
 
 
-	clientRequest.verifyPlayerConnection = function()
+	clientRequest.verifyPlayerConnection = function( playerId )
 	{
+		// todo: verify playerId exists on server
+
 		return ( _player !== undefined && _toServer !== undefined );
 	};
 
@@ -153,7 +160,7 @@ const ChatController = function( frontEnd )
 		// add player to local storage
 		const newPlayers = addPlayer( playerId, playerName );
 
-		frontEnd.updateRoomListUI( newPlayers );
+		frontEnd.updatePlayerListUI( newPlayers );
 
 		if ( _gameControl )
 			_gameControl.onPlayerJoinedChatRoom( playerId, playerName, chatRoomName );
@@ -174,26 +181,26 @@ const ChatController = function( frontEnd )
 
 		_chatroom = removePlayer( _chatroom, playerId );
 
-		frontEnd.updateRoomListUI( _chatroom.players );
+		frontEnd.updatePlayerListUI( _chatroom.players );
 
 		if ( _gameControl )
 			_gameControl.onPlayerLeftChatRoom( playerId, playerName, chatRoomName );
 	};
 
-	/**
-	 * Called when a new person has just joined a room.  They will have no idea who
-	 * is in the room unless they receive a complete list from the server.  This
-	 * message is sent only to the one user and not to anyone else.
-	 * @param players
-	 */
-	clientRequest.onListPlayers = function( players )
-	{
-		console.log("onListPlayers> %o", players );
-
-		_chatroom.players = players;
-
-		frontEnd.updatePlayerListUI( players );
-	};
+	// /**
+	//  * Called when a new person has just joined a room.  They will have no idea who
+	//  * is in the room unless they receive a complete list from the server.  This
+	//  * message is sent only to the one user and not to anyone else.
+	//  * @param players
+	//  */
+	// clientRequest.onListPlayers = function( players )
+	// {
+	// 	console.log("onListPlayers> %o", players );
+	//
+	// 	_chatroom.players = players;
+	//
+	// 	frontEnd.updatePlayerListUI( players );
+	// };
 
 
 	/**
@@ -225,7 +232,7 @@ const ChatController = function( frontEnd )
 		_chatroom.players = players;
 		_chatroom.gameStarted = gameStarted;
 
-		frontEnd.updateRoomListUI( players );
+		frontEnd.updatePlayerListUI( players );
 
 		if ( _chatroom.gameStarted === true )
 		{
@@ -261,7 +268,12 @@ const ChatController = function( frontEnd )
 	 */
 	clientRequest.triggerStartGame = function()
 	{
-		_toServer.startGame( currentRoomName, _socket );
+		let gameOptions = {
+			defaultPlayerColor : Phaser.Display.Color.HexStringToColor( "0xFF0000" ),
+			gameMap : "level1"
+		};
+
+		_toServer.startGame( currentRoomName, gameOptions, _socket );
 	};
 
 	/**
@@ -271,12 +283,14 @@ const ChatController = function( frontEnd )
 	{
 		if ( _gameControl === undefined )
 		{
-			_gameControl = GameController(_socket, frontEnd, _chatroom, game, _player);
+			_gameControl = GameController(_socket, frontEnd, game, _player);
 			_gameControl.onStartGame();
 		}
+		else
+			console.log("GAME CONTROL WAS ALREADY DEFINED - NOT REDEFINING");
 	};
 
 	return clientRequest;
 };
 
-const chatControl = ChatController( toFrontEnd() );
+const chatControl = ChatController( toFrontEnd );

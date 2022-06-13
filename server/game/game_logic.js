@@ -7,53 +7,79 @@ module.exports = function (io, gameManager)
 {
 	const _gameManager = gameManager;
 
-	let ServerLogic = function()
+	let GameServerLogic = function()
 	{
 		console.log('server logic constructor');
 	};
 
-	/**
-	 * Create a new game.
-	 * @param chatroom the chatroom object containing the player starting the game
-	 * @returns {*}
-	 */
-	ServerLogic.createGame = function( chatroom )
+	GameServerLogic.playerHasJoinedPreGame = function( socket, gameId, playerDataWrapper )
 	{
-		return gameManager.createGame( chatroom );
+		const game = gameManager.findGameById( gameId );
+
+		const player = game.chatroom.players.find( p => p.id === playerDataWrapper.playerId );
+
+		// configure player defaults (color, readyState, etc...)
+		game.initializePlayer( player, game.options );
+
+		//sendToEveryoneElseInRoom(socket, game.chatroom.name, "on_player_joined_pre_game", player );
+		sendToEveryoneInRoom( game.chatroom.name, "on_player_joined_pre_game", player );
+	};
+
+	GameServerLogic.playerHasJoinedGame = function( socket, gameId, playerDataWrapper )
+	{
+		const game = gameManager.findGameById( gameId );
+
+		const player = game.chatroom.players.find( p => p.id === playerDataWrapper.playerId );
+
+		// configure player defaults (color, readyState, etc...)
+		//game.initializePlayer( player, game.options );
+
+		//sendToEveryoneElseInRoom(socket, game.chatroom.name, "on_player_joined_pre_game", player );
+		sendToEveryoneInRoom( game.chatroom.name, "on_player_joined_game", player );
 	};
 
 	/**
 	 * Update player options like choosing colors.
 	 * @param socket
-	 * @param roomName
+	 * @param gameId
 	 * @param playerOptions
 	 */
-	ServerLogic.playerUpdateOptions = function( socket, roomName, playerOptions )
+	GameServerLogic.playerUpdateOptions = function( socket, gameId, playerOptions )
 	{
-		sendToEveryoneInRoom( roomName, "on_player_update_options", playerOptions );
+		const game = gameManager.findGameById( gameId );
+
+		const player = game.chatroom.players.find( p => p.id === playerOptions.id );
+
+		player.game.color = playerOptions.color;
+		player.game.ready = playerOptions.ready;
+
+		sendToEveryoneInRoom( game.chatroom.name, "on_player_update_options", playerOptions );
 	};
 
 	/**
 	 * Called when a player has moved position or changed state.
 	 * This will be sent from one player to everyone else in the room.
 	 * @param socket
-	 * @param data
+	 * @param gameId
+	 * @param playerStateData
 	 */
-	ServerLogic.playerStateUpdate = function( socket, data )
+	GameServerLogic.playerStateUpdate = function( socket, gameId, playerStateData )
 	{
-		sendToEveryoneElseInRoom( socket, data.roomName, "on_player_state_update", data.playerStateData );
+		const game = gameManager.findGameById( gameId );
+
+		if ( game !== undefined )
+		{
+			const player = game.chatroom.players.find(p => p.id === playerStateData.id);
+
+			player.game.x = playerStateData.x;
+			player.game.y = playerStateData.y;
+			player.game.moving = playerStateData.moving;
+			player.game.endFrame = playerStateData.endFrame;
+
+			sendToEveryoneElseInRoom(socket, game.chatroom.name, "on_player_state_update", playerStateData);
+		}
 	};
 
-
-	ServerLogic.leaveRoom = function( playerId, roomName )
-	{
-		//const player = chatManager.findPlayerById( playerId );
-
-		const game = gameManager.findGameByName( roomName );
-
-		// disassociate player with room
-		//chatManager.removePlayerFromRoom( player, room );
-	};
 
 
 
@@ -93,7 +119,7 @@ module.exports = function (io, gameManager)
 
 
 
-	ServerLogic.choosePlayer = function( gameId, playerId, playerConfigJson )
+	GameServerLogic.choosePlayer = function( gameId, playerId, playerConfigJson )
 	{
 		const current_player = gameManager.findPlayerByGameId( gameId, playerId );
 
@@ -179,7 +205,7 @@ module.exports = function (io, gameManager)
 	// 	socket.broadcast.to(game.name).emit('on_player_attr_updated', game.players, player);
 	// };
 	
-	ServerLogic.playerIsReady = function( player, socket )
+	GameServerLogic.playerIsReady = function( player, socket )
 	{
 		let game = gameManager.findGameByPlayerId( player.id );
 	
@@ -201,7 +227,7 @@ module.exports = function (io, gameManager)
 		}			
 	};
 	
-	ServerLogic.playerHasFinishedLoadingResources = function( player )
+	GameServerLogic.playerHasFinishedLoadingResources = function( player )
 	{
 		let game = gameManager.findGameByPlayerId( player.id );
 		
@@ -257,6 +283,6 @@ module.exports = function (io, gameManager)
 		return JSON.parse(fs.readFileSync('public/data/level_' + levelName + '.json', 'utf8'));
 	}
 	
-	return ServerLogic;
+	return GameServerLogic;
 };
 

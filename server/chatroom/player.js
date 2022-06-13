@@ -9,12 +9,12 @@ let Player = function( name )
 	this.id = utils.guid();
 
 	// player selection
-	this.color = undefined;
-	this.ready = undefined;
+	//this.color = undefined;
+	//this.ready = undefined;
 
 	// game play
-	this.pos = { x : 0, y : 0 };
-	this.room = -1;
+	//this.pos = { x : 0, y : 0 };
+	//this.room = -1;
 };
 
 Player.prototype.constructor = Player;

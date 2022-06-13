@@ -62,9 +62,9 @@ var Spy = (function()
 		this._player_id = playerId;
 		this._room_id = null;
 
-		createSpriteWithColor( phaserGame, playerId, playerConfig, 'spies' );
+//		createSpriteWithColor( phaserGame, playerId, playerConfig, 'spies' );
 		
-		Phaser.Particle.call(this, phaserGame, x, y, playerId + '_', playerConfig.stand);
+//		Phaser.Particle.call(this, phaserGame, x, y, playerId + '_', playerConfig.stand);
 		
 		// Associate specific image frames with animation sequences
 		this.animations.add('run_right', [playerConfig.stand_right, playerConfig.run_right], 8, true, false);
@@ -72,11 +72,11 @@ var Spy = (function()
 
 		this.gameControl = gameControl;
 
-		this.box = drawCollisionBox( phaserGame, x, y );
+//		this.box = drawCollisionBox( phaserGame, x, y );
 
 		this.phaserGame = phaserGame;
 		
-		phaserGame.add.existing(this);
+//		phaserGame.add.existing(this);
 				
 		console.log('spy()');
 	};

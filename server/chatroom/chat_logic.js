@@ -4,7 +4,7 @@ const fs = require('fs');
 module.exports = function (io, chatManager, gameManager, gameLogic)
 {
 
-	let ServerLogic = function()
+	let ChatServerLogic = function()
 	{
 		console.log('server logic constructor');
 	};
@@ -12,7 +12,7 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 	/**
 	 * Create a new player based on their name.
 	 */
-	ServerLogic.createPlayer = function( playerName )
+	ChatServerLogic.createPlayer = function( playerName )
 	{
 		if ( chatManager.findPlayerByName(playerName) )
 		{
@@ -23,9 +23,15 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 		const newPlayer = chatManager.createPlayer( playerName );
 
 		// return data to ourself
-		return {
-			"playerId" : newPlayer.id
-		}
+		return newPlayer;
+		// return {
+		// 	"playerId" : newPlayer.id
+		// }
+	};
+
+	ChatServerLogic.deletePlayer = function( playerId )
+	{
+		chatManager.deletePlayer( playerId );
 	};
 
 	/**
@@ -34,7 +40,7 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 	 * That means you can perform admin actions like starting the game,
 	 * removing users and changing admin properties.
 	 */
-	ServerLogic.joinRoom = function( playerId, roomName, socket )
+	ChatServerLogic.joinRoom = function( playerId, roomName, socket )
 	{
 		const player = chatManager.findPlayerById( playerId );
 
@@ -62,16 +68,17 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 	 * @param roomName
 	 * @param socket
 	 */
-	ServerLogic.leaveRoom = function( playerId, roomName, socket )
+	ChatServerLogic.leaveRoom = function( playerId, roomName, socket )
 	{
 		const player = chatManager.findPlayerById( playerId );
 
 		const room = chatManager.findRoomByName( roomName );
 
+		if ( room === undefined )
+			return;
+
 		// disassociate player with room
 		chatManager.removePlayerFromRoom( player, room );
-
-		gameLogic.leaveRoom( playerId, roomName );
 
 		let data =
 			{
@@ -89,7 +96,7 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 	 * @param roomName name of chat room
 	 * @param socket socket connection to client
 	 */
-	ServerLogic.listPlayers = function( roomName, socket )
+	ChatServerLogic.listPlayers = function( roomName, socket )
 	{
 		const players = chatManager.findPlayersInRoom( roomName );
 
@@ -103,12 +110,11 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 		sendToOurself( socket, "on_list_players", data );
 	};
 
-
 	/**
 	 * Return list of all chat rooms
 	 * @param socket socket connection to client
 	 */
-	ServerLogic.listRooms = function( socket )
+	ChatServerLogic.listRooms = function( socket )
 	{
 		// send only to ourself
 		console.log("Sending room list to ourself" );
@@ -122,7 +128,7 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 	 * @param roomName
 	 * @param socket
 	 */
-	ServerLogic.getRoomStatus = function( roomName, socket )
+	ChatServerLogic.getRoomStatus = function( roomName, socket )
 	{
 		const players = chatManager.findPlayersInRoom( roomName );
 
@@ -144,50 +150,34 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 	 * @param message text content to send to the other users in the room
 	 * @param socket socket connection to client
 	 */
-	ServerLogic.sendChat = function( roomName, message, socket )
+	ChatServerLogic.sendChat = function( roomName, message, socket )
 	{
 		// Send to everone else
 		sendToEveryoneElseInRoom(socket, roomName, "on_chat", message );
 	};
 
-
 	/**
 	 * Create and start a new game for the room specified by roomName.
 	 * All players will receive a message to start.
 	 * @param roomName
+	 * @param options
 	 */
-	ServerLogic.startGame = function( roomName )
+	ChatServerLogic.startGame = function( roomName, options )
 	{
 		const chatroom = chatManager.findRoomByName( roomName );
 
+		let game = gameManager.findGameByName( chatroom.name );
+
 		// create game object in game obj manager
-		const game = gameManager.createGame( chatroom );
+		if ( game === null )
+			game = gameManager.createGame( chatroom, options );
 
-		// save reference to game in chatroom
+		game.initializePlayers();
 
-		// save reference to chatroom in game
+		// todo: save reference to game in chatroom?
 
-		// Send to everone else
+		// Send to everone which will start up the phaser engine
 		sendToEveryoneInRoom( roomName, "on_start_game", game );
-	};
-
-	/**
-	 * Inform everyone in the game that a player has left
-	 * @param socket
-	 * @param roomName
-	 * @param playerId
-	 */
-	ServerLogic.playerHasLeft = function( socket, roomName, playerId )
-	{
-		console.log('playerHasLeft> ', roomName, playerId );
-
-		const data = {
-			playerId : playerId,
-			playerName : "nobody",
-			roomName : roomName
-		};
-
-		sendToEveryoneInRoom( roomName, "on_player_left", data );
 	};
 
 
@@ -237,7 +227,7 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 
 
 	
-	ServerLogic.playerIsReady = function( player, socket )
+	ChatServerLogic.playerIsReady = function( player, socket )
 	{
 		let game = chatManager.findGameByPlayerId( player.id );
 	
@@ -259,7 +249,7 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 		}			
 	};
 	
-	ServerLogic.playerHasFinishedLoadingResources = function( player, socket )
+	ChatServerLogic.playerHasFinishedLoadingResources = function( player, socket )
 	{
 		let game = chatManager.findGameByPlayerId( player.id );
 		
@@ -315,6 +305,6 @@ module.exports = function (io, chatManager, gameManager, gameLogic)
 		return JSON.parse(fs.readFileSync('public/data/level_' + levelName + '.json', 'utf8'));
 	}
 	
-	return ServerLogic;
+	return ChatServerLogic;
 };
 

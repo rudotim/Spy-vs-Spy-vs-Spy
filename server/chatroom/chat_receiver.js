@@ -55,8 +55,11 @@ module.exports = function (io, router, chatLogic, chatManager, gameReceiver)
 
 				console.log('disconnected socket: ', currentSocket.playerId);
 				
-				// remove from server list
-				chatLogic.playerHasLeft( socket, currentSocket.roomName, currentSocket.playerId );
+				// remove from chat room
+				chatLogic.leaveRoom( currentSocket.playerId, currentSocket.roomName, socket );
+
+				// remove player from game database
+				chatLogic.deletePlayer( currentSocket.playerId );
 			});
 	
 			// -------------------------------------------------------
@@ -107,15 +110,15 @@ module.exports = function (io, router, chatLogic, chatManager, gameReceiver)
 				chatLogic.listRooms( socket );
 			});
 
-			/**
-			 * Received when a client requests a list of the people in a room.
-			 */
-			socket.on('list_players', function( data )
-			{
-				console.log("Request to list players in room[%o]", data.roomName);
-
-				chatLogic.listPlayers( data.roomName, socket );
-			});
+			// /**
+			//  * Received when a client requests a list of the people in a room.
+			//  */
+			// socket.on('list_players', function( data )
+			// {
+			// 	console.log("Request to list players in room[%o]", data.roomName);
+			//
+			// 	chatLogic.listPlayers( data.roomName, socket );
+			// });
 
 			/**
 			 *
@@ -132,7 +135,7 @@ module.exports = function (io, router, chatLogic, chatManager, gameReceiver)
 			{
 				console.log('server received request to start the game');
 
-				chatLogic.startGame( data.roomName );
+				chatLogic.startGame( data.roomName, data.gameOptions );
 			});
 
 			// /**

@@ -2,10 +2,14 @@
 
 const NO_MOVEMENT=0, RUN_RIGHT=1, RUN_DOWN=2, RUN_LEFT=3, RUN_UP=4;
 
+// Might not need these - Check if used and consider deletion
+let gameloop_loaded = false;
+let gameloop_players_to_process = [];
+
 let GameLoop = new Phaser.Class({
 
 	Extends: Phaser.Scene,
-
+	
 	initialize:
 
 		function GameLoop ()
@@ -22,15 +26,23 @@ let GameLoop = new Phaser.Class({
 		this.eventCenter = EventDispatcher.getInstance();
 		this.addListeners();
 
-
 		this.gameControl = data.gameControl;
 
 		this.players = this.gameControl.players;
 		this.myPlayer = this.players.find( p => p.id === this.gameControl.player.id );
-		//this.myPlayer = this.gameControl.player;
+	},
+
+	stop : function()
+	{
+		this.cleanup();
 	},
 
 	destroy : function()
+	{
+		this.cleanup();
+	},
+
+	cleanup : function()
 	{
 		console.log("Destroying game loop plugin");
 		this.removeListeners();
@@ -42,11 +54,15 @@ let GameLoop = new Phaser.Class({
 		this.removeListeners();
 
 		this.eventCenter.on('on_player_state_update', this.onUpdatePlayerState, this);
+		this.eventCenter.on('on_player_joined_game', this.onPlayerJoinedGame, this);
+		this.eventCenter.on('on_player_left_game', this.onPlayerLeftGame, this);
 	},
 
 	removeListeners : function()
 	{
-		this.eventCenter.removeListener('on_player_update_options');
+		this.eventCenter.removeListener('on_player_state_update');
+		this.eventCenter.removeListener('on_player_joined_game');
+		this.eventCenter.removeListener('on_player_left_game');
 	},
 
 	preload: function ()
@@ -62,11 +78,13 @@ let GameLoop = new Phaser.Class({
 
 	create: function ()
 	{
+		// todo: load level data according to game options
+		//console.log("game map> %o", this.gameControl.game.options.gameMap );
+
 		this.add.sprite(0, 0, "room").setOrigin(0, 0);
 
 		// make copies of our default model for each player.
 		// color the models and configure the animation frames.
-		console.log("players> %o", this.players );
 		this.processPlayers( this.players );
 
 		this.joyStick = this.plugins.get('rexvirtualjoystickplugin').add(this, {
@@ -82,8 +100,9 @@ let GameLoop = new Phaser.Class({
 
 		this.text = this.add.text(0, 0);
 		this.dumpJoyStickState.call( this );
-	},
 
+		this.gameloop_loaded = true;
+	},
 
 	update: function()
 	{
@@ -110,7 +129,6 @@ let GameLoop = new Phaser.Class({
 		if ( update === true )
 			this.updatePlayerState( this.myPlayer.spy.x, this.myPlayer.spy.y, this.moving, "run_right" );
 	},
-
 
 	getPlayerAtlastName : function( playerId )
 	{
@@ -141,7 +159,7 @@ let GameLoop = new Phaser.Class({
 
 			this.addAnimationsToSpriteSheets( player.id );
 
-			this.placePlayerStartingLocation( player );
+			this.placePlayerStartingLocation( player );			
 		});
 	},
 
@@ -162,6 +180,7 @@ let GameLoop = new Phaser.Class({
 			console.log('my spy> %o', this.myPlayer );
 		}
 	},
+
 
 	/**
 	 * Called when any other player has updated their position or state
@@ -197,6 +216,56 @@ let GameLoop = new Phaser.Class({
 
 			player.spy.moving = playerUpdateData.moving;
 		}
+		else
+			console.log("Unknown player for update> %o", player);
+	},
+
+	onPlayerJoinedGame : function( newPlayer )
+	{
+		console.log('onPlayerJoinedGame> name: %o, id: %o', newPlayer.name, newPlayer.id );
+
+		const player = this.players.find( p => p.id === newPlayer.id );
+
+		// If this player didn't already exist due to late joining,
+		// add them to our local player array.  The server side 
+		// already knows the correct player list and is expecting
+		// the client to update itself.
+		if ( player === undefined )
+			this.players.push( newPlayer );
+
+		// If this is a late player, create the necessary textures
+		if ( this.gameloop_loaded )
+		{
+			// Verify this player's texture doesn't already exist and then create it
+			if ( ! this.textures.exists(this.getPlayerTextureName(newPlayer.id)) )
+			{
+				this.processPlayers( [newPlayer] );
+			}
+		}					
+	},
+
+	onPlayerLeftGame : function( playerId, playerName )
+	{
+		console.log('onPlayerLeftGame> name: ', playerName, ' id: ', playerId );
+
+		// find player's spy
+		const player = this.players.find( p => p.id === playerId );
+
+		// remove spy from screen
+		player.spy.destroy();
+
+		// todo: remove from local players object
+		//this.players.splice()
+
+		// destroy spy object
+
+		// this.resetPlayerSprites( this.playerSprites );
+		//
+		// // compare player sprites to players and remove the one that doens't belong
+		// this.removePlayerSprite( playerId );
+		//
+		// // redraw the player sprites with the one that left filtered out
+		// this.drawPlayerStatus( this.playerSprites );
 	},
 
 	/**
@@ -229,7 +298,7 @@ let GameLoop = new Phaser.Class({
 		let copiedFrameData = this.copyTextureFromImage( frameData, this.getPlayerTextureName(playerId) );
 
 		// perform a color swap on the new canvas to color the textures the way we need them
-		let redbmd = this.updateTextureColor( copiedFrameData, 0xFFFFFF, player.color );
+		let redbmd = this.updateTextureColor( copiedFrameData, 0xFFFFFF, player.game.color );
 
 		// add our new colored textures to a new atlas
 		this.textures.addAtlas( this.getPlayerAtlastName(playerId), redbmd.canvas, this.cache.json.get('spies'));

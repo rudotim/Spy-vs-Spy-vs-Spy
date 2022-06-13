@@ -151,7 +151,13 @@ a {
 */
 
 
-
+#playerNameLabel
+{
+    display: none;
+    font-size: 1.5em;
+    color: #af2727;
+    font-weight: bold;
+}
 
 
 .header {
@@ -191,6 +197,7 @@ nav {
     width: 225px;
     left: -225px;
     transition: transform 0.3s;
+    z-index: 1;
 }
 
 nav .logo {
